@@ -1,9 +1,16 @@
 {
+  "name": "pinksky-api",
+  "version": "1.0.0",
+  "description": "pinksky-api",
+  "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "dev": "nodemon index.js"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "apollo-server-express": "^3.10.2",
     "axios": "^0.27.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.2",

@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 const request = require("request");
-// const sheetdb = require("sheetdb-node");
 const fs = require("fs");
 const stripe = require("stripe")(
   "sk_test_51IBywyEAjIG7X6ReN7Xk9I0tznJCmgOtQ1cqV0X744gtCFaYhUYI4FBUPdi8PmJ7fRN9bAaQnBA89yDzkFd7KuHj00ucejTMdS"
@@ -10,15 +9,10 @@ const stripe = require("stripe")(
 
 require("dotenv").config();
 const { Firebase } = require("./config.js");
-// const { FrontendData } = require("./frontendData");
 
 const app = express();
 //https://pinksky.herokuapp.com/
 const PORT = process.env.PORT || 5000;
-// const client = sheetdb({ address: process.env.SPREADSHEET });
-// const clientBrand = sheetdb({
-//   address: process.env.SPREADSHEET + "?sheet=Brand",
-// });
 
 app.use(express.json());
 app.use(cors());
@@ -28,7 +22,6 @@ app.post("/api/mappinginfluencerasmember/update", async (req, res) => {
   console.log(response);
   if (response.isInfluencer === true) {
     const snapshot = await Firebase.Influencer.doc(response.id).get();
-    //let snapshotData = snapshot.data();
     console.log(snapshot.data().pinkskymember.isMember);
     if (snapshot.data().pinkskymember.isMember === true) {
       //nothing
@@ -617,12 +610,10 @@ app.post("/api/noninfluencer", async (req, res) => {
       // console.log(list);
       // console.log("[...snapshot.data()]",{...snapshot.data()})
       // console.log("yahaan hoon");
-      res
-        .status(200)
-        .json({
-          data: [noninfluencerprofiledata],
-          message: "Fetched Non Influencer",
-        });
+      res.status(200).json({
+        data: [noninfluencerprofiledata],
+        message: "Fetched Non Influencer",
+      });
     }, 5000);
   } catch (error) {
     res.status(500).json({ message: error });
@@ -772,7 +763,7 @@ app.get("/api/home", async (req, res) => {
       campaignlist: campaignlist,
       influencerlist: influencerlist,
       eventlist: eventlist,
-      couponlist:couponlist,
+      couponlist: couponlist,
       message: "Fetched Home",
     });
   } catch (error) {
