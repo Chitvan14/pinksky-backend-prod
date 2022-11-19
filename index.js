@@ -164,6 +164,7 @@ app.post("/api/getbrandsubplan/stripe", async (req, res) => {
   //add cases
   let paymentLink = {};
   if (label === "Food & Beverage") {
+    //cafe/restaurent
     paymentLink = await stripe.paymentLinks.create({
       line_items: [
         {
@@ -173,17 +174,23 @@ app.post("/api/getbrandsubplan/stripe", async (req, res) => {
       ],
       after_completion: {
         redirect: {
-          url: "https://pinksky-development.netlify.app",
+          url: "https://pinksky-development.netlify.app/profile",
         },
         type: "redirect",
       },
     });
   } else if (label === "Skincare & Salon") {
+    //salon
   } else if (label === "Clubbing & Nightlife") {
+    //club
   } else if (label === "Gym & Fitness") {
+    //gym
   } else if (label === "Automobiles") {
+    paymentLink = "false";
   } else if (label === "Fashion & Lifestyle") {
+    paymentLink = "false";
   } else if (label === "Beauty & Cosmetic") {
+    paymentLink = "false";
   }
 
   console.log(paymentLink);
@@ -309,7 +316,7 @@ app.post("/api/signin", async (req, res) => {
         var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
         console.log("daysDifference", daysDifference);
         if (daysDifference > 15) {
-          console.log("inside");
+          console.log("inside", brandData[0].instagramurl);
           let brandSchema = null;
           const options = {
             method: "GET",
@@ -319,10 +326,13 @@ app.post("/api/signin", async (req, res) => {
               "X-RapidAPI-Host": process.env.RapidAPIHost,
             },
           };
+          console.log("inside1", options);
 
           await axios
             .request(options)
             .then(function (response) {
+              console.log("inside2", response.data);
+
               brandSchema = {
                 ...brandData[0],
                 //imgURL: response.data.data.profile_pic_url_hd,
@@ -339,23 +349,33 @@ app.post("/api/signin", async (req, res) => {
               };
               setTimeout(async () => {
                 await Firebase.Brand.doc(brandData[0].id).update(brandSchema);
+                res.status(200).json({
+                  message: {
+                    displayName: userResponse.user.displayName,
+                    id: brandData[0].id,
+                    email: createUser.email,
+                    type: "Brand",
+                    status: brandData[0].status,
+                    isMember: false,
+                  },
+                });
               }, 2000);
             })
             .catch(function (error) {
               throw error;
             });
+        } else {
+          res.status(200).json({
+            message: {
+              displayName: userResponse.user.displayName,
+              id: brandData[0].id,
+              email: createUser.email,
+              type: "Brand",
+              status: brandData[0].status,
+              isMember: false,
+            },
+          });
         }
-
-        res.status(200).json({
-          message: {
-            displayName: userResponse.user.displayName,
-            id: brandData[0].id,
-            email: createUser.email,
-            type: "Brand",
-            status: brandData[0].status,
-            isMember: false,
-          },
-        });
       } else if (
         userResponse.user.displayName.indexOf("Non_Influencer") != -1
       ) {
@@ -371,14 +391,19 @@ app.post("/api/signin", async (req, res) => {
         if (noninfluencerData[0].pinkskymember === null) {
           isMember = false;
         } else {
-          console.log("---")
-          console.log("Current",new Date(
-            noninfluencerData[0].pinkskymember.cooldown.seconds * 1000))
-          console.log("Today",new Date())
-          console.log("Diff", new Date(
-            noninfluencerData[0].pinkskymember.cooldown.seconds * 1000
-          ) < new Date())
-          console.log("---")
+          console.log("---");
+          console.log(
+            "Current",
+            new Date(noninfluencerData[0].pinkskymember.cooldown.seconds * 1000)
+          );
+          console.log("Today", new Date());
+          console.log(
+            "Diff",
+            new Date(
+              noninfluencerData[0].pinkskymember.cooldown.seconds * 1000
+            ) < new Date()
+          );
+          console.log("---");
           if (
             new Date(
               noninfluencerData[0].pinkskymember.cooldown.seconds * 1000
@@ -466,7 +491,7 @@ app.post("/api/signin", async (req, res) => {
             .then(function (response) {
               let sum = 0;
               let count = 0;
-             
+
               response.data.data.edge_owner_to_timeline_media.edges.map(
                 (item) => {
                   console.log(item);
@@ -494,7 +519,8 @@ app.post("/api/signin", async (req, res) => {
               );
               console.log("SUM", sum);
               let engagementRate =
-                (sum / response.data.data.edge_followed_by.count) * 1000;
+                sum / response.data.data.edge_followed_by.count;
+              //* 1000;
               console.log("ENGAGEMENT RATE", engagementRate);
 
               influencerSchema = {
@@ -505,7 +531,10 @@ app.post("/api/signin", async (req, res) => {
                 imgURL4: instagramPostDetails[2].display_url,
                 imgURL5: instagramPostDetails[3].display_url,
                 instagram: {
-                  engagementRate: engagementRate.substr(0, 1) + '.' + engagementRate.substr(1, 2),
+                  engagementRate:
+                    engagementRate.toString().replace(".", "").substring(0, 1) +
+                    "." +
+                    engagementRate.toString().replace(".", "").substring(1, 3),
                   id: response.data.data.id,
                   is_business_account: response.data.data.is_business_account,
                   external_url: response.data.data.external_url,
@@ -516,13 +545,12 @@ app.post("/api/signin", async (req, res) => {
                 },
                 updatedDate: new Date(),
               };
-         
             })
             .catch(function (error) {
               throw error;
             });
 
-            let interval = 8000;
+          let interval = 8000;
           let lengthOfArray = instagramPostDetails.length - 1;
           let influencerArr = [];
           console.log("lengthOfArray", lengthOfArray);
@@ -581,7 +609,6 @@ app.post("/api/signin", async (req, res) => {
                           imgURL3: instagramPostDetails[2]?.new_url,
                           imgURL4: instagramPostDetails[3]?.new_url,
                           imgURL5: instagramPostDetails[4]?.new_url,
-
                         };
                         console.log("influencerSchema", influencerSchema);
                         // Firebase.Influencer.add(influencerSchema);
@@ -594,9 +621,9 @@ app.post("/api/signin", async (req, res) => {
                           //   }
                           // });
                           // setTimeout(async () => {
-                            await Firebase.Influencer.doc(influencerData[0].id).update(
-                              influencerSchema
-                            );
+                          await Firebase.Influencer.doc(
+                            influencerData[0].id
+                          ).update(influencerSchema);
                           // }, 2000);
                           res.status(200).json({
                             message: {
@@ -626,9 +653,18 @@ app.post("/api/signin", async (req, res) => {
               }).pipe(fs.createWriteStream(filePath));
             }, index * interval);
           });
-
+        } else {
+          res.status(200).json({
+            message: {
+              displayName: userResponse.user.displayName,
+              id: influencerData[0].id,
+              email: createUser.email,
+              type: "Influencer",
+              status: influencerData[0].status,
+              isMember: isMember,
+            },
+          });
         }
-       
       }
     } else {
       res.status(500).json({ message: "Invalid User" });
@@ -829,7 +865,7 @@ app.post("/api/brand", async (req, res) => {
 // });
 //Get
 app.get("/api/coupons", async (req, res) => {
-  try{
+  try {
     const snapshotcoupon = await Firebase.Coupons.get();
     let couponlist = [];
     snapshotcoupon.docs.map((doc) => {
@@ -837,16 +873,15 @@ app.get("/api/coupons", async (req, res) => {
         couponlist.push({ id: doc.id, ...doc.data() });
       }
     });
-  
+
     res.status(200).json({
       couponlist: couponlist,
       message: "Fetched Coupon Page",
     });
-  }catch (error) {
+  } catch (error) {
     res.status(500).json({ message: error });
   }
-  
-})
+});
 //1.Campaign using id
 app.get("/api/home", async (req, res) => {
   try {
@@ -1036,10 +1071,11 @@ app.post("/api/admin/pinksky", async (req, res) => {
       //influencer
       const snapshotInfl = await Firebase.Influencer.get();
       let influencerlist = [];
-      let localcampaignmapping = [];
-      let localeventmapping = [];
+
       console.log("step5");
       snapshotInfl.docs.map((doc) => {
+        let localcampaignmapping = [];
+        let localeventmapping = [];
         // console.log("influencerlist5");
         if (doc.data().status === "new") {
           influencerlist.push({
@@ -1094,9 +1130,10 @@ app.post("/api/admin/pinksky", async (req, res) => {
       //brand
       const snapshotbrand = await Firebase.Brand.get();
       let brandlist = [];
-      let localinfluemapping = [];
-      let locallaunchmapping = [];
+
       snapshotbrand.docs.map((doc) => {
+        let localinfluemapping = [];
+        let locallaunchmapping = [];
         if (doc.data()?.status === "new") {
           brandlist.push({ id: doc.id, ...doc.data() });
         } else if (doc.data()?.status === "accepted") {
@@ -1296,11 +1333,24 @@ app.post("/api/coupons/filter", async (req, res) => {
 //2.Filter Influencer
 app.post("/api/influencer/filter", async (req, res) => {
   let data = req.body;
-  // console.log(data);
+  //  console.log(data);
   try {
     // console.log("req.body", req.body);
     const snapshot = await Firebase.Influencer.get();
-    let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    let list = []
+   
+    snapshot.docs.map((doc) => {
+      console.log(doc.id);
+      if(doc.data().status === "accepted"){
+        list.push({ id: doc.id, ...doc.data() });
+      }else{
+       //nothing
+      }
+    })
+   
+    
+    // (doc.data().status === "accepted") {
+    // ({ id: doc.id, ...doc.data() }));
     let namesorted;
     let agesorted;
     let gendersorted;
@@ -1647,7 +1697,7 @@ app.post("/api/influencer/create", async (req, res) => {
               // instagramPostDetails.push(profileItemData);
               response.data.data.edge_owner_to_timeline_media.edges.map(
                 (item) => {
-                  console.log(item);
+                  // console.log(item);
                   sum =
                     sum +
                     item.node.edge_media_to_comment.count +
@@ -1672,11 +1722,20 @@ app.post("/api/influencer/create", async (req, res) => {
               );
 
               let engagementRate =
-                (sum / response.data.data.edge_followed_by.count) * 1000;
+                sum / response.data.data.edge_followed_by.count;
+              // * 1000;
+
+              console.log(
+                "engagementRate",
+                engagementRate.toString().replace(".", "")
+              );
               influencerSchema = {
                 ...influencerData,
                 instagram: {
-                  engagementRate: engagementRate.substr(0, 1) + '.' + engagementRate.substr(1, 2),
+                  engagementRate:
+                    engagementRate.toString().replace(".", "").substring(0, 1) +
+                    "." +
+                    engagementRate.toString().replace(".", "").substring(1, 3),
                   id: response.data.data.id,
                   is_business_account: response.data.data.is_business_account,
                   external_url: response.data.data.external_url,
@@ -2263,6 +2322,18 @@ app.post("/api/influencerpayment/create", async (req, res) => {
 });
 
 app.post("/api/spreadsheet/influencer", async (req, res) => {
+  // const passcode = req.body.id;
+  // if(passcode === "2022"){
+
+  //   client.create({ name: "William", age: 25 }).then(function(data) {
+  //     console.log(data);
+  //   }, function(err){
+  //     console.log(err);
+  //   });
+  // }else{
+  //   res.status(200).json({ message: "Not Valid" });
+  // }
+  
   //influencer
   // const snapshotInfl = await Firebase.Influencer.get();
   // let influencerlist = [];
@@ -2290,10 +2361,11 @@ app.post("/api/spreadsheet/influencer", async (req, res) => {
 //Put
 //1.Influencer by admin and profile page
 app.put("/api/influencer/update", async (req, res) => {
-  const id = req.body.id;
-  delete req.body.id;
   const data = req.body;
   console.log(data);
+  const id = req.body.id;
+  delete req.body.id;
+
   try {
     await Firebase.Influencer.doc(id).update(data);
     res.status(200).json({ message: "Updated Influencer" });
@@ -2621,18 +2693,21 @@ app.put("/api/acceptstatus/update", async (req, res) => {
     if (data.type === "influencerNewRequest") {
       const id = data.id;
       console.log(id);
-      const snapshot = await Firebase.Influencer.get();
-      let influencerData = [];
-      snapshot.docs.map((doc) => {
-        if (doc.id === id) {
-          influencerData.push(...doc.data().message);
-        }
-      });
-      influencerData.push({
-        statusID: "101",
-        campaignID: "",
-        campaignName: "",
-      });
+      const snapshot = await Firebase.Influencer.doc(id).get();
+      let influencerData = [
+        ...snapshot.data().message,
+        {
+          statusID: "101",
+          campaignID: "",
+          campaignName: "",
+        },
+      ];
+      // snapshot.docs.map((doc) => {
+      //   if (doc.id === id) {
+      //     influencerData.push(...doc.data().message);
+      //   }
+      // });
+
       //message:[],
       await Firebase.Influencer.doc(id).update({
         status: "accepted",
