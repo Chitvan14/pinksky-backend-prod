@@ -447,6 +447,10 @@ app.post("/api/signin", async (req, res) => {
         // ) {
         // }
         //console.log("influencerData[0].pinkskymember.isMember",influencerData[0].pinkskymember.cooldown.seconds);
+        console.log("date 1",new Date());
+        console.log("date 2",
+          new Date(influencerData[0].pinkskymember.cooldown.seconds * 1000)
+        );
         let isMember = false;
         if (influencerData[0].pinkskymember.cooldown === null) {
           isMember = false;
@@ -1034,173 +1038,457 @@ app.post("/api/admin/pinksky", async (req, res) => {
     //   });
     // }else
     if (getAdmin.data().admin) {
-      //globalAdmin = false;
-      //campaign
-      console.log("step1");
-      const snapshotCoupon = await Firebase.Coupons.get();
-      let couponlist = [];
-      snapshotCoupon.docs.map((doc) => {
-        if (doc.data()?.isActive === 1) {
-          couponlist.push({ id: doc.id, ...doc.data() });
-        } else {
-          //move
-        }
-      });
-      console.log("step2");
-      const snapshotCamp = await Firebase.Campaign.get();
-      let campaignlist = [];
-      let rawcampaignlist = [];
-      snapshotCamp.docs.map((doc) => {
-        if (doc.data()?.isActive === 1) {
-          campaignlist.push({ id: doc.id, ...doc.data() });
-        }
-        rawcampaignlist.push({ id: doc.id, ...doc.data() });
-      });
-      console.log("step3");
-      //event
-      const snapshotevent = await Firebase.Event.get();
-      let eventlist = [];
-      let raweventlist = [];
-      snapshotevent.docs.map((doc) => {
-        if (doc.data().isActive === 1) {
-          eventlist.push({ id: doc.id, ...doc.data() });
-        }
-        raweventlist.push({ id: doc.id, ...doc.data() });
-      });
-      console.log("step4");
-      //influencer
-      const snapshotInfl = await Firebase.Influencer.get();
-      let influencerlist = [];
+      if (data.changesTrigger == "" || data.changesTrigger == undefined) {
+        //globalAdmin = false;
+        //campaign
 
-      console.log("step5");
-      snapshotInfl.docs.map((doc) => {
-        let localcampaignmapping = [];
-        let localeventmapping = [];
-        // console.log("influencerlist5");
-        if (doc.data().status === "new") {
-          influencerlist.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        } else if (doc.data().status === "accepted") {
-          console.log("influencerlist6");
-          doc.data().campaignmapping.map((nesitem) => {
-            console.log("influencerlist66");
-            localcampaignmapping.push({
-              ...nesitem,
-              name:
-                rawcampaignlist.filter(
-                  (fun) => fun.id === nesitem.campaignId
-                )[0].name || "",
-              category:
-                rawcampaignlist.filter(
-                  (fun) => fun.id === nesitem.campaignId
-                )[0].category || [],
+        console.log("step1");
+        const snapshotCoupon = await Firebase.Coupons.get();
+        let couponlist = [];
+        snapshotCoupon.docs.map((doc) => {
+          if (doc.data()?.isActive === 1) {
+            couponlist.push({ id: doc.id, ...doc.data() });
+          } else {
+            //move
+          }
+        });
+        console.log("step2");
+        const snapshotCamp = await Firebase.Campaign.get();
+        let campaignlist = [];
+        let rawcampaignlist = [];
+        snapshotCamp.docs.map((doc) => {
+          if (doc.data()?.isActive === 1) {
+            campaignlist.push({ id: doc.id, ...doc.data() });
+          }
+          rawcampaignlist.push({ id: doc.id, ...doc.data() });
+        });
+        console.log("step3");
+        //event
+        const snapshotevent = await Firebase.Event.get();
+        let eventlist = [];
+        let raweventlist = [];
+        snapshotevent.docs.map((doc) => {
+          if (doc.data().isActive === 1) {
+            eventlist.push({ id: doc.id, ...doc.data() });
+          }
+          raweventlist.push({ id: doc.id, ...doc.data() });
+        });
+        console.log("step4");
+        //influencer
+        const snapshotInfl = await Firebase.Influencer.get();
+        let influencerlist = [];
+
+        console.log("step5");
+        snapshotInfl.docs.map((doc) => {
+          let localcampaignmapping = [];
+          let localeventmapping = [];
+          // console.log("influencerlist5");
+          if (doc.data().status === "new") {
+            influencerlist.push({
+              id: doc.id,
+              ...doc.data(),
             });
-          });
-          console.log("influencerlist7");
-          doc.data().eventmapping.map((nesitem) => {
-            localeventmapping.push({
-              ...nesitem,
-              name:
-                raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
-                  .name || "",
+          } else if (doc.data().status === "accepted") {
+            console.log("influencerlist6");
+            doc.data().campaignmapping.map((nesitem) => {
+              console.log("influencerlist66");
+              localcampaignmapping.push({
+                ...nesitem,
+                name:
+                  rawcampaignlist.filter(
+                    (fun) => fun.id === nesitem.campaignId
+                  )[0].name || "",
+                category:
+                  rawcampaignlist.filter(
+                    (fun) => fun.id === nesitem.campaignId
+                  )[0].category || [],
+              });
             });
-          });
-          console.log("influencerlist1");
-          influencerlist.push({
-            id: doc.id,
-            ...doc.data(),
-            campaignmapping: localcampaignmapping,
-            eventmapping: localeventmapping,
-          });
-          console.log("influencerlist2");
-        } else {
-          console.log("influencerlist3");
-        }
-      });
-      console.log("influencerlist4");
-      // console.log("influencerlist1");
-
-      // console.log("influencerlist", influencerlist);
-      // influencerlist.map(item => {
-
-      // })
-      console.log("step6");
-      //brand
-      const snapshotbrand = await Firebase.Brand.get();
-      let brandlist = [];
-
-      snapshotbrand.docs.map((doc) => {
-        let localinfluemapping = [];
-        let locallaunchmapping = [];
-        if (doc.data()?.status === "new") {
-          brandlist.push({ id: doc.id, ...doc.data() });
-        } else if (doc.data()?.status === "accepted") {
-          doc.data().message.map((item) => {
-            if (item.isShowAdmin === true) {
-              locallaunchmapping.push(item);
-            }
-          });
-          doc.data().influencermapping.map((nesitem) => {
-            localinfluemapping.push({
-              ...nesitem,
-              name:
-                influencerlist.filter(
-                  (fun) => fun.id === nesitem.influencerId
-                )[0].name || "",
-              surname:
-                influencerlist.filter(
-                  (fun) => fun.id === nesitem.influencerId
-                )[0].surname || "",
-              phonenumber:
-                influencerlist.filter(
-                  (fun) => fun.id === nesitem.influencerId
-                )[0].phonenumber || "",
-              whatsappnumber:
-                influencerlist.filter(
-                  (fun) => fun.id === nesitem.influencerId
-                )[0].whatsappnumber || "",
-              instagramurl:
-                influencerlist.filter(
-                  (fun) => fun.id === nesitem.influencerId
-                )[0].instagramurl || "",
-              email:
-                influencerlist.filter(
-                  (fun) => fun.id === nesitem.influencerId
-                )[0].email || "",
-              category:
-                influencerlist.filter(
-                  (fun) => fun.id === nesitem.influencerId
-                )[0].category || "",
+            console.log("influencerlist7");
+            doc.data().eventmapping.map((nesitem) => {
+              localeventmapping.push({
+                ...nesitem,
+                name:
+                  raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
+                    .name || "",
+              });
             });
-          });
-          brandlist.push({
-            id: doc.id,
-            ...doc.data(),
-            influencermapping: localinfluemapping,
-            launchmapping: locallaunchmapping,
-          });
-        }
-      });
-      console.log("step7");
-      const snapshotpinkskypopup = await Firebase.PinkskyPopup.get();
-      let pinkskypopuplist = [];
-      snapshotpinkskypopup.docs.map((doc) => {
-        pinkskypopuplist.push({ id: doc.id, ...doc.data() });
-      });
-      console.log("step8");
-      // console.log("brandlist", brandlist);
-      res.status(200).json({
-        campaignlist: campaignlist,
-        influencerlist: influencerlist,
-        brandlist: brandlist,
-        eventlist: eventlist,
-        pinkskypopuplist: pinkskypopuplist,
-        couponlist: couponlist,
-        // globalAdmin: globalAdmin,
-        message: "Fetched Admin",
-      });
+            console.log("influencerlist1");
+            influencerlist.push({
+              id: doc.id,
+              ...doc.data(),
+              campaignmapping: localcampaignmapping,
+              eventmapping: localeventmapping,
+            });
+            console.log("influencerlist2");
+          } else {
+            console.log("influencerlist3");
+          }
+        });
+        console.log("influencerlist4");
+        // console.log("influencerlist1");
+
+        // console.log("influencerlist", influencerlist);
+        // influencerlist.map(item => {
+
+        // })
+        console.log("step6");
+        //brand
+        const snapshotbrand = await Firebase.Brand.get();
+        let brandlist = [];
+
+        snapshotbrand.docs.map((doc) => {
+          let localinfluemapping = [];
+          let locallaunchmapping = [];
+          if (doc.data()?.status === "new") {
+            brandlist.push({ id: doc.id, ...doc.data() });
+          } else if (doc.data()?.status === "accepted") {
+            doc.data().message.map((item) => {
+              if (item.isShowAdmin === true) {
+                locallaunchmapping.push(item);
+              }
+            });
+            doc.data().influencermapping.map((nesitem) => {
+              localinfluemapping.push({
+                ...nesitem,
+                name:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].name || "",
+                surname:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].surname || "",
+                phonenumber:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].phonenumber || "",
+                whatsappnumber:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].whatsappnumber || "",
+                instagramurl:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].instagramurl || "",
+                email:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].email || "",
+                category:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].category || "",
+              });
+            });
+            brandlist.push({
+              id: doc.id,
+              ...doc.data(),
+              influencermapping: localinfluemapping,
+              launchmapping: locallaunchmapping,
+            });
+          }
+        });
+        console.log("step7");
+        const snapshotpinkskypopup = await Firebase.PinkskyPopup.get();
+        let pinkskypopuplist = [];
+        snapshotpinkskypopup.docs.map((doc) => {
+          pinkskypopuplist.push({ id: doc.id, ...doc.data() });
+        });
+        console.log("step8");
+        // console.log("brandlist", brandlist);
+        res.status(200).json({
+          campaignlist: campaignlist,
+          influencerlist: influencerlist,
+          brandlist: brandlist,
+          eventlist: eventlist,
+          pinkskypopuplist: pinkskypopuplist,
+          couponlist: couponlist,
+          // globalAdmin: globalAdmin,
+          message: "Fetched Admin",
+        });
+      } else if (data.changesTrigger == "influencer") {
+        console.log("step2");
+        const snapshotCamp = await Firebase.Campaign.get();
+        // let campaignlist = [];
+        let rawcampaignlist = [];
+        snapshotCamp.docs.map((doc) => {
+          // if (doc.data()?.isActive === 1) {
+          //   campaignlist.push({ id: doc.id, ...doc.data() });
+          // }
+          rawcampaignlist.push({ id: doc.id, ...doc.data() });
+        });
+        console.log("step3");
+        //event
+        const snapshotevent = await Firebase.Event.get();
+        // let eventlist = [];
+        let raweventlist = [];
+        snapshotevent.docs.map((doc) => {
+          // if (doc.data().isActive === 1) {
+          //   eventlist.push({ id: doc.id, ...doc.data() });
+          // }
+          raweventlist.push({ id: doc.id, ...doc.data() });
+        });
+        console.log("step4");
+        //influencer
+        const snapshotInfl = await Firebase.Influencer.get();
+        let influencerlist = [];
+
+        console.log("step5");
+        snapshotInfl.docs.map((doc) => {
+          let localcampaignmapping = [];
+          let localeventmapping = [];
+          // console.log("influencerlist5");
+          if (doc.data().status === "new") {
+            influencerlist.push({
+              id: doc.id,
+              ...doc.data(),
+            });
+          } else if (doc.data().status === "accepted") {
+            console.log("influencerlist6");
+            doc.data().campaignmapping.map((nesitem) => {
+              console.log("influencerlist66");
+              localcampaignmapping.push({
+                ...nesitem,
+                name:
+                  rawcampaignlist.filter(
+                    (fun) => fun.id === nesitem.campaignId
+                  )[0].name || "",
+                category:
+                  rawcampaignlist.filter(
+                    (fun) => fun.id === nesitem.campaignId
+                  )[0].category || [],
+              });
+            });
+            console.log("influencerlist7");
+            doc.data().eventmapping.map((nesitem) => {
+              localeventmapping.push({
+                ...nesitem,
+                name:
+                  raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
+                    .name || "",
+              });
+            });
+            console.log("influencerlist1");
+            influencerlist.push({
+              id: doc.id,
+              ...doc.data(),
+              campaignmapping: localcampaignmapping,
+              eventmapping: localeventmapping,
+            });
+            console.log("influencerlist2");
+          } else {
+            console.log("influencerlist3");
+          }
+        });
+        res.status(200).json({
+          campaignlist: [],
+          influencerlist: influencerlist,
+          brandlist: [],
+          eventlist: [],
+          pinkskypopuplist: [],
+          couponlist: [],
+          message: "Fetched Admin",
+        });
+      } else if (data.changesTrigger == "brand") {
+        console.log("step2");
+        const snapshotCamp = await Firebase.Campaign.get();
+        // let campaignlist = [];
+        let rawcampaignlist = [];
+        snapshotCamp.docs.map((doc) => {
+          // if (doc.data()?.isActive === 1) {
+          //   campaignlist.push({ id: doc.id, ...doc.data() });
+          // }
+          rawcampaignlist.push({ id: doc.id, ...doc.data() });
+        });
+        console.log("step3");
+        //event
+        const snapshotevent = await Firebase.Event.get();
+        // let eventlist = [];
+        let raweventlist = [];
+        snapshotevent.docs.map((doc) => {
+          // if (doc.data().isActive === 1) {
+          //   eventlist.push({ id: doc.id, ...doc.data() });
+          // }
+          raweventlist.push({ id: doc.id, ...doc.data() });
+        });
+        console.log("step4");
+        //influencer
+        const snapshotInfl = await Firebase.Influencer.get();
+        let influencerlist = [];
+
+        console.log("step5");
+        snapshotInfl.docs.map((doc) => {
+          let localcampaignmapping = [];
+          let localeventmapping = [];
+          // console.log("influencerlist5");
+          if (doc.data().status === "new") {
+            influencerlist.push({
+              id: doc.id,
+              ...doc.data(),
+            });
+          } else if (doc.data().status === "accepted") {
+            console.log("influencerlist6");
+            doc.data().campaignmapping.map((nesitem) => {
+              console.log("influencerlist66");
+              localcampaignmapping.push({
+                ...nesitem,
+                name:
+                  rawcampaignlist.filter(
+                    (fun) => fun.id === nesitem.campaignId
+                  )[0].name || "",
+                category:
+                  rawcampaignlist.filter(
+                    (fun) => fun.id === nesitem.campaignId
+                  )[0].category || [],
+              });
+            });
+            console.log("influencerlist7");
+            doc.data().eventmapping.map((nesitem) => {
+              localeventmapping.push({
+                ...nesitem,
+                name:
+                  raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
+                    .name || "",
+              });
+            });
+            console.log("influencerlist1");
+            influencerlist.push({
+              id: doc.id,
+              ...doc.data(),
+              campaignmapping: localcampaignmapping,
+              eventmapping: localeventmapping,
+            });
+            console.log("influencerlist2");
+          } else {
+            console.log("influencerlist3");
+          }
+        });
+
+        const snapshotbrand = await Firebase.Brand.get();
+        let brandlist = [];
+
+        snapshotbrand.docs.map((doc) => {
+          let localinfluemapping = [];
+          let locallaunchmapping = [];
+          if (doc.data()?.status === "new") {
+            brandlist.push({ id: doc.id, ...doc.data() });
+          } else if (doc.data()?.status === "accepted") {
+            doc.data().message.map((item) => {
+              if (item.isShowAdmin === true) {
+                locallaunchmapping.push(item);
+              }
+            });
+            doc.data().influencermapping.map((nesitem) => {
+              localinfluemapping.push({
+                ...nesitem,
+                name:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].name || "",
+                surname:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].surname || "",
+                phonenumber:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].phonenumber || "",
+                whatsappnumber:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].whatsappnumber || "",
+                instagramurl:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].instagramurl || "",
+                email:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].email || "",
+                category:
+                  influencerlist.filter(
+                    (fun) => fun.id === nesitem.influencerId
+                  )[0].category || "",
+              });
+            });
+            brandlist.push({
+              id: doc.id,
+              ...doc.data(),
+              influencermapping: localinfluemapping,
+              launchmapping: locallaunchmapping,
+            });
+          }
+        });
+        res.status(200).json({
+          campaignlist: [],
+          influencerlist: [],
+          brandlist: brandlist,
+          eventlist: [],
+          pinkskypopuplist: [],
+          couponlist: [],
+          message: "Fetched Admin",
+        });
+      } else if (data.changesTrigger == "campaign") {
+        console.log("step2");
+        const snapshotCamp = await Firebase.Campaign.get();
+        let campaignlist = [];
+
+        snapshotCamp.docs.map((doc) => {
+          if (doc.data()?.isActive === 1) {
+            campaignlist.push({ id: doc.id, ...doc.data() });
+          }
+        });
+        res.status(200).json({
+          campaignlist: campaignlist,
+          influencerlist: [],
+          brandlist: [],
+          eventlist: [],
+          pinkskypopuplist: [],
+          couponlist: [],
+          message: "Fetched Admin",
+        });
+      } else if (data.changesTrigger == "event") {
+        const snapshotevent = await Firebase.Event.get();
+        let eventlist = [];
+
+        snapshotevent.docs.map((doc) => {
+          if (doc.data().isActive === 1) {
+            eventlist.push({ id: doc.id, ...doc.data() });
+          }
+        });
+        res.status(200).json({
+          campaignlist: [],
+          influencerlist: [],
+          brandlist: [],
+          eventlist: eventlist,
+          pinkskypopuplist: [],
+          couponlist: [],
+          message: "Fetched Admin",
+        });
+      } else if (data.changesTrigger == "member") {
+        console.log("step1");
+        const snapshotCoupon = await Firebase.Coupons.get();
+        let couponlist = [];
+        snapshotCoupon.docs.map((doc) => {
+          if (doc.data()?.isActive === 1) {
+            couponlist.push({ id: doc.id, ...doc.data() });
+          } else {
+            //move
+          }
+        });
+        res.status(200).json({
+          campaignlist: [],
+          influencerlist: [],
+          brandlist: [],
+          eventlist: [],
+          pinkskypopuplist: [],
+          couponlist: couponlist,
+          message: "Fetched Admin",
+        });
+      } else {
+        res.status(401).json({ message: "Failed!" });
+      }
     } else {
       //globalAdmin = false;
       res.status(401).json({ message: "Failed!" });
@@ -1337,18 +1625,17 @@ app.post("/api/influencer/filter", async (req, res) => {
   try {
     // console.log("req.body", req.body);
     const snapshot = await Firebase.Influencer.get();
-    let list = []
-   
+    let list = [];
+
     snapshot.docs.map((doc) => {
       console.log(doc.id);
-      if(doc.data().status === "accepted"){
+      if (doc.data().status === "accepted") {
         list.push({ id: doc.id, ...doc.data() });
-      }else{
-       //nothing
+      } else {
+        //nothing
       }
-    })
-   
-    
+    });
+
     // (doc.data().status === "accepted") {
     // ({ id: doc.id, ...doc.data() }));
     let namesorted;
@@ -2324,7 +2611,6 @@ app.post("/api/influencerpayment/create", async (req, res) => {
 app.post("/api/spreadsheet/influencer", async (req, res) => {
   // const passcode = req.body.id;
   // if(passcode === "2022"){
-
   //   client.create({ name: "William", age: 25 }).then(function(data) {
   //     console.log(data);
   //   }, function(err){
@@ -2333,7 +2619,6 @@ app.post("/api/spreadsheet/influencer", async (req, res) => {
   // }else{
   //   res.status(200).json({ message: "Not Valid" });
   // }
-  
   //influencer
   // const snapshotInfl = await Firebase.Influencer.get();
   // let influencerlist = [];
