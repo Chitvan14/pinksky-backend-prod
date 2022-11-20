@@ -386,24 +386,11 @@ app.post("/api/signin", async (req, res) => {
             noninfluencerData.push({ id: doc.id, ...doc.data() });
           }
         });
-        console.log("here", noninfluencerData);
+
         let isMember = false;
-        if (noninfluencerData[0].pinkskymember === null) {
+        if (noninfluencerData[0].pinkskymember.cooldown === null) {
           isMember = false;
         } else {
-          console.log("---");
-          console.log(
-            "Current",
-            new Date(noninfluencerData[0].pinkskymember.cooldown.seconds * 1000)
-          );
-          console.log("Today", new Date());
-          console.log(
-            "Diff",
-            new Date(
-              noninfluencerData[0].pinkskymember.cooldown.seconds * 1000
-            ) < new Date()
-          );
-          console.log("---");
           if (
             new Date(
               noninfluencerData[0].pinkskymember.cooldown.seconds * 1000
@@ -420,6 +407,7 @@ app.post("/api/signin", async (req, res) => {
             isMember = true;
           }
         }
+        console.log("here", noninfluencerData);
 
         res.status(200).json({
           message: {
@@ -447,8 +435,9 @@ app.post("/api/signin", async (req, res) => {
         // ) {
         // }
         //console.log("influencerData[0].pinkskymember.isMember",influencerData[0].pinkskymember.cooldown.seconds);
-        console.log("date 1",new Date());
-        console.log("date 2",
+        console.log("date 1", new Date());
+        console.log(
+          "date 2",
           new Date(influencerData[0].pinkskymember.cooldown.seconds * 1000)
         );
         let isMember = false;
@@ -941,7 +930,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
   let data = req.body;
   try {
     const getAdmin = await Firebase.Influencer.doc(data.adminid).get();
-    console.log("entered");
+    console.log("entered", getAdmin.data().admin);
     //let globalAdmin = false;
 
     // if (getAdmin.data().admin && data.adminid === process.env.ADMINID) {
@@ -1041,7 +1030,18 @@ app.post("/api/admin/pinksky", async (req, res) => {
       if (data.changesTrigger == "" || data.changesTrigger == undefined) {
         //globalAdmin = false;
         //campaign
-
+        console.log("step0");
+        const snapshotRamdomdata = await Firebase.RandomData.get();
+        let ramdomdatalist = [];
+        console.log("step0");
+        snapshotRamdomdata.docs.map((doc) => {
+          console.log("step0");
+          if (doc.data()?.isActive === 1) {
+            ramdomdatalist.push({ id: doc.id, ...doc.data() });
+          } else {
+            //move
+          }
+        });
         console.log("step1");
         const snapshotCoupon = await Firebase.Coupons.get();
         let couponlist = [];
@@ -1204,6 +1204,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           eventlist: eventlist,
           pinkskypopuplist: pinkskypopuplist,
           couponlist: couponlist,
+          ramdomdatalist: ramdomdatalist,
           // globalAdmin: globalAdmin,
           message: "Fetched Admin",
         });
@@ -2433,17 +2434,52 @@ app.post(
   "/api/event/create",
   Firebase.multer.single("file"),
   async (req, res) => {
+    // let { file, body } = req;
+    // let eventFile = file;
+    // console.log(eventFile);
+    // let eventFileSplit = eventFile.fileRef.metadata.id.split("/");
+    // let eventFileSplittype = eventFile.mimetype.split("/");
+    // const d = new Date();
+    // let month = d.getMonth() + 1;
+    // let date = d.getDate();
+    // let year = d.getFullYear();
+    // let time = d.getTime();
+    // const fileName =
+    //   month +
+    //   "_" +
+    //   date +
+    //   "_" +
+    //   year +
+    //   "_" +
+    //   time +
+    //   "." +
+    //   eventFileSplittype[1];
+    // let eventFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${eventFileSplit[0]}/o/${fileName}`;
+    // console.log("eventFileSplit", eventFileSplit);
+    // console.log("eventFileFirebaseURL", eventFileFirebaseURL);
+    // let getDownloadURL = "";
+    // await axios
+    //   .get(eventFileFirebaseURL)
+    //   .then((response) => {
+    //     getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${eventFileSplit[0]}/o/${fileName}?alt=media&token=${response.data.downloadTokens}`;
+    //     console.log("hello");
+
+    //   })
+    //   .catch((error) => {
+    //     console.log("any error");
+    //     res.status(500).json({ message: error });
+    //   });
     let { file, body } = req;
-    let eventFile = file;
-    let eventFileSplit = eventFile.fileRef.metadata.id.split("/");
-    let eventFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${eventFileSplit[0]}/o/${eventFileSplit[1]}`;
-    console.log("eventFileSplit", eventFileSplit);
-    console.log("eventFileFirebaseURL", eventFileFirebaseURL);
+    let couponFile = file;
+    let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
+    let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}`;
+    console.log("couponFileSplit", couponFileSplit);
+    console.log("couponFileFirebaseURL", couponFileFirebaseURL);
     let getDownloadURL = "";
     await axios
-      .get(eventFileFirebaseURL)
+      .get(couponFileFirebaseURL)
       .then((response) => {
-        getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${eventFileSplit[0]}/o/${eventFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
+        getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
       })
       .catch((error) => {
         res.status(500).json({ message: error });
@@ -2458,11 +2494,11 @@ app.post(
     try {
       setTimeout(async () => {
         const response = await Firebase.Event.add(eventData);
-        console.log("response", response.data);
+
         res.status(200).json({ message: "Posted Event" });
       }, 2000);
     } catch (error) {
-      console.log("error", error);
+      console.log("error");
       res.status(500).json({ message: error });
     }
   }
@@ -2506,6 +2542,18 @@ app.post(
     }
   }
 );
+
+app.post("/api/randomdata/create", async (req, res) => {
+  const data = req.body;
+  console.log(data);
+  try {
+    await Firebase.RandomData.add(data);
+    res.status(200).json({ message: "Posted RandomData" });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({ message: error });
+  }
+});
 
 app.post("/api/noninfluencer/create", async (req, res) => {
   let data = req.body;

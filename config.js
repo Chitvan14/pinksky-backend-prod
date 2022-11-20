@@ -24,6 +24,7 @@ const Event = db.collection("Event");
 const NonInfluencer = db.collection("NonInfluencer");
 const PinkskyPopup = db.collection("PinkskyPopup");
 const Coupons = db.collection("Coupons");
+const RandomData = db.collection("RandomData");
 
 const multer = Multer({
   storage: FirebaseStorage({
@@ -36,4 +37,4 @@ const multer = Multer({
   }),
 });
 
-module.exports.Firebase = { Influencer, Brand, Campaign,Coupons, Event,NonInfluencer,PinkskyPopup, admin,firebase, multer };
+module.exports.Firebase = { Influencer,RandomData, Brand, Campaign,Coupons, Event,NonInfluencer,PinkskyPopup, admin,firebase, multer };
