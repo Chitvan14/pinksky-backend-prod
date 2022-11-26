@@ -1802,7 +1802,7 @@ app.post("/api/campaign/filter", async (req, res) => {
     // } else {
     //   namesorted = list;
     // }
-    console.log("namesorted length", namesorted.length);
+    //console.log("namesorted length", namesorted.length);
     let selectedCategory = [];
     let mySetCategory = new Set();
     data.radioInfluencerValue
@@ -1821,7 +1821,7 @@ app.post("/api/campaign/filter", async (req, res) => {
     } else {
       categorysorted = namesorted;
     }
-    console.log("categorysorted length", categorysorted.length);
+    //console.log("categorysorted length", categorysorted.length);
     let selectedCity = [];
     let mySetCity = new Set();
     data.radioCityValue
@@ -1842,14 +1842,14 @@ app.post("/api/campaign/filter", async (req, res) => {
       specialValuesorted = citysorted.filter((item) => {
         if (data.radioSpecialValue === "Pinksky Privilege") {
           return item.viewerDetails.pinkskyPrivilege === true;
-        } else if (data.radioAgeValue === "Paid Privilege") {
+        } else if (data.radioSpecialValue === "Paid Privilege") {
           return item.viewerDetails.paidPrivilege === true;
         }
       });
     } else {
       specialValuesorted = citysorted;
     }
-    console.log("specialValuesorted length", specialValuesorted.length);
+    //console.log("specialValuesorted length", specialValuesorted.length);
     // if (data.radioBrandValue !== "All") {
     //   brandcategorysorted = specialValuesorted.filter((item) => {
     //     if (
@@ -1896,7 +1896,7 @@ app.post("/api/campaign/filter", async (req, res) => {
     // } else {
     //   followersorted = gendersorted;
     // }
-    console.log("data.radioBrandValue", data.radioBrandValue);
+    //console.log("data.radioBrandValue", data.radioBrandValue);
     let brandselectedCategory = [];
     let myBrandSetCategory = new Set();
     data.radioBrandValue
