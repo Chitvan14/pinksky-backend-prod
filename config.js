@@ -14,7 +14,10 @@ const firebaseConfig = {
   appId: process.env.appId,
 };
 firebase.initializeApp(firebaseConfig);
-admin.initializeApp({ credential: admin.credential.cert(credientials),  storageBucket: "pinksky-8804c.appspot.com" });
+admin.initializeApp({
+  credential: admin.credential.cert(credientials),
+  storageBucket: "pinksky-8804c.appspot.com",
+});
 
 const db = firebase.firestore();
 const Influencer = db.collection("Influencer");
@@ -25,6 +28,7 @@ const NonInfluencer = db.collection("NonInfluencer");
 const PinkskyPopup = db.collection("PinkskyPopup");
 const Coupons = db.collection("Coupons");
 const RandomData = db.collection("RandomData");
+const Gallery = db.collection("Gallery");
 
 const multer = Multer({
   storage: FirebaseStorage({
@@ -37,4 +41,17 @@ const multer = Multer({
   }),
 });
 
-module.exports.Firebase = { Influencer,RandomData, Brand, Campaign,Coupons, Event,NonInfluencer,PinkskyPopup, admin,firebase, multer };
+module.exports.Firebase = {
+  Influencer,
+  RandomData,
+  Gallery,
+  Brand,
+  Campaign,
+  Coupons,
+  Event,
+  NonInfluencer,
+  PinkskyPopup,
+  admin,
+  firebase,
+  multer,
+};

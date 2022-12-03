@@ -1029,7 +1029,19 @@ app.post("/api/admin/pinksky", async (req, res) => {
     if (getAdmin.data().admin) {
       if (data.changesTrigger == "" || data.changesTrigger == undefined) {
         //globalAdmin = false;
-        //campaign
+        console.log("step00");
+        const snapshotGallerydata = await Firebase.Gallery.get();
+        let gallerylist = [];
+        console.log("step0");
+        snapshotGallerydata.docs.map((doc) => {
+          console.log("step0");
+          if (doc.data()?.isActive === 1) {
+            gallerylist.push({ id: doc.id, ...doc.data() });
+          } else {
+            //move
+          }
+        });
+        //randomdata
         console.log("step0");
         const snapshotRamdomdata = await Firebase.RandomData.get();
         let ramdomdatalist = [];
@@ -1140,47 +1152,53 @@ app.post("/api/admin/pinksky", async (req, res) => {
         snapshotbrand.docs.map((doc) => {
           let localinfluemapping = [];
           let locallaunchmapping = [];
+          console.log("step6kyahai--");
           if (doc.data()?.status === "new") {
             brandlist.push({ id: doc.id, ...doc.data() });
           } else if (doc.data()?.status === "accepted") {
             doc.data().message.map((item) => {
-              if (item.isShowAdmin === true) {
+              if (item?.isShowAdmin === true) {
                 locallaunchmapping.push(item);
+              } else {
+                //continue
               }
             });
+            console.log("step6?");
             doc.data().influencermapping.map((nesitem) => {
+              console.log("Datataatat", nesitem);
               localinfluemapping.push({
                 ...nesitem,
                 name:
                   influencerlist.filter(
                     (fun) => fun.id === nesitem.influencerId
-                  )[0].name || "",
+                  )[0]?.name || "",
                 surname:
                   influencerlist.filter(
                     (fun) => fun.id === nesitem.influencerId
-                  )[0].surname || "",
+                  )[0]?.surname || "",
                 phonenumber:
                   influencerlist.filter(
                     (fun) => fun.id === nesitem.influencerId
-                  )[0].phonenumber || "",
+                  )[0]?.phonenumber || "",
                 whatsappnumber:
                   influencerlist.filter(
                     (fun) => fun.id === nesitem.influencerId
-                  )[0].whatsappnumber || "",
+                  )[0]?.whatsappnumber || "",
                 instagramurl:
                   influencerlist.filter(
                     (fun) => fun.id === nesitem.influencerId
-                  )[0].instagramurl || "",
+                  )[0]?.instagramurl || "",
                 email:
                   influencerlist.filter(
                     (fun) => fun.id === nesitem.influencerId
-                  )[0].email || "",
+                  )[0]?.email || "",
                 category:
                   influencerlist.filter(
                     (fun) => fun.id === nesitem.influencerId
-                  )[0].category || "",
+                  )[0]?.category || "",
               });
             });
+            console.log("step6??");
             brandlist.push({
               id: doc.id,
               ...doc.data(),
@@ -1205,6 +1223,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           pinkskypopuplist: pinkskypopuplist,
           couponlist: couponlist,
           ramdomdatalist: ramdomdatalist,
+          gallerylist: gallerylist,
           // globalAdmin: globalAdmin,
           message: "Fetched Admin",
         });
@@ -1289,6 +1308,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           eventlist: [],
           pinkskypopuplist: [],
           couponlist: [],
+          gallerylist: [],
           message: "Fetched Admin",
         });
       } else if (data.changesTrigger == "brand") {
@@ -1428,6 +1448,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           eventlist: [],
           pinkskypopuplist: [],
           couponlist: [],
+          gallerylist: [],
           message: "Fetched Admin",
         });
       } else if (data.changesTrigger == "campaign") {
@@ -1447,6 +1468,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           eventlist: [],
           pinkskypopuplist: [],
           couponlist: [],
+          gallerylist: [],
           message: "Fetched Admin",
         });
       } else if (data.changesTrigger == "event") {
@@ -1465,6 +1487,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           eventlist: eventlist,
           pinkskypopuplist: [],
           couponlist: [],
+          gallerylist: [],
           message: "Fetched Admin",
         });
       } else if (data.changesTrigger == "member") {
@@ -1485,6 +1508,29 @@ app.post("/api/admin/pinksky", async (req, res) => {
           eventlist: [],
           pinkskypopuplist: [],
           couponlist: couponlist,
+          gallerylist: [],
+          message: "Fetched Admin",
+        });
+      } else if (data.changesTrigger == "gallery") {
+        const snapshotGallerydata = await Firebase.Gallery.get();
+        let gallerylist = [];
+        console.log("step0");
+        snapshotGallerydata.docs.map((doc) => {
+          console.log("step0");
+          if (doc.data()?.isActive === 1) {
+            gallerylist.push({ id: doc.id, ...doc.data() });
+          } else {
+            //move
+          }
+        });
+        res.status(200).json({
+          campaignlist: [],
+          influencerlist: [],
+          brandlist: [],
+          eventlist: [],
+          pinkskypopuplist: [],
+          couponlist: [],
+          gallerylist: gallerylist,
           message: "Fetched Admin",
         });
       } else {
@@ -1524,7 +1570,39 @@ app.get("/api/brands", async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
+app.post("/api/city/filter", async (req, res) => {
+  const data = req.body;
+  console.log(data.city);
+  try {
+    const options = {
+      method: "GET",
+      url: process.env.RAPID_CITY + data.city,
+      headers: {
+        "X-RapidAPI-Key": process.env.RapidAPIKey,
+        "X-RapidAPI-Host": process.env.RapidAPIHostCity,
+      },
+    };
 
+    await axios
+      .request(options)
+      .then(function (response) {
+        let citynamesSet = new Set();
+        response.data.Result.forEach((item) =>
+          citynamesSet.add(item.split(",")[0])
+        );
+        console.log("set", Array.from(citynamesSet));
+        res
+          .status(200)
+          .json({ data: Array.from(citynamesSet), message: "Filtered City" });
+      })
+      .catch((err) => {
+        console.log(err);
+        throw err;
+      });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+});
 app.post("/api/brands/filter", async (req, res) => {
   let data = req.body;
   try {
@@ -1930,22 +2008,50 @@ app.post("/api/campaign/filter", async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
+app.post("/api/influencerbyphonenumber/create", async (req, res) => {
+  // let userResponse = await Firebase.admin.auth().createUser({
+  //   // email: createUser.email,
+  //   // password: createUser.password,
+  //   // emailVerified: false,
+  //   // disabled: false,
+  //   // displayName: createUser.name,
+  //   phoneNumber: '+11234567890',
+  // });
+  const appVerifier = new Firebase.firebase.auth.RecaptchaVerifier(
+    'sign-in-button',
+    {
+      'size': 'invisible',
+      'callback': function(response) {
+        // reCAPTCHA solved, allow signInWithPhoneNumber.
+        onSignInSubmit();
+      }
+    });
+  const userResponse2 = await Firebase.firebase
+  .auth().signInWithPhoneNumber("+11234567890","");
 
+
+  // .signInWithEmailAndPassword(createUser.email, createUser.password)
+  // .catch((error) => {
+  //   throw error;
+  // });
+  res.status(200).json({ userResponse2 });
+})
 //Post
 //1.Influencer with login
 app.post("/api/influencer/create", async (req, res) => {
   let influencerData = req.body;
   console.log("influencerData", req.body);
   const createUser = {
-    email: influencerData.email,
+     email: influencerData.email,
     password: influencerData.password,
     name: "Influencer_" + influencerData.name + "_" + influencerData.surname,
   };
   console.log("createUser", createUser);
+  let userResponse=null;
   try {
     //login here
     if (createUser.email != undefined && createUser.password != undefined) {
-      const userResponse = await Firebase.admin.auth().createUser({
+      userResponse = await Firebase.admin.auth().createUser({
         email: createUser.email,
         password: createUser.password,
         emailVerified: false,
@@ -1953,7 +2059,7 @@ app.post("/api/influencer/create", async (req, res) => {
         displayName: createUser.name,
       });
 
-      console.log("userResponse email", userResponse.email);
+      console.log("userResponse email", userResponse);
       // fetch instagram photos not engagement and not profile details
       if (userResponse.email != undefined && userResponse.uid != undefined) {
         let influencerSchema = null;
@@ -2152,6 +2258,15 @@ app.post("/api/influencer/create", async (req, res) => {
       }
     }
   } catch (error) {
+    console.log(userResponse.uid);
+    await Firebase.admin.auth().deleteUser(userResponse.uid)
+    // const userResponse = await Firebase.admin.auth().createUser({
+    //   email: createUser.email,
+    //   password: createUser.password,
+    //   emailVerified: false,
+    //   disabled: false,
+    //   displayName: createUser.name,
+    // });
     console.log("error", error.message);
     res.status(500).json({ message: error.message });
   }
@@ -2537,6 +2652,82 @@ app.post(
         res.status(200).json({ message: "Posted coupon" });
       }, 2000);
     } catch (error) {
+      console.log("error", error);
+      res.status(500).json({ message: error });
+    }
+  }
+);
+
+app.post(
+  "/api/gallery/create",
+  Firebase.multer.single("file"),
+  async (req, res) => {
+    let { file, body } = req;
+    let couponFile = file;
+    let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
+    let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}`;
+    console.log("couponFileSplit", couponFileSplit);
+    console.log("couponFileFirebaseURL", couponFileFirebaseURL);
+    let getDownloadURL = "";
+    await axios
+      .get(couponFileFirebaseURL)
+      .then((response) => {
+        getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
+      })
+      .catch((error) => {
+        res.status(500).json({ message: error });
+      });
+    var object = JSON.parse(body.data);
+
+    let couponData = {
+      ...object,
+
+      url: getDownloadURL,
+      createdDate: new Date(),
+      updatedDate: new Date(),
+    };
+    try {
+      setTimeout(async () => {
+        const response = await Firebase.Gallery.add(couponData);
+        console.log("response", response.data);
+        res.status(200).json({ message: "Posted Gallery" });
+      }, 2000);
+    } catch (error) {
+      console.log("error", error);
+      res.status(500).json({ message: error });
+    }
+  }
+);
+app.post(
+  "/api/firestorelink/create",
+  Firebase.multer.single("file"),
+  async (req, res) => {
+    let { file } = req;
+    let newFile = file;
+    let newFileSplit = newFile.fileRef.metadata.id.split("/");
+    let newFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/${newFileSplit[1]}`;
+    console.log("newFileSplit", newFileSplit);
+    console.log("newFileFirebaseURL", newFileFirebaseURL);
+    let getDownloadURL = "";
+    await axios
+      .get(newFileFirebaseURL)
+      .then((response) => {
+        getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/${newFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
+        console.log("getDownloadURL", getDownloadURL);
+      })
+      .catch((error) => {
+        res.status(500).json({ message: error });
+      });
+
+    try {
+      setTimeout(() => {
+        console.log("up");
+        res
+          .status(200)
+          .json({ data: getDownloadURL, message: "Posted coupon" });
+      }, 1500);
+    } catch (error) {
+      console.log("down");
       console.log("error", error);
       res.status(500).json({ message: error });
     }
@@ -3709,6 +3900,21 @@ app.put("/api/removecoupon/update", async (req, res) => {
   // console.log(data);
   try {
     await Firebase.Coupons.doc(id).update(data);
+    res.status(200).json({ message: "Updated Coupon" });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+});
+app.put("/api/gallery/update", async (req, res) => {
+  const id = req.body.id;
+  delete req.body.id;
+  const data = req.body;
+
+  let snapshot = await Firebase.Gallery.doc(id).get();
+  let highlightData = [...snapshot.data().highlights, ...data.highlights];
+  console.log(highlightData);
+  try {
+     await Firebase.Gallery.doc(id).update({highlights:highlightData});
     res.status(200).json({ message: "Updated Coupon" });
   } catch (error) {
     res.status(500).json({ message: error });
