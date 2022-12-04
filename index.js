@@ -19,9 +19,73 @@ const client = sheetdb({ address: process.env.SPREADSHEET });
 const clientBrand = sheetdb({
   address: process.env.SPREADSHEET + "?sheet=Brand",
 });
+const clientInfluencer = sheetdb({
+  address: process.env.SPREADSHEET + "?sheet=Influencer",
+});
 
 app.use(express.json());
 app.use(cors());
+
+// const sheetdb = require("sheetdb-node");
+// const client = sheetdb({ address: '58f61be4dda40' });
+
+app.get("/api/spreadsheetgettingdata", async (req, res) => {
+  const snapshot = await Firebase.Influencer.doc("knYk5qZTU126pGea5vac").get();
+
+  clientInfluencer.read().then(
+    function (data) {
+      let value = JSON.parse(data);
+      let interval = 60000;
+
+      value.forEach((item, index) => {
+        setTimeout(() => {
+          let addvalue = {
+            ...item,
+            admin: false,
+            pinkskymember: {
+              isMember: false,
+              cooldown: null,
+            },
+            category: [
+              {
+                href: "/influencer",
+                id: 2,
+                status: false,
+                label: "Lifestyle Category",
+                value: "Lifestyle",
+                icon: {
+                  _store: {},
+                  key: null,
+                  _owner: null,
+                  type: "img",
+                  ref: null,
+                  props: {
+                    loading: "lazy",
+                    src: "/static/media/healthy-lifestyle.adbd2600d92cbd99718b.png",
+                    width: "25px",
+                    height: "25px",
+                  },
+                },
+              },
+            ],
+          };
+          axios
+            .post("http://localhost:5000/api/influencer/create", addvalue)
+            .then((response) => {
+              res.status(200).json(response.data);
+            })
+            .catch((error) => {
+              console.log(error);
+              res.status(500).json(error.response.data);
+            });
+        }, index * interval);
+      });
+    },
+    function (error) {
+      console.log(error);
+    }
+  );
+});
 
 app.post("/api/mappinginfluencerasmember/update", async (req, res) => {
   let response = req.body;
@@ -435,15 +499,17 @@ app.post("/api/signin", async (req, res) => {
         // ) {
         // }
         //console.log("influencerData[0].pinkskymember.isMember",influencerData[0].pinkskymember.cooldown.seconds);
-        console.log("date 1", new Date());
-        console.log(
-          "date 2",
-          new Date(influencerData[0].pinkskymember.cooldown.seconds * 1000)
-        );
+        // console.log("date 1", new Date());
+        // console.log(
+        //   "date 2",
+        //   new Date(influencerData[0].pinkskymember.cooldown.seconds * 1000)
+        // );
         let isMember = false;
-        if (influencerData[0].pinkskymember.cooldown === null) {
+        if (influencerData[0].pinkskymember.cooldown == null) {
+          console.log("Here 1");
           isMember = false;
         } else {
+          console.log("Here 2");
           if (
             new Date(influencerData[0].pinkskymember.cooldown.seconds * 1000) <
             new Date()
@@ -459,7 +525,7 @@ app.post("/api/signin", async (req, res) => {
             isMember = true;
           }
         }
-
+     
         var difference =
           new Date().getTime() -
           influencerData[0].updatedDate.toDate().getTime();
@@ -2018,36 +2084,37 @@ app.post("/api/influencerbyphonenumber/create", async (req, res) => {
   //   phoneNumber: '+11234567890',
   // });
   const appVerifier = new Firebase.firebase.auth.RecaptchaVerifier(
-    'sign-in-button',
+    "sign-in-button",
     {
-      'size': 'invisible',
-      'callback': function(response) {
+      size: "invisible",
+      callback: function (response) {
         // reCAPTCHA solved, allow signInWithPhoneNumber.
         onSignInSubmit();
-      }
-    });
+      },
+    }
+  );
   const userResponse2 = await Firebase.firebase
-  .auth().signInWithPhoneNumber("+11234567890","");
-
+    .auth()
+    .signInWithPhoneNumber("+11234567890", "");
 
   // .signInWithEmailAndPassword(createUser.email, createUser.password)
   // .catch((error) => {
   //   throw error;
   // });
   res.status(200).json({ userResponse2 });
-})
+});
 //Post
 //1.Influencer with login
 app.post("/api/influencer/create", async (req, res) => {
   let influencerData = req.body;
   console.log("influencerData", req.body);
   const createUser = {
-     email: influencerData.email,
+    email: influencerData.email,
     password: influencerData.password,
     name: "Influencer_" + influencerData.name + "_" + influencerData.surname,
   };
   console.log("createUser", createUser);
-  let userResponse=null;
+  let userResponse = null;
   try {
     //login here
     if (createUser.email != undefined && createUser.password != undefined) {
@@ -2258,17 +2325,16 @@ app.post("/api/influencer/create", async (req, res) => {
       }
     }
   } catch (error) {
-    console.log(userResponse.uid);
-    await Firebase.admin.auth().deleteUser(userResponse.uid)
-    // const userResponse = await Firebase.admin.auth().createUser({
-    //   email: createUser.email,
-    //   password: createUser.password,
-    //   emailVerified: false,
-    //   disabled: false,
-    //   displayName: createUser.name,
-    // });
-    console.log("error", error.message);
-    res.status(500).json({ message: error.message });
+    if(userResponse?.uid == undefined || userResponse?.uid == ""){
+      res.status(500).json({ message: createUser.email + " is already an pinksky user. Try sigging up with another id." });
+    }else{
+      console.log(userResponse?.uid);
+      await Firebase.admin.auth().deleteUser(userResponse?.uid);
+    
+      console.log("error", error.message);
+      res.status(500).json({ message: error.message });
+    }
+   
   }
 });
 
@@ -3914,7 +3980,7 @@ app.put("/api/gallery/update", async (req, res) => {
   let highlightData = [...snapshot.data().highlights, ...data.highlights];
   console.log(highlightData);
   try {
-     await Firebase.Gallery.doc(id).update({highlights:highlightData});
+    await Firebase.Gallery.doc(id).update({ highlights: highlightData });
     res.status(200).json({ message: "Updated Coupon" });
   } catch (error) {
     res.status(500).json({ message: error });
