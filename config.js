@@ -29,6 +29,7 @@ const PinkskyPopup = db.collection("PinkskyPopup");
 const Coupons = db.collection("Coupons");
 const RandomData = db.collection("RandomData");
 const Gallery = db.collection("Gallery");
+const Feedback = db.collection("Feedback");
 
 const multer = Multer({
   storage: FirebaseStorage({
@@ -54,4 +55,5 @@ module.exports.Firebase = {
   admin,
   firebase,
   multer,
+  Feedback
 };

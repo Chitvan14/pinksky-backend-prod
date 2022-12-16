@@ -19,8 +19,26 @@ const client = sheetdb({ address: process.env.SPREADSHEET });
 const clientBrand = sheetdb({
   address: process.env.SPREADSHEET + "?sheet=Brand",
 });
+const clientSpreadsheetToDB = sheetdb({
+  address: process.env.SPREADSHEET + "?sheet=SpreadsheetToDB",
+});
 const clientInfluencer = sheetdb({
   address: process.env.SPREADSHEET + "?sheet=Influencer",
+});
+const clientCampaign = sheetdb({
+  address: process.env.SPREADSHEET + "?sheet=Campaign",
+});
+const clientNonInfluencer = sheetdb({
+  address: process.env.SPREADSHEET + "?sheet=NonInfluencer",
+});
+const clientPinkskyPopup = sheetdb({
+  address: process.env.SPREADSHEET + "?sheet=PinkskyPopup",
+});
+const clientNamePhonenumber = sheetdb({
+  address: process.env.SPREADSHEET + "?sheet=NamePhonenumber",
+});
+const clientFeedback = sheetdb({
+  address: process.env.SPREADSHEET + "?sheet=Feedback",
 });
 
 app.use(express.json());
@@ -28,11 +46,256 @@ app.use(cors());
 
 // const sheetdb = require("sheetdb-node");
 // const client = sheetdb({ address: '58f61be4dda40' });
+app.post("/api/firebasetospreadsheet", async (req, res) => {
+  try {
+    let isValid = 1;
+    //Influencer
+    const snapshot = await Firebase.Influencer.get();
+    let influencerData = [];
+    snapshot.docs.map(async (doc) => {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+        influencerData.push({
+          id: doc.id,
+          city: doc.data().city,
+          email: doc.data().email,
+          gender: doc.data().gender,
+          instagramurl: doc.data().instagramurl,
+          name: doc.data().name,
+          phonenumber: doc.data().phonenumber,
+          surname: doc.data().surname,
+          whatsappnumber: doc.data().whatsappnumber,
+        });
+        await Firebase.Influencer.doc(doc.id).update({
+          dbInserted: 1,
+        });
+      } else {
+        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+      }
+    });
+    if (influencerData.length > 0) {
+      clientInfluencer.create(influencerData).then(
+        function (data) {
+          console.log(data);
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
 
-app.get("/api/spreadsheetgettingdata", async (req, res) => {
+    //Brand
+    const brandsnapshot = await Firebase.Brand.get();
+    let brandData = [];
+    brandsnapshot.docs.map(async (doc) => {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+        brandData.push({
+          id: doc.id,
+          companyname: doc.data().companyname,
+          designation: doc.data().designation,
+          email: doc.data().email,
+          instagramurl: doc.data().instagramurl,
+          name: doc.data().name,
+          phonenumber: doc.data().phonenumber,
+          city: doc.data().city,
+          whatsappnumber: doc.data().whatsappnumber,
+        });
+        await Firebase.Brand.doc(doc.id).update({
+          dbInserted: 1,
+        });
+      } else {
+        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+      }
+    });
+
+    if (brandData.length > 0) {
+      clientBrand.create(brandData).then(
+        function (data) {
+          console.log(data);
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
+
+    //Campaign
+    const campaignsnapshot = await Firebase.Campaign.get();
+    let campaignData = [];
+    campaignsnapshot.docs.map(async (doc) => {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+        campaignData.push({
+          id: doc.id,
+          brandcategory: doc.data().brandcategory,
+          city: doc.data().city,
+          name: doc.data().name,
+          paidPrivilege: doc.data().viewerDetails.paidPrivilege,
+          pinkskyPrivilege: doc.data().viewerDetails.pinkskyPrivilege,
+        });
+        await Firebase.Campaign.doc(doc.id).update({
+          dbInserted: 1,
+        });
+      } else {
+        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+      }
+    });
+
+    if (campaignData.length > 0) {
+      clientCampaign.create(campaignData).then(
+        function (data) {
+          console.log(data);
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
+
+    //NonInfluencer
+    const noninfluencersnapshot = await Firebase.NonInfluencer.get();
+    let noninfluencerData = [];
+    noninfluencersnapshot.docs.map(async (doc) => {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+        noninfluencerData.push({
+          id: doc.id,
+          email: doc.data().email,
+          instagramid: doc.data().instagramid,
+          name: doc.data().name,
+          whatsappnumber: doc.data().whatsappnumber,
+        });
+        await Firebase.NonInfluencer.doc(doc.id).update({
+          dbInserted: 1,
+        });
+      } else {
+        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+      }
+    });
+
+    if (noninfluencerData.length > 0) {
+      clientNonInfluencer.create(noninfluencerData).then(
+        function (data) {
+          console.log(data);
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
+
+    //Pinksky Popup
+    const pinkskyPopupsnapshot = await Firebase.PinkskyPopup.get();
+    let pinkskyPopupData = [];
+    pinkskyPopupsnapshot.docs.map(async (doc) => {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+        pinkskyPopupData.push({
+          id: doc.id,
+          targetage: doc.data().age,
+          brandname: doc.data().brandname,
+          email: doc.data().email,
+          targetgender: doc.data().gender,
+          instagramid: doc.data().instagramid,
+          name: doc.data().name,
+          whatdoyousell: doc.data().whatdoyousell,
+          yesnoppe: doc.data().yesnoppe,
+          whatsappnumber: doc.data().whatsappnumber,
+        });
+        await Firebase.PinkskyPopup.doc(doc.id).update({
+          dbInserted: 1,
+        });
+      } else {
+        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+      }
+    });
+
+    if (pinkskyPopupData.length > 0) {
+      clientPinkskyPopup.create(pinkskyPopupData).then(
+        function (data) {
+          console.log(data);
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
+
+    //Random Data
+    const randomDatasnapshot = await Firebase.RandomData.get();
+    let randomData = [];
+    randomDatasnapshot.docs.map(async (doc) => {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+        randomData.push({
+          id: doc.id,
+          category: doc.data().category,
+          name: doc.data().name,
+          number: doc.data().number,
+        });
+        await Firebase.RandomData.doc(doc.id).update({
+          dbInserted: 1,
+        });
+      } else {
+        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+      }
+    });
+
+    if (randomData.length > 0) {
+      clientNamePhonenumber.create(randomData).then(
+        function (data) {
+          console.log(data);
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
+
+    //Feedback
+    const feedbackDatasnapshot = await Firebase.Feedback.get();
+    let feedbackData = [];
+    feedbackDatasnapshot.docs.map(async (doc) => {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+        feedbackData.push({
+          id: doc.id,
+        
+          name: doc.data().name,
+          message: doc.data().message,
+        });
+        await Firebase.Feedback.doc(doc.id).update({
+          dbInserted: 1,
+        });
+      } else {
+        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+      }
+    });
+
+    if (feedbackData.length > 0) {
+      clientFeedback.create(feedbackData).then(
+        function (data) {
+          console.log(data);
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
+
+    if (isValid === 1) {
+      res.status(200).json({ message: "Excel Updated" });
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+app.get("/api/spreadsheettofirebase", async (req, res) => {
   const snapshot = await Firebase.Influencer.doc("knYk5qZTU126pGea5vac").get();
 
-  clientInfluencer.read().then(
+  clientSpreadsheetToDB.read().then(
     function (data) {
       let value = JSON.parse(data);
       let interval = 60000;
@@ -525,7 +788,7 @@ app.post("/api/signin", async (req, res) => {
             isMember = true;
           }
         }
-     
+
         var difference =
           new Date().getTime() -
           influencerData[0].updatedDate.toDate().getTime();
@@ -2325,16 +2588,19 @@ app.post("/api/influencer/create", async (req, res) => {
       }
     }
   } catch (error) {
-    if(userResponse?.uid == undefined || userResponse?.uid == ""){
-      res.status(500).json({ message: createUser.email + " is already an pinksky user. Try sigging up with another id." });
-    }else{
+    if (userResponse?.uid == undefined || userResponse?.uid == "") {
+      res.status(500).json({
+        message:
+          createUser.email +
+          " is already an pinksky user. Try sigging up with another id.",
+      });
+    } else {
       console.log(userResponse?.uid);
       await Firebase.admin.auth().deleteUser(userResponse?.uid);
-    
+
       console.log("error", error.message);
       res.status(500).json({ message: error.message });
     }
-   
   }
 });
 
@@ -2345,7 +2611,7 @@ app.post("/api/brand/create", async (req, res) => {
   const createUser = {
     email: brandData.email,
     password: brandData.password,
-    name: "Brand_" + brandData.companyname + "_" + brandData.name,
+    name: "Brand_" + brandData.companyname,
   };
   console.log("createUser", createUser);
   try {
@@ -2412,155 +2678,164 @@ app.post("/api/brand/create", async (req, res) => {
           let interval = 8000;
           let lengthOfArray = instagramPostDetails.length - 1;
           let brandArr = [];
-          console.log("lengthOfArray", lengthOfArray);
-          instagramPostDetails.forEach((file, index) => {
-            setTimeout(() => {
-              console.log("hi people", interval * index);
-
-              const d = new Date();
-              let month = d.getMonth() + 1;
-              let date = d.getDate();
-              let year = d.getFullYear();
-              let time = d.getTime();
-              const fileName =
-                index +
-                "_" +
-                createUser.name +
-                "_" +
-                month +
-                "_" +
-                date +
-                "_" +
-                year +
-                "_" +
-                time +
-                ".jpeg";
-              let filePath = "./images/" + fileName;
-              const options = {
-                url: file.display_url,
-                method: "GET",
-              };
-              console.log("fileName", fileName);
-              let getDownloadURL = "";
-              request(options, async (err, resp, body) => {
-                if (resp.statusCode === 200) {
-                  console.log("res.statusCode", resp.statusCode);
-                  var bucket = Firebase.admin.storage().bucket();
-
-                  await bucket.upload(filePath);
-                  let fileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}`;
-                  console.log("------Here------");
-                  console.log(fileFirebaseURL);
-                  axios
-                    .get(fileFirebaseURL)
-                    .then((response) => {
-                      getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}?alt=media&token=${response.data.downloadTokens}`;
-                      instagramPostDetails[index].new_url = getDownloadURL;
-                      console.log("index", index);
-                      fs.unlinkSync(filePath);
-                      if (index === lengthOfArray) {
-                        console.log("inside");
-                        const customer = stripe.customers.create({
-                          description: brandData.companyname,
-                          email: brandData.email,
-                        });
-                        brandSchema = {
-                          ...brandSchema,
-                          customerid: customer.id,
-                          imgURL: instagramPostDetails[0].new_url,
-                          message: [
-                            {
-                              statusID: "100",
-                              influencerID: "",
-                              influencerName: "",
-                            },
-                          ],
-
-                          createdDate: new Date(),
-                          updatedDate: new Date(),
+           let customer = stripe.customers.create({
+                    description: brandData.companyname,
+                    email: brandData.email,
+                  });
+                  customer.then(striperesponse => {
+                    console.log("customer",striperesponse);
+                    console.log("lengthOfArray", lengthOfArray);
+                    instagramPostDetails.forEach((file, index) => {
+                      setTimeout(() => {
+                        console.log("hi people", interval * index);
+          
+                        const d = new Date();
+                        let month = d.getMonth() + 1;
+                        let date = d.getDate();
+                        let year = d.getFullYear();
+                        let time = d.getTime();
+                        const fileName =
+                          index +
+                          "_" +
+                          createUser.name +
+                          "_" +
+                          month +
+                          "_" +
+                          date +
+                          "_" +
+                          year +
+                          "_" +
+                          time +
+                          ".jpeg";
+                        let filePath = "./images/" + fileName;
+                        const options = {
+                          url: file.display_url,
+                          method: "GET",
                         };
-                      }
-
-                      Firebase.Brand.add(brandSchema);
-                      setTimeout(async () => {
-                        console.log("inside2");
-
-                        const snapshot = await Firebase.Brand.get();
-
-                        snapshot.docs.map((doc) => {
-                          if (doc.data().email === createUser.email) {
-                            brandArr.push({ id: doc.id, ...doc.data() });
+                        console.log("fileName", fileName);
+                        let getDownloadURL = "";
+                        request(options, async (err, resp, body) => {
+                          if (resp.statusCode === 200) {
+                            console.log("res.statusCode", resp.statusCode);
+                            var bucket = Firebase.admin.storage().bucket();
+          
+                            await bucket.upload(filePath);
+                            let fileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}`;
+                            console.log("------Here------");
+                            console.log(fileFirebaseURL);
+                           
+                            axios
+                              .get(fileFirebaseURL)
+                              .then((response) => {
+                                getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}?alt=media&token=${response.data.downloadTokens}`;
+                                instagramPostDetails[index].new_url = getDownloadURL;
+                                console.log("index", index);
+                                fs.unlinkSync(filePath);
+                                if (index === lengthOfArray) {
+                                  console.log("inside");
+                                 
+                                  brandSchema = {
+                                    ...brandSchema,
+                                    customerid: striperesponse.id,
+                                    // customerid: 12,
+                                    imgURL: instagramPostDetails[0].new_url,
+                                    message: [
+                                      {
+                                        statusID: "100",
+                                        influencerID: "",
+                                        influencerName: "",
+                                      },
+                                    ],
+          
+                                    createdDate: new Date(),
+                                    updatedDate: new Date(),
+                                  };
+                                }
+          
+                                Firebase.Brand.add(brandSchema);
+                                setTimeout(async () => {
+                                  console.log("inside2");
+          
+                                  const snapshot = await Firebase.Brand.get();
+          
+                                  snapshot.docs.map((doc) => {
+                                    if (doc.data().email === createUser.email) {
+                                      brandArr.push({ id: doc.id, ...doc.data() });
+                                    }
+                                  });
+          
+                                  res.status(200).json({
+                                    message: {
+                                      displayName: createUser.name,
+                                      id: brandArr[0].id,
+                                      email: createUser.email,
+                                      type: "Posted Brand",
+                                    },
+                                  });
+                                }, 4000);
+                              })
+                              .catch((error) => {
+                                throw error;
+                              });
                           }
-                        });
-
-                        res.status(200).json({
-                          message: {
-                            displayName: createUser.name,
-                            id: brandArr[0].id,
-                            email: createUser.email,
-                            type: "Posted Brand",
-                          },
-                        });
-                      }, 4000);
-                    })
-                    .catch((error) => {
-                      throw error;
+                        }).pipe(fs.createWriteStream(filePath));
+                      }, index * interval);
+          
+                      // if (response.data.data.is_private === false) {
+                      //   brandSchema = {
+                      //     ...brandData,
+                      //     imgURL: response.data.data.profile_pic_url_hd,
+                      //     instagram: {
+                      //       id: response.data.data.id,
+                      //       is_business_account: response.data.data.is_business_account,
+                      //       external_url: response.data.data.external_url,
+                      //       followers: response.data.data.edge_followed_by.count,
+                      //       edge_follow: response.data.data.edge_follow.count,
+                      //       is_private: response.data.data.is_private,
+                      //       is_verified: response.data.data.is_verified,
+                      //     },
+                      //     message: [
+                      //       { statusID: "100", influencerID: "", influencerName: "" },
+                      //     ],
+          
+                      //     createdDate: new Date(),
+                      //     updatedDate: new Date(),
+                      //   };
+                      // }
+          
+                      // if (brandSchema != null) {
+                      //   setTimeout(async () => {
+                      //     const response = await Firebase.Brand.add(brandSchema);
+                      //     // console.log("response", response.data);
+                      //     const snapshot = await Firebase.Brand.get();
+                      //     const brandData = [];
+                      //     snapshot.docs.map((doc) => {
+                      //       if (doc.data().email === createUser.email) {
+                      //         brandData.push({ id: doc.id, ...doc.data() });
+                      //       }
+                      //     });
+                      //     res.status(200).json({
+                      //       message: {
+                      //         displayName: createUser.name,
+                      //         id: brandData[0].id,
+                      //         email: createUser.email,
+                      //         type: "Posted Brand",
+                      //       },
+                      //     });
+                      //   }, 2000);
+                      // } else {
+                      //   res.status(401).json({ message: "Instagram Private account" });
+                      // }
+                      // }
+                      // })
+                      // .catch(function (error) {
+                      //   throw error;
+                      // });
                     });
-                }
-              }).pipe(fs.createWriteStream(filePath));
-            }, index * interval);
-
-            // if (response.data.data.is_private === false) {
-            //   brandSchema = {
-            //     ...brandData,
-            //     imgURL: response.data.data.profile_pic_url_hd,
-            //     instagram: {
-            //       id: response.data.data.id,
-            //       is_business_account: response.data.data.is_business_account,
-            //       external_url: response.data.data.external_url,
-            //       followers: response.data.data.edge_followed_by.count,
-            //       edge_follow: response.data.data.edge_follow.count,
-            //       is_private: response.data.data.is_private,
-            //       is_verified: response.data.data.is_verified,
-            //     },
-            //     message: [
-            //       { statusID: "100", influencerID: "", influencerName: "" },
-            //     ],
-
-            //     createdDate: new Date(),
-            //     updatedDate: new Date(),
-            //   };
-            // }
-
-            // if (brandSchema != null) {
-            //   setTimeout(async () => {
-            //     const response = await Firebase.Brand.add(brandSchema);
-            //     // console.log("response", response.data);
-            //     const snapshot = await Firebase.Brand.get();
-            //     const brandData = [];
-            //     snapshot.docs.map((doc) => {
-            //       if (doc.data().email === createUser.email) {
-            //         brandData.push({ id: doc.id, ...doc.data() });
-            //       }
-            //     });
-            //     res.status(200).json({
-            //       message: {
-            //         displayName: createUser.name,
-            //         id: brandData[0].id,
-            //         email: createUser.email,
-            //         type: "Posted Brand",
-            //       },
-            //     });
-            //   }, 2000);
-            // } else {
-            //   res.status(401).json({ message: "Instagram Private account" });
-            // }
-            // }
-            // })
-            // .catch(function (error) {
-            //   throw error;
-            // });
-          });
+                  }).catch(err => {
+                    throw err;
+                  })
+         
         }
       }
     }
@@ -2811,7 +3086,17 @@ app.post("/api/randomdata/create", async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
-
+app.post("/api/feedbackdata/create", async (req, res) => {
+  const data = req.body;
+  console.log(data);
+  try {
+    await Firebase.Feedback.add(data);
+    res.status(200).json({ message: "Posted Feedback" });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({ message: error });
+  }
+});
 app.post("/api/noninfluencer/create", async (req, res) => {
   let data = req.body;
 
@@ -2913,40 +3198,7 @@ app.post("/api/influencerpayment/create", async (req, res) => {
   }
 });
 
-app.post("/api/spreadsheet/influencer", async (req, res) => {
-  // const passcode = req.body.id;
-  // if(passcode === "2022"){
-  //   client.create({ name: "William", age: 25 }).then(function(data) {
-  //     console.log(data);
-  //   }, function(err){
-  //     console.log(err);
-  //   });
-  // }else{
-  //   res.status(200).json({ message: "Not Valid" });
-  // }
-  //influencer
-  // const snapshotInfl = await Firebase.Influencer.get();
-  // let influencerlist = [];
-  // snapshotInfl.docs.map((doc) => {
-  //   influencerlist.push({ id: doc.id, ...doc.data() });
-  // });
-  // const snapshotInfl = await Firebase.Influencer.where('isActive', '==', 1).get();
-  // console.log(snapshotInfl.data);
-  // snapshotInfl.then(reponse => {
-  //   console.log(reponse);
-  // }).catch(error => {
-  //   console.log(error)
-  // })
-  //if 0 then dont execute
-  // clientBrand.create(influencerlist).then(
-  //   function (data) {
-  //     console.log(data);
-  //   },
-  //   function (err) {
-  //     console.log(err);
-  //   }
-  // );
-});
+
 
 //Put
 //1.Influencer by admin and profile page
