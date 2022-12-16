@@ -260,7 +260,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
       if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
         feedbackData.push({
           id: doc.id,
-        
+
           name: doc.data().name,
           message: doc.data().message,
         });
@@ -615,11 +615,10 @@ app.post("/api/forgotpassword", async (req, res) => {
 app.post("/api/signin", async (req, res) => {
   //update instagram on login...⭐️
   try {
-    const createUser = {
+    let createUser = {
       email: req.body.email,
       password: req.body.password,
     };
-    console.log(createUser);
     const userResponse = await Firebase.firebase
       .auth()
       .signInWithEmailAndPassword(createUser.email, createUser.password)
@@ -627,8 +626,8 @@ app.post("/api/signin", async (req, res) => {
         throw error;
       });
     console.log("userResponse.user.displayName", userResponse.user.displayName);
-    if (userResponse.user.displayName != null) {
-      if (userResponse.user.displayName.indexOf("Brand") != -1) {
+    if (userResponse.user.displayName !== null) {
+      if (userResponse.user.displayName.indexOf("Brand") !== -1) {
         //Brand
         const snapshot = await Firebase.Brand.get();
         let brandData = [];
@@ -704,7 +703,7 @@ app.post("/api/signin", async (req, res) => {
           });
         }
       } else if (
-        userResponse.user.displayName.indexOf("Non_Influencer") != -1
+        userResponse.user.displayName.indexOf("Non_Influencer") !== -1
       ) {
         let noninfluencerData = [];
         const snapshot = await Firebase.NonInfluencer.get();
@@ -2380,7 +2379,7 @@ app.post("/api/influencer/create", async (req, res) => {
   let userResponse = null;
   try {
     //login here
-    if (createUser.email != undefined && createUser.password != undefined) {
+    if (createUser.email !== undefined && createUser.password !== undefined) {
       userResponse = await Firebase.admin.auth().createUser({
         email: createUser.email,
         password: createUser.password,
@@ -2391,7 +2390,7 @@ app.post("/api/influencer/create", async (req, res) => {
 
       console.log("userResponse email", userResponse);
       // fetch instagram photos not engagement and not profile details
-      if (userResponse.email != undefined && userResponse.uid != undefined) {
+      if (userResponse.email !== undefined && userResponse.uid !== undefined) {
         let influencerSchema = null;
         const options = {
           method: "GET",
@@ -2615,7 +2614,7 @@ app.post("/api/brand/create", async (req, res) => {
   };
   console.log("createUser", createUser);
   try {
-    if (createUser.email != undefined && createUser.password != undefined) {
+    if (createUser.email !== undefined && createUser.password !== undefined) {
       const userResponse = await Firebase.admin.auth().createUser({
         email: createUser.email,
         password: createUser.password,
@@ -2625,7 +2624,7 @@ app.post("/api/brand/create", async (req, res) => {
       });
 
       console.log("userResponse email", userResponse.email);
-      if (userResponse.email != undefined && userResponse.uid != undefined) {
+      if (userResponse.email !== undefined && userResponse.uid !== undefined) {
         let brandSchema = null;
         const options = {
           method: "GET",
@@ -2678,164 +2677,165 @@ app.post("/api/brand/create", async (req, res) => {
           let interval = 8000;
           let lengthOfArray = instagramPostDetails.length - 1;
           let brandArr = [];
-           let customer = stripe.customers.create({
-                    description: brandData.companyname,
-                    email: brandData.email,
-                  });
-                  customer.then(striperesponse => {
-                    console.log("customer",striperesponse);
-                    console.log("lengthOfArray", lengthOfArray);
-                    instagramPostDetails.forEach((file, index) => {
-                      setTimeout(() => {
-                        console.log("hi people", interval * index);
-          
-                        const d = new Date();
-                        let month = d.getMonth() + 1;
-                        let date = d.getDate();
-                        let year = d.getFullYear();
-                        let time = d.getTime();
-                        const fileName =
-                          index +
-                          "_" +
-                          createUser.name +
-                          "_" +
-                          month +
-                          "_" +
-                          date +
-                          "_" +
-                          year +
-                          "_" +
-                          time +
-                          ".jpeg";
-                        let filePath = "./images/" + fileName;
-                        const options = {
-                          url: file.display_url,
-                          method: "GET",
-                        };
-                        console.log("fileName", fileName);
-                        let getDownloadURL = "";
-                        request(options, async (err, resp, body) => {
-                          if (resp.statusCode === 200) {
-                            console.log("res.statusCode", resp.statusCode);
-                            var bucket = Firebase.admin.storage().bucket();
-          
-                            await bucket.upload(filePath);
-                            let fileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}`;
-                            console.log("------Here------");
-                            console.log(fileFirebaseURL);
-                           
-                            axios
-                              .get(fileFirebaseURL)
-                              .then((response) => {
-                                getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}?alt=media&token=${response.data.downloadTokens}`;
-                                instagramPostDetails[index].new_url = getDownloadURL;
-                                console.log("index", index);
-                                fs.unlinkSync(filePath);
-                                if (index === lengthOfArray) {
-                                  console.log("inside");
-                                 
-                                  brandSchema = {
-                                    ...brandSchema,
-                                    customerid: striperesponse.id,
-                                    // customerid: 12,
-                                    imgURL: instagramPostDetails[0].new_url,
-                                    message: [
-                                      {
-                                        statusID: "100",
-                                        influencerID: "",
-                                        influencerName: "",
-                                      },
-                                    ],
-          
-                                    createdDate: new Date(),
-                                    updatedDate: new Date(),
-                                  };
-                                }
-          
-                                Firebase.Brand.add(brandSchema);
-                                setTimeout(async () => {
-                                  console.log("inside2");
-          
-                                  const snapshot = await Firebase.Brand.get();
-          
-                                  snapshot.docs.map((doc) => {
-                                    if (doc.data().email === createUser.email) {
-                                      brandArr.push({ id: doc.id, ...doc.data() });
-                                    }
-                                  });
-          
-                                  res.status(200).json({
-                                    message: {
-                                      displayName: createUser.name,
-                                      id: brandArr[0].id,
-                                      email: createUser.email,
-                                      type: "Posted Brand",
-                                    },
-                                  });
-                                }, 4000);
-                              })
-                              .catch((error) => {
-                                throw error;
-                              });
+          let customer = stripe.customers.create({
+            description: brandData.companyname,
+            email: brandData.email,
+          });
+          customer
+            .then((striperesponse) => {
+              console.log("customer", striperesponse);
+              console.log("lengthOfArray", lengthOfArray);
+              instagramPostDetails.forEach((file, index) => {
+                setTimeout(() => {
+                  console.log("hi people", interval * index);
+
+                  const d = new Date();
+                  let month = d.getMonth() + 1;
+                  let date = d.getDate();
+                  let year = d.getFullYear();
+                  let time = d.getTime();
+                  const fileName =
+                    index +
+                    "_" +
+                    createUser.name +
+                    "_" +
+                    month +
+                    "_" +
+                    date +
+                    "_" +
+                    year +
+                    "_" +
+                    time +
+                    ".jpeg";
+                  let filePath = "./images/" + fileName;
+                  const options = {
+                    url: file.display_url,
+                    method: "GET",
+                  };
+                  console.log("fileName", fileName);
+                  let getDownloadURL = "";
+                  request(options, async (err, resp, body) => {
+                    if (resp.statusCode === 200) {
+                      console.log("res.statusCode", resp.statusCode);
+                      var bucket = Firebase.admin.storage().bucket();
+
+                      await bucket.upload(filePath);
+                      let fileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}`;
+                      console.log("------Here------");
+                      console.log(fileFirebaseURL);
+
+                      axios
+                        .get(fileFirebaseURL)
+                        .then((response) => {
+                          getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}?alt=media&token=${response.data.downloadTokens}`;
+                          instagramPostDetails[index].new_url = getDownloadURL;
+                          console.log("index", index);
+                          fs.unlinkSync(filePath);
+                          if (index === lengthOfArray) {
+                            console.log("inside");
+
+                            brandSchema = {
+                              ...brandSchema,
+                              customerid: striperesponse.id,
+                              // customerid: 12,
+                              imgURL: instagramPostDetails[0].new_url,
+                              message: [
+                                {
+                                  statusID: "100",
+                                  influencerID: "",
+                                  influencerName: "",
+                                },
+                              ],
+
+                              createdDate: new Date(),
+                              updatedDate: new Date(),
+                            };
                           }
-                        }).pipe(fs.createWriteStream(filePath));
-                      }, index * interval);
-          
-                      // if (response.data.data.is_private === false) {
-                      //   brandSchema = {
-                      //     ...brandData,
-                      //     imgURL: response.data.data.profile_pic_url_hd,
-                      //     instagram: {
-                      //       id: response.data.data.id,
-                      //       is_business_account: response.data.data.is_business_account,
-                      //       external_url: response.data.data.external_url,
-                      //       followers: response.data.data.edge_followed_by.count,
-                      //       edge_follow: response.data.data.edge_follow.count,
-                      //       is_private: response.data.data.is_private,
-                      //       is_verified: response.data.data.is_verified,
-                      //     },
-                      //     message: [
-                      //       { statusID: "100", influencerID: "", influencerName: "" },
-                      //     ],
-          
-                      //     createdDate: new Date(),
-                      //     updatedDate: new Date(),
-                      //   };
-                      // }
-          
-                      // if (brandSchema != null) {
-                      //   setTimeout(async () => {
-                      //     const response = await Firebase.Brand.add(brandSchema);
-                      //     // console.log("response", response.data);
-                      //     const snapshot = await Firebase.Brand.get();
-                      //     const brandData = [];
-                      //     snapshot.docs.map((doc) => {
-                      //       if (doc.data().email === createUser.email) {
-                      //         brandData.push({ id: doc.id, ...doc.data() });
-                      //       }
-                      //     });
-                      //     res.status(200).json({
-                      //       message: {
-                      //         displayName: createUser.name,
-                      //         id: brandData[0].id,
-                      //         email: createUser.email,
-                      //         type: "Posted Brand",
-                      //       },
-                      //     });
-                      //   }, 2000);
-                      // } else {
-                      //   res.status(401).json({ message: "Instagram Private account" });
-                      // }
-                      // }
-                      // })
-                      // .catch(function (error) {
-                      //   throw error;
-                      // });
-                    });
-                  }).catch(err => {
-                    throw err;
-                  })
-         
+
+                          Firebase.Brand.add(brandSchema);
+                          setTimeout(async () => {
+                            console.log("inside2");
+
+                            const snapshot = await Firebase.Brand.get();
+
+                            snapshot.docs.map((doc) => {
+                              if (doc.data().email === createUser.email) {
+                                brandArr.push({ id: doc.id, ...doc.data() });
+                              }
+                            });
+
+                            res.status(200).json({
+                              message: {
+                                displayName: createUser.name,
+                                id: brandArr[0].id,
+                                email: createUser.email,
+                                type: "Posted Brand",
+                              },
+                            });
+                          }, 4000);
+                        })
+                        .catch((error) => {
+                          throw error;
+                        });
+                    }
+                  }).pipe(fs.createWriteStream(filePath));
+                }, index * interval);
+
+                // if (response.data.data.is_private === false) {
+                //   brandSchema = {
+                //     ...brandData,
+                //     imgURL: response.data.data.profile_pic_url_hd,
+                //     instagram: {
+                //       id: response.data.data.id,
+                //       is_business_account: response.data.data.is_business_account,
+                //       external_url: response.data.data.external_url,
+                //       followers: response.data.data.edge_followed_by.count,
+                //       edge_follow: response.data.data.edge_follow.count,
+                //       is_private: response.data.data.is_private,
+                //       is_verified: response.data.data.is_verified,
+                //     },
+                //     message: [
+                //       { statusID: "100", influencerID: "", influencerName: "" },
+                //     ],
+
+                //     createdDate: new Date(),
+                //     updatedDate: new Date(),
+                //   };
+                // }
+
+                // if (brandSchema !== null) {
+                //   setTimeout(async () => {
+                //     const response = await Firebase.Brand.add(brandSchema);
+                //     // console.log("response", response.data);
+                //     const snapshot = await Firebase.Brand.get();
+                //     const brandData = [];
+                //     snapshot.docs.map((doc) => {
+                //       if (doc.data().email === createUser.email) {
+                //         brandData.push({ id: doc.id, ...doc.data() });
+                //       }
+                //     });
+                //     res.status(200).json({
+                //       message: {
+                //         displayName: createUser.name,
+                //         id: brandData[0].id,
+                //         email: createUser.email,
+                //         type: "Posted Brand",
+                //       },
+                //     });
+                //   }, 2000);
+                // } else {
+                //   res.status(401).json({ message: "Instagram Private account" });
+                // }
+                // }
+                // })
+                // .catch(function (error) {
+                //   throw error;
+                // });
+              });
+            })
+            .catch((err) => {
+              throw err;
+            });
         }
       }
     }
@@ -3114,7 +3114,7 @@ app.post("/api/noninfluencer/create", async (req, res) => {
       disabled: false,
       displayName: createUser.name,
     });
-    if (userResponse.email != undefined && userResponse.uid != undefined) {
+    if (userResponse.email !== undefined && userResponse.uid !== undefined) {
       let noninfluencerData = {
         ...data,
         createdDate: new Date(),
@@ -3197,8 +3197,6 @@ app.post("/api/influencerpayment/create", async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
-
-
 
 //Put
 //1.Influencer by admin and profile page
