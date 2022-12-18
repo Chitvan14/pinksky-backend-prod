@@ -3,6 +3,7 @@ const cors = require("cors");
 const axios = require("axios");
 const request = require("request");
 const sheetdb = require("sheetdb-node");
+const Razorpay = require("razorpay");
 const fs = require("fs");
 const stripe = require("stripe")(
   "sk_test_51IBywyEAjIG7X6ReN7Xk9I0tznJCmgOtQ1cqV0X744gtCFaYhUYI4FBUPdi8PmJ7fRN9bAaQnBA89yDzkFd7KuHj00ucejTMdS"
@@ -46,8 +47,47 @@ app.use(cors());
 
 // const sheetdb = require("sheetdb-node");
 // const client = sheetdb({ address: '58f61be4dda40' });
+app.get("/api/testrazorpay", async (req, res) => {
+  var instance = new Razorpay({
+    key_id: "rzp_test_9RHoBCA09dZ77x",
+    key_secret: "07otmmIcVMcyeMoc0AuaZqRX",
+  });
+
+  // let something = await instance.plans.all({count : 20});
+  //https://rzp.io/i/MLBaeISh asked no user
+  let something = await instance.subscriptions.create({
+    plan_id: "plan_Kt4TCvVFFGqAc2",
+    customer_notify: 1,
+    quantity: 1,
+    total_count: 3,
+    callback_url:
+      "https://www.npmjs.com/package/react-infinite-scroll-component",
+    redirect: true,
+    // start_at: 1495995837,
+    // addons: [
+    //   {
+    //     item: {
+    //       name: "Delivery charges",
+    //       amount: 700,
+    //       currency: "INR"
+    //     }
+    //   }
+    // ],
+    // notes: {
+    //   key1: "value3",
+    //   key2: "value2"
+    // },
+    // notify_info: {
+    //   notify_phone: 9123456789,
+    //   notify_email: "gaurav.kumar@example.com"
+    // }
+  });
+  // let something = await instance.subscriptions.fetch("sub_Kt4UrvPWiCfpfZ");
+  res.status(200).json({ something });
+});
 app.post("/api/firebasetospreadsheet", async (req, res) => {
   try {
+    // 7secitons
     let isValid = 1;
     //Influencer
     const snapshot = await Firebase.Influencer.get();
@@ -285,7 +325,9 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     }
 
     if (isValid === 1) {
-      res.status(200).json({ message: "Excel Updated" });
+      res
+        .status(200)
+        .json({ message: "Excel Updated", url: process.env.SPREADSHEET_URL });
     }
   } catch (err) {
     res.status(500).json(err);
@@ -615,19 +657,20 @@ app.post("/api/forgotpassword", async (req, res) => {
 app.post("/api/signin", async (req, res) => {
   //update instagram on login...⭐️
   try {
-    let createUser = {
+    const createUser = {
       email: req.body.email,
       password: req.body.password,
     };
+    console.log(createUser);
     const userResponse = await Firebase.firebase
       .auth()
       .signInWithEmailAndPassword(createUser.email, createUser.password)
       .catch((error) => {
         throw error;
       });
-    console.log("userResponse.user.displayName", userResponse.user.displayName);
-    if (userResponse.user.displayName !== null) {
-      if (userResponse.user.displayName.indexOf("Brand") !== -1) {
+    console.log("userResponse.user.displayName", userResponse.user);
+    if (userResponse.user.displayName != null) {
+      if (userResponse.user.displayName.indexOf("Brand") != -1) {
         //Brand
         const snapshot = await Firebase.Brand.get();
         let brandData = [];
@@ -699,11 +742,12 @@ app.post("/api/signin", async (req, res) => {
               type: "Brand",
               status: brandData[0].status,
               isMember: false,
+              uuid: userResponse.user.uid,
             },
           });
         }
       } else if (
-        userResponse.user.displayName.indexOf("Non_Influencer") !== -1
+        userResponse.user.displayName.indexOf("Non_Influencer") != -1
       ) {
         let noninfluencerData = [];
         const snapshot = await Firebase.NonInfluencer.get();
@@ -743,6 +787,7 @@ app.post("/api/signin", async (req, res) => {
             type: "Non_Influencer",
             status: "100",
             isMember: isMember,
+            uuid: userResponse.user.uid,
           },
         });
       } else {
@@ -871,9 +916,9 @@ app.post("/api/signin", async (req, res) => {
               throw error;
             });
 
-          let interval = 8000;
+          let interval = 9000;
           let lengthOfArray = instagramPostDetails.length - 1;
-          let influencerArr = [];
+          // let influencerArr = [];
           console.log("lengthOfArray", lengthOfArray);
           instagramPostDetails.forEach((file, index) => {
             setTimeout(() => {
@@ -983,6 +1028,7 @@ app.post("/api/signin", async (req, res) => {
               type: "Influencer",
               status: influencerData[0].status,
               isMember: isMember,
+              uuid: userResponse.user.uid,
             },
           });
         }
@@ -1206,6 +1252,20 @@ app.get("/api/coupons", async (req, res) => {
 //1.Campaign using id
 app.get("/api/home", async (req, res) => {
   try {
+    const gallerySnapshot = await Firebase.Gallery.get();
+    let gallery = [];
+    let exhibitiongallery = [];
+    gallerySnapshot.docs.map((doc) => {
+      if (doc.data().isActive === 1) {
+        if (doc.data().type === "event") {
+          gallery.push({ id: doc.id, ...doc.data() });
+        } else if (doc.data().type === "exhibition") {
+          exhibitiongallery.push({ id: doc.id, ...doc.data() });
+        } else {
+          //nothing
+        }
+      }
+    });
     //campaign
     const snapshot = await Firebase.Campaign.get();
     let campaignlist = [];
@@ -1243,10 +1303,20 @@ app.get("/api/home", async (req, res) => {
     });
 
     res.status(200).json({
-      campaignlist: campaignlist,
-      influencerlist: influencerlist,
-      eventlist: eventlist,
-      couponlist: couponlist,
+      gallerylist: gallery.sort((a, b) => b.createdDate - a.createdDate),
+      exhibitiongallerylist: exhibitiongallery.sort(
+        (a, b) => b.createdDate - a.createdDate
+      ),
+      campaignlist: campaignlist
+        .sort((a, b) => b.createdDate - a.createdDate)
+        .slice(0, 6),
+      influencerlist: influencerlist
+        .sort((a, b) => b.createdDate - a.createdDate)
+        .slice(0, 6),
+      eventlist: eventlist.sort((a, b) => b.createdDate - a.createdDate),
+      couponlist: couponlist
+        .sort((a, b) => b.createdDate - a.createdDate)
+        .slice(0, 10),
       message: "Fetched Home",
     });
   } catch (error) {
@@ -1259,101 +1329,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
   try {
     const getAdmin = await Firebase.Influencer.doc(data.adminid).get();
     console.log("entered", getAdmin.data().admin);
-    //let globalAdmin = false;
 
-    // if (getAdmin.data().admin && data.adminid === process.env.ADMINID) {
-    //   globalAdmin = true;
-    //   //campaign
-    //   const snapshotCamp = await Firebase.Campaign.get();
-    //   // let campaignlist = [];
-    //   let admincampaignlist = [];
-    //   snapshotCamp.docs.map((doc) => {
-    //     // if (doc.data().isActive === 1) {
-    //     //   campaignlist.push({ id: doc.id, ...doc.data() });
-    //     // }
-    //     admincampaignlist.push({ id: doc.id, ...doc.data() });
-    //   });
-    //   //event
-    //   const snapshotevent = await Firebase.Event.get();
-    //   // let eventlist = [];
-    //   let admineventlist = [];
-    //   snapshotevent.docs.map((doc) => {
-    //     // if (doc.data().isActive === 1) {
-    //     //   eventlist.push({ id: doc.id, ...doc.data() });
-    //     // }
-    //     admineventlist.push({ id: doc.id, ...doc.data() });
-    //   });
-
-    //   //influencer
-    //   const snapshotInfl = await Firebase.Influencer.get();
-    //   // let influencerlist = [];
-    //   let admininfluencerlist = [];
-    //   let localcampaignmapping = [];
-    //   let localeventmapping = [];
-
-    //   snapshotInfl.docs.map((doc) => {
-
-    //       console.log("influencerlist6");
-    //       doc.data().campaignmapping.map((nesitem) => {
-    //         localcampaignmapping.push({
-    //           ...nesitem,
-    //           name: campaignlist.filter(
-    //             (fun) => fun.id === nesitem.campaignId
-    //           )[0].name,
-    //           category: campaignlist.filter(
-    //             (fun) => fun.id === nesitem.campaignId
-    //           )[0].category,
-    //         });
-    //       });
-    //       console.log("influencerlist7");
-    //       doc.data().eventmapping.map((nesitem) => {
-    //         localeventmapping.push({
-    //           ...nesitem,
-    //           name: eventlist.filter((fun) => fun.id === nesitem.eventId)[0]
-    //             .name,
-    //         });
-    //       });
-    //       console.log("influencerlist1");
-    //       admininfluencerlist.push({
-    //         id: doc.id,
-    //         ...doc.data(),
-    //         campaignmapping: localcampaignmapping,
-    //         eventmapping: localeventmapping,
-    //       });
-    //       localcampaignmapping=[];
-    //       localeventmapping=[];
-    //       console.log("influencerlist2");
-
-    //   });
-    //   console.log("influencerlist4");
-    //   // console.log("influencerlist1");
-
-    //   // console.log("influencerlist", influencerlist);
-    //   // influencerlist.map(item => {
-
-    //   // })
-
-    //   //brand
-    //   const snapshotbrand = await Firebase.Brand.get();
-    //   // let brandlist = [];
-    //   let adminbrandlist = [];
-    //   snapshotbrand.docs.map((doc) => {
-    //     // if (doc.data().status === "new" || doc.data().status === "accepted") {
-    //     //   brandlist.push({ id: doc.id, ...doc.data() });
-    //     // }
-    //     adminbrandlist.push({ id: doc.id, ...doc.data() });
-    //   });
-
-    //   res.status(200).json({
-    //     campaignlist: admincampaignlist,
-    //     influencerlist: admininfluencerlist,
-    //     brandlist: adminbrandlist,
-
-    //     eventlist: admineventlist,
-    //     globalAdmin : globalAdmin,
-    //     message: "Fetched Global Admin",
-    //   });
-    // }else
     if (getAdmin.data().admin) {
       if (data.changesTrigger == "" || data.changesTrigger == undefined) {
         //globalAdmin = false;
@@ -1370,18 +1346,18 @@ app.post("/api/admin/pinksky", async (req, res) => {
           }
         });
         //randomdata
-        console.log("step0");
-        const snapshotRamdomdata = await Firebase.RandomData.get();
+        // console.log("step0");
+        // const snapshotRamdomdata = await Firebase.RandomData.get();
         let ramdomdatalist = [];
-        console.log("step0");
-        snapshotRamdomdata.docs.map((doc) => {
-          console.log("step0");
-          if (doc.data()?.isActive === 1) {
-            ramdomdatalist.push({ id: doc.id, ...doc.data() });
-          } else {
-            //move
-          }
-        });
+        // console.log("step0");
+        // snapshotRamdomdata.docs.map((doc) => {
+        //   console.log("step0");
+        //   if (doc.data()?.isActive === 1) {
+        //     ramdomdatalist.push({ id: doc.id, ...doc.data() });
+        //   } else {
+        //     //move
+        //   }
+        // });
         console.log("step1");
         const snapshotCoupon = await Firebase.Coupons.get();
         let couponlist = [];
@@ -1535,12 +1511,12 @@ app.post("/api/admin/pinksky", async (req, res) => {
             });
           }
         });
-        console.log("step7");
-        const snapshotpinkskypopup = await Firebase.PinkskyPopup.get();
+        // console.log("step7");
+        // const snapshotpinkskypopup = await Firebase.PinkskyPopup.get();
         let pinkskypopuplist = [];
-        snapshotpinkskypopup.docs.map((doc) => {
-          pinkskypopuplist.push({ id: doc.id, ...doc.data() });
-        });
+        // snapshotpinkskypopup.docs.map((doc) => {
+        //   pinkskypopuplist.push({ id: doc.id, ...doc.data() });
+        // });
         console.log("step8");
         // console.log("brandlist", brandlist);
         res.status(200).json({
@@ -1558,7 +1534,6 @@ app.post("/api/admin/pinksky", async (req, res) => {
       } else if (data.changesTrigger == "influencer") {
         console.log("step2");
         const snapshotCamp = await Firebase.Campaign.get();
-        // let campaignlist = [];
         let rawcampaignlist = [];
         snapshotCamp.docs.map((doc) => {
           // if (doc.data()?.isActive === 1) {
@@ -2173,7 +2148,7 @@ app.post("/api/campaign/filter", async (req, res) => {
     // let agesorted;
     // let gendersorted;
     // let followersorted;
-    console.log("data", data);
+    // console.log("data", data);
     let categorysorted;
     let citysorted;
     let specialValuesorted;
@@ -2329,9 +2304,10 @@ app.post("/api/campaign/filter", async (req, res) => {
     }
     // console.log("citysorted", citysorted);
     console.log("brandcategorysorted length", brandcategorysorted.length);
-    res
-      .status(200)
-      .json({ data: brandcategorysorted, message: "Filtered Campaign" });
+    res.status(200).json({
+      data: brandcategorysorted.sort((a, b) => b.createdDate - a.createdDate),
+      message: "Filtered Campaign",
+    });
   } catch (error) {
     res.status(500).json({ message: error });
   }
@@ -2365,11 +2341,21 @@ app.post("/api/influencerbyphonenumber/create", async (req, res) => {
   // });
   res.status(200).json({ userResponse2 });
 });
+// app.get("/api/influencer/createeeeee", async (req, res) => {
+//   console.log("hit");
+//   let getUserByEmail = await Firebase.admin
+//     .auth()
+//     .getUserByEmail("divyaos@gmail.com");
+//   res.json(getUserByEmail);
+// });
+
 //Post
 //1.Influencer with login
 app.post("/api/influencer/create", async (req, res) => {
   let influencerData = req.body;
   console.log("influencerData", req.body);
+  //check if noninfluencer
+
   const createUser = {
     email: influencerData.email,
     password: influencerData.password,
@@ -2379,18 +2365,39 @@ app.post("/api/influencer/create", async (req, res) => {
   let userResponse = null;
   try {
     //login here
-    if (createUser.email !== undefined && createUser.password !== undefined) {
-      userResponse = await Firebase.admin.auth().createUser({
-        email: createUser.email,
-        password: createUser.password,
-        emailVerified: false,
-        disabled: false,
-        displayName: createUser.name,
-      });
+    if (createUser.email != undefined && createUser.password != undefined) {
+      console.log(influencerData.isNonInfluencer);
+      if (influencerData.isNonInfluencer.length > 2) {
+        let getUserByUuid = await Firebase.admin
+          .auth()
+          .getUser(influencerData.isNonInfluencer.toString());
+
+        await Firebase.admin.auth().updateUser(getUserByUuid?.uid, {  
+          password: createUser.password,
+          emailVerified: false,
+          disabled: false,
+          displayName: createUser.name,
+        });
+
+        userResponse = {
+          email: influencerData.email,
+          uid: getUserByUuid?.uid,
+        };
+        console.log("userResponse", userResponse);
+      } else {
+        console.log("abc");
+        userResponse = await Firebase.admin.auth().createUser({
+          email: createUser.email,
+          password: createUser.password,
+          emailVerified: false,
+          disabled: false,
+          displayName: createUser.name,
+        });
+      }
 
       console.log("userResponse email", userResponse);
       // fetch instagram photos not engagement and not profile details
-      if (userResponse.email !== undefined && userResponse.uid !== undefined) {
+      if (userResponse.email != undefined && userResponse.uid != undefined) {
         let influencerSchema = null;
         const options = {
           method: "GET",
@@ -2484,7 +2491,7 @@ app.post("/api/influencer/create", async (req, res) => {
           );
           throw err;
         } else {
-          let interval = 8000;
+          let interval = 9000;
           let lengthOfArray = instagramPostDetails.length - 1;
           let influencerArr = [];
           console.log("lengthOfArray", lengthOfArray);
@@ -2595,8 +2602,11 @@ app.post("/api/influencer/create", async (req, res) => {
       });
     } else {
       console.log(userResponse?.uid);
-      await Firebase.admin.auth().deleteUser(userResponse?.uid);
-
+      if (influencerData.isNonInfluencer.length > 2) {
+        //non influencer is safe
+      } else {
+        await Firebase.admin.auth().deleteUser(userResponse?.uid);
+      }
       console.log("error", error.message);
       res.status(500).json({ message: error.message });
     }
@@ -2614,7 +2624,7 @@ app.post("/api/brand/create", async (req, res) => {
   };
   console.log("createUser", createUser);
   try {
-    if (createUser.email !== undefined && createUser.password !== undefined) {
+    if (createUser.email != undefined && createUser.password != undefined) {
       const userResponse = await Firebase.admin.auth().createUser({
         email: createUser.email,
         password: createUser.password,
@@ -2624,7 +2634,7 @@ app.post("/api/brand/create", async (req, res) => {
       });
 
       console.log("userResponse email", userResponse.email);
-      if (userResponse.email !== undefined && userResponse.uid !== undefined) {
+      if (userResponse.email != undefined && userResponse.uid != undefined) {
         let brandSchema = null;
         const options = {
           method: "GET",
@@ -2674,7 +2684,7 @@ app.post("/api/brand/create", async (req, res) => {
           );
           throw err;
         } else {
-          let interval = 8000;
+          let interval = 9000;
           let lengthOfArray = instagramPostDetails.length - 1;
           let brandArr = [];
           let customer = stripe.customers.create({
@@ -2803,7 +2813,7 @@ app.post("/api/brand/create", async (req, res) => {
                 //   };
                 // }
 
-                // if (brandSchema !== null) {
+                // if (brandSchema != null) {
                 //   setTimeout(async () => {
                 //     const response = await Firebase.Brand.add(brandSchema);
                 //     // console.log("response", response.data);
@@ -3114,7 +3124,7 @@ app.post("/api/noninfluencer/create", async (req, res) => {
       disabled: false,
       displayName: createUser.name,
     });
-    if (userResponse.email !== undefined && userResponse.uid !== undefined) {
+    if (userResponse.email != undefined && userResponse.uid != undefined) {
       let noninfluencerData = {
         ...data,
         createdDate: new Date(),
