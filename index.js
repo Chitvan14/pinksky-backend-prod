@@ -5,9 +5,9 @@ const request = require("request");
 const sheetdb = require("sheetdb-node");
 const Razorpay = require("razorpay");
 const fs = require("fs");
-const stripe = require("stripe")(
-  "sk_test_51IBywyEAjIG7X6ReN7Xk9I0tznJCmgOtQ1cqV0X744gtCFaYhUYI4FBUPdi8PmJ7fRN9bAaQnBA89yDzkFd7KuHj00ucejTMdS"
-);
+// const stripe = require("stripe")(
+//   "sk_test_51IBywyEAjIG7X6ReN7Xk9I0tznJCmgOtQ1cqV0X744gtCFaYhUYI4FBUPdi8PmJ7fRN9bAaQnBA89yDzkFd7KuHj00ucejTMdS"
+// );
 
 require("dotenv").config();
 const { Firebase } = require("./config.js");
@@ -44,47 +44,363 @@ const clientFeedback = sheetdb({
 
 app.use(express.json());
 app.use(cors());
+//----------------------------------------------------------------------
+// razorpay section only
+const razorpay = new Razorpay({
+  key_id: "rzp_test_5rCCf0RQfpS4ik",
+  key_secret: "VkG7W6cQUmV3lpodAVPpY3Bu",
+});
+// app.post("/api/mappinginfluencerasmember/update", async (req, res) => {
+//   let response = req.body;
+//   console.log(response);
+
+// });
+//verify webhook
+app.post("/api/verify/razorpay", async (req, res) => {
+  // do a validation
+  const secret = "12345678";
+
+  console.log(req.body.event);
+
+  const crypto = require("crypto");
+
+  const shasum = crypto.createHmac("sha256", secret);
+  shasum.update(JSON.stringify(req.body));
+  const digest = shasum.digest("hex");
+
+  // console.log(digest, req.headers["x-razorpay-signature"]);
+
+  if (digest === req.headers["x-razorpay-signature"]) {
+    // require("fs").writeFileSync(
+    //   "payment2.json",
+    //   JSON.stringify(req.body, null, 4)
+    // );
+    console.log("step 1 :");
+
+    if (req.body.event === "subscription.activated") {
+      // const snapshot = await Firebase.Brand.doc(
+      //   req.body.payload.payment.entity.notes.pinksky_id
+      // ).get();
+      console.log("step 2 :",req.body.payload.subscription.entity.notes.pinksky_id);
+      const updating = await Firebase.Brand.doc(
+        req.body.payload.subscription.entity.notes.pinksky_id
+      ).update({
+        subscription: req.body,
+      });
+      console.log("step 3 :");
+      res.status(200).json({ message: "Subscription Activated" });
+    }
+
+    if (req.body.event === "payment_link.paid") {
+      console.log("step 2 :");
+      console.log(req.body.payload.payment_link.entity);
+      console.log(req.body.payload.payment_link.entity.notes.influencer);
+      if (req.body.payload.payment_link.entity.notes.influencer === "true") {
+        console.log("step 3 :");
+
+        const snapshot = await Firebase.Influencer.doc(
+          req.body.payload.payment_link.entity.notes.pinksky_id
+        ).get();
+        console.log(snapshot.data().pinkskymember.isMember);
+        if (snapshot.data().pinkskymember.isMember !== true) {
+          console.log("step 4 :");
+          const updated = await Firebase.Influencer.doc(
+            req.body.payload.payment_link.entity.notes.pinksky_id
+          ).update({
+            pinkskymember: {
+              isMember: true,
+              cooldown: new Date(
+                new Date().setFullYear(new Date().getFullYear() + 1)
+              ),
+              history: req.body,
+            },
+          });
+          console.log("step 5 :", updated);
+          res.status(200).json({ message: "Mapped User as member" });
+        }
+      } else if (
+        req.body.payload.payment_link.entity.notes.non_Influencer === "true"
+      ) {
+        console.log("step 4 :");
+
+        const nonsnapshot = await Firebase.NonInfluencer.doc(
+          req.body.payload.payment_link.entity.notes.pinksky_id
+        ).get();
+        //let nonsnapshotData = nonsnapshot.data();
+        if (nonsnapshot.data().pinkskymember.isMember !== true) {
+          await Firebase.NonInfluencer.doc(
+            req.body.payload.payment_link.entity.notes.pinksky_id
+          ).update({
+            pinkskymember: {
+              isMember: true,
+              cooldown: new Date(
+                new Date().setFullYear(new Date().getFullYear() + 1)
+              ),
+              history: req.body,
+            },
+          });
+          res.status(200).json({ message: "Mapped User as member" });
+        }
+      }
+    }
+  } else {
+    res.status(500).json({
+      message: "Error Occured Webhook configuring! Malicious Happening.",
+    });
+  }
+});
+
+//subscription
+app.post("/api/subscription/razorpay", async (req, res) => {
+  let data = req.body;
+  let planid = "";
+  if (data.brandCategoryFormValue === "Cafe") {
+    planid = "plan_Kt4TCvVFFGqAc2";
+  } else if (data.brandCategoryFormValue === "Club") {
+    planid = "";
+  } else if (data.brandCategoryFormValue === "Booth") {
+    planid = "";
+  } else if (data.brandCategoryFormValue === "Salon") {
+    planid = "";
+  } else if (data.brandCategoryFormValue === "Gym") {
+    planid = "";
+  } else if (data.brandCategoryFormValue === "Professionals") {
+    planid = "";
+  } else {
+    //nothing
+  }
+  // if (data.brandCategoryFormValue === "Food & Beverage") {
+  //   planid = "";
+  // } else if (data.brandCategoryFormValue === "Skincare & Salon") {
+  //   planid = "";
+  // } else if (data.brandCategoryFormValue === "Clubbing & Nightlife") {
+  //   planid = "";
+  // } else if (data.brandCategoryFormValue === "Gym & Fitness") {
+  //   planid = "";
+  // } else if (data.brandCategoryFormValue === "Automobiles") {
+  //   planid = "";
+  // } else if (data.brandCategoryFormValue === "Fashion & Lifestyle") {
+  //   planid = "";
+  // } else if (data.brandCategoryFormValue === "Beauty & Cosmetic") {
+  //   planid = "";
+  // } else {
+  //   //nothing
+  // }
+  try {
+    const options = {
+      plan_id: planid,
+      customer_notify: 1,
+      quantity: 1,
+      total_count: data.monthFormValue.split(" ")[0],
+      // start_at: 1495995837,
+      // addons: [
+      //   {
+      //     item: {
+      //       name: "Delivery charges",
+      //       amount: 30000,
+      //       currency: "INR"
+      //     }
+      //   }
+      // ],
+      notes: {
+        pinksky_id: data.id,
+        displayName: data.displayName,
+      },
+    };
+    const response = await razorpay.subscriptions.create(options);
+    console.log(options);
+    //append subscripton to brand firebse
+    // const snapshot = await Firebase.Influencer.get();
+    // snapshot.data().map(m => {
+
+    // })
+    // await Firebase.Brand.doc(data.id).update({
+    //   dbInserted: 1,
+    // });
+    // const snapshot =  await Firebase.Brand.doc(doc.id).update({
+    //   dbInserted: 1,
+    // });
+
+    // res.json({
+    //   url: response.short_url,
+    //   heading: "Subscribe",
+    // });
+    res.status(200).json({
+      url: response.short_url,
+      message: "Generate Subscribe Link",
+      heading: "Subscription",
+    });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
+//coupons
+app.post("/api/getcouponmessage/razorpay", async (req, res) => {
+  let response = req.body;
+
+  console.log(response);
+
+  if (response.isMember === false) {
+    let paymentLink = {};
+
+    // paymentLink = await stripe.paymentLinks.create({
+    //   line_items: [
+    //     {
+    //       price: "price_1LvkcyEAjIG7X6ResejEPNS9",
+    //       // price: response.data.paymentcode,
+    //       quantity: 1,
+    //     },
+    //   ],
+    //   after_completion: {
+    //     redirect: {
+    //       //paymentsuccess
+    //       url:
+    //         // "https://pinksky-development.netlify.app?id=" +
+    //         "http://localhost:3000/paymentsuccess?id=" + response.influencerid,
+    //     },
+    //     type: "redirect",
+    //   },
+    // });
+    try {
+      const snapshot = await Firebase.Influencer.doc(
+        response.influencerid
+      ).get();
+      // console.log(snapshot.data());
+      paymentLink = await razorpay.paymentLink.create({
+        amount: 200000,
+        currency: "INR",
+        accept_partial: true,
+        // first_min_partial_amount: 100,
+        // description: "For XYZ purpose",
+        customer: {
+          name: snapshot.data().name + " " + snapshot.data().surname,
+          email: snapshot.data().email,
+          contact: snapshot.data().whatsappnumber,
+        },
+        notify: {
+          sms: true,
+          email: true,
+        },
+        reminder_enable: true,
+        notes: {
+          pinksky_id: response.influencerid,
+          influencer: response.isInfluencer,
+          non_Influencer: response.isNonInfluencer,
+        },
+        // callback_url: "https://example-callback-url.com/",
+        // callback_method: "get"
+      });
+      console.log("paymentLink", paymentLink);
+      res.status(200).json({
+        url: paymentLink.short_url,
+        message: "Generate Coupon Payment Link",
+        heading: "Membership",
+      });
+
+      // razorpay.paymentLink.create({
+      //   upi_link: false,
+      //   amount: 200000,
+      //   currency: "INR",
+      //   accept_partial: false,
+      //   first_min_partial_amount: 100,
+      //   description: "For XYZ purpose",
+      //   customer: {
+      //     name: "Gaurav Kumar",
+      //     email: "gaurav.kumar@example.com",
+      //     contact: "+919999999954",
+      //   },
+      //   notify: {
+      //     sms: true,
+      //     email: true,
+      //   },
+      //   reminder_enable: true,
+      //   notes: {
+      //     policy_name: "Jeevan Bima",
+      //   },
+      // });
+      // res
+      //   .status(200)
+      //   .json({
+      //     data: paymentLink.short_url,
+      //     heading:"Grab Membership",
+      //     message: "Generate Coupon Payment Link",
+      //   });
+    } catch (error) {
+      console.log(error);
+    }
+
+    // .then((resp) => {
+    //   console.log(resp);
+    //   res
+    //     .status(200)
+    //     .json({ data: resp, message: "Generate Coupon Payment Link" });
+    // })
+    // .catch((error) => {
+    //   res.status(500).json({ message: error });
+    // });
+  } else {
+    //map influencrer id with coupon
+    //send message
+    const snapshot = await Firebase.Coupons.doc(response.data.id).get();
+
+    // if(snapshot.data().userCouponMapping.length > 0){
+    //   snapshot.data().userCouponMapping.map(ucm => {
+
+    //   })
+    // }
+    await Firebase.Coupons.doc(response.data.id).update({
+      userCouponMapping: [
+        ...snapshot.data().userCouponMapping,
+        response.influencerid,
+      ],
+    });
+    res.status(200).json({ message: "Notified" });
+  }
+  //add cases
+});
+//----------------------------------------------------------------------
 
 // const sheetdb = require("sheetdb-node");
 // const client = sheetdb({ address: '58f61be4dda40' });
-app.get("/api/testrazorpay", async (req, res) => {
-  var instance = new Razorpay({
-    key_id: "rzp_test_9RHoBCA09dZ77x",
-    key_secret: "07otmmIcVMcyeMoc0AuaZqRX",
-  });
+// app.get("/api/testrazorpay", async (req, res) => {
+//   var instance = new Razorpay({
+//     key_id: "rzp_test_9RHoBCA09dZ77x",
+//     key_secret: "07otmmIcVMcyeMoc0AuaZqRX",
+//   });
 
-  // let something = await instance.plans.all({count : 20});
-  //https://rzp.io/i/MLBaeISh asked no user
-  let something = await instance.subscriptions.create({
-    plan_id: "plan_Kt4TCvVFFGqAc2",
-    customer_notify: 1,
-    quantity: 1,
-    total_count: 3,
-    callback_url:
-      "https://www.npmjs.com/package/react-infinite-scroll-component",
-    redirect: true,
-    // start_at: 1495995837,
-    // addons: [
-    //   {
-    //     item: {
-    //       name: "Delivery charges",
-    //       amount: 700,
-    //       currency: "INR"
-    //     }
-    //   }
-    // ],
-    // notes: {
-    //   key1: "value3",
-    //   key2: "value2"
-    // },
-    // notify_info: {
-    //   notify_phone: 9123456789,
-    //   notify_email: "gaurav.kumar@example.com"
-    // }
-  });
-  // let something = await instance.subscriptions.fetch("sub_Kt4UrvPWiCfpfZ");
-  res.status(200).json({ something });
-});
+// let something = await instance.plans.all({count : 20});
+//https://rzp.io/i/MLBaeISh asked no user
+//   let something = await instance.subscriptions.create({
+//     plan_id: "plan_Kt4TCvVFFGqAc2",
+//     customer_notify: 1,
+//     quantity: 1,
+//     total_count: 3,
+//     callback_url:
+//       "https://www.npmjs.com/package/react-infinite-scroll-component",
+//     redirect: true,
+//     // start_at: 1495995837,
+//     // addons: [
+//     //   {
+//     //     item: {
+//     //       name: "Delivery charges",
+//     //       amount: 700,
+//     //       currency: "INR"
+//     //     }
+//     //   }
+//     // ],
+//     // notes: {
+//     //   key1: "value3",
+//     //   key2: "value2"
+//     // },
+//     // notify_info: {
+//     //   notify_phone: 9123456789,
+//     //   notify_email: "gaurav.kumar@example.com"
+//     // }
+//   });
+//   // let something = await instance.subscriptions.fetch("sub_Kt4UrvPWiCfpfZ");
+//   res.status(200).json({ something });
+// });
 app.post("/api/firebasetospreadsheet", async (req, res) => {
   try {
     // 7secitons
@@ -392,96 +708,6 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
   );
 });
 
-app.post("/api/mappinginfluencerasmember/update", async (req, res) => {
-  let response = req.body;
-  console.log(response);
-  if (response.isInfluencer === true) {
-    const snapshot = await Firebase.Influencer.doc(response.id).get();
-    //let snapshotData = snapshot.data();
-    console.log(snapshot.data().pinkskymember.isMember);
-    if (snapshot.data().pinkskymember.isMember === true) {
-      //nothing
-    } else {
-      await Firebase.Influencer.doc(response.id).update({
-        pinkskymember: {
-          isMember: true,
-          cooldown: new Date(
-            new Date().setFullYear(new Date().getFullYear() + 1)
-          ),
-        },
-      });
-      res.status(200).json({ message: "Mapping User as member" });
-    }
-  } else if (response.isNonInfluencer === true) {
-    const nonsnapshot = await Firebase.NonInfluencer.doc(response.id).get();
-    //let nonsnapshotData = nonsnapshot.data();
-    if (nonsnapshot.data().pinkskymember.isMember === true) {
-      //nothing
-    } else {
-      await Firebase.NonInfluencer.doc(response.id).update({
-        pinkskymember: {
-          isMember: true,
-          cooldown: new Date(
-            new Date().setFullYear(new Date().getFullYear() + 1)
-          ),
-        },
-      });
-      res.status(200).json({ message: "Mapping User as member" });
-    }
-  } else {
-    //nothing
-  }
-});
-app.post("/api/getcouponmessage/stripe", async (req, res) => {
-  let response = req.body;
-
-  console.log(response);
-
-  if (response.isMember === false) {
-    let paymentLink = {};
-
-    paymentLink = await stripe.paymentLinks.create({
-      line_items: [
-        {
-          price: "price_1LvkcyEAjIG7X6ResejEPNS9",
-          // price: response.data.paymentcode,
-          quantity: 1,
-        },
-      ],
-      after_completion: {
-        redirect: {
-          //paymentsuccess
-          url:
-            // "https://pinksky-development.netlify.app?id=" +
-            "http://localhost:3000/paymentsuccess?id=" + response.influencerid,
-        },
-        type: "redirect",
-      },
-    });
-
-    console.log(paymentLink);
-    res
-      .status(200)
-      .json({ data: paymentLink, message: "Generate Coupon Payment Link" });
-  } else {
-    //map influencrer id with coupon
-    //send message
-    const snapshot = await Firebase.Coupons.doc(response.data.id).get();
-    // if(snapshot.data().userCouponMapping.length > 0){
-    //   snapshot.data().userCouponMapping.map(ucm => {
-
-    //   })
-    // }
-    await Firebase.Coupons.doc(response.data.id).update({
-      userCouponMapping: [
-        ...snapshot.data().userCouponMapping,
-        response.influencerid,
-      ],
-    });
-    res.status(200).json({ message: "Notified" });
-  }
-  //add cases
-});
 // app.post("/api//stripe", async (req, res) => {
 //   // const customer = await stripe.customers.retrieve(
 //   //   'cus_Mf4s5JNb4DAeyv'
@@ -524,78 +750,79 @@ app.post("/api/getcouponmessage/stripe", async (req, res) => {
 //   //   .status(200)
 //   //   .json({ data: session, message: "Generate Brand Subscription Link" });
 // });
-app.post("/api/getbrandsubplan/stripe", async (req, res) => {
-  let response = req.body;
+// app.post("/api/getbrandsubplan/stripe", async (req, res) => {
+//   let response = req.body;
 
-  console.log(response.data);
-  console.log(response.label);
-  let label = response.label;
-  //add cases
-  let paymentLink = {};
-  if (label === "Food & Beverage") {
-    //cafe/restaurent
-    paymentLink = await stripe.paymentLinks.create({
-      line_items: [
-        {
-          price: "price_1LvkcyEAjIG7X6ResejEPNS9",
-          quantity: 1,
-        },
-      ],
-      after_completion: {
-        redirect: {
-          url: "https://pinksky-development.netlify.app/profile",
-        },
-        type: "redirect",
-      },
-    });
-  } else if (label === "Skincare & Salon") {
-    //salon
-  } else if (label === "Clubbing & Nightlife") {
-    //club
-  } else if (label === "Gym & Fitness") {
-    //gym
-  } else if (label === "Automobiles") {
-    paymentLink = "false";
-  } else if (label === "Fashion & Lifestyle") {
-    paymentLink = "false";
-  } else if (label === "Beauty & Cosmetic") {
-    paymentLink = "false";
-  }
+//   console.log(response.data);
+//   console.log(response.label);
+//   let label = response.label;
+//   //add cases
+//   let paymentLink = {};
+//   if (label === "Food & Beverage") {
+//     //cafe/restaurent
+//     paymentLink = await stripe.paymentLinks.create({
+//       line_items: [
+//         {
+//           price: "price_1LvkcyEAjIG7X6ResejEPNS9",
+//           quantity: 1,
+//         },
+//       ],
+//       after_completion: {
+//         redirect: {
+//           url: "https://pinksky-development.netlify.app/profile",
+//         },
+//         type: "redirect",
+//       },
+//     });
+//   } else if (label === "Skincare & Salon") {
+//     //salon
+//   } else if (label === "Clubbing & Nightlife") {
+//     //club
+//   } else if (label === "Gym & Fitness") {
+//     //gym
+//   } else if (label === "Automobiles") {
+//     paymentLink = "false";
+//   } else if (label === "Fashion & Lifestyle") {
+//     paymentLink = "false";
+//   } else if (label === "Beauty & Cosmetic") {
+//     paymentLink = "false";
+//   }
 
-  console.log(paymentLink);
-  res
-    .status(200)
-    .json({ data: paymentLink, message: "Generate Brand Payment Link" });
-});
+//   console.log(paymentLink);
+//   res
+//     .status(200)
+//     .json({ data: paymentLink, message: "Generate Brand Payment Link" });
+// });
 
-app.post("/api/getbrandsubscription/stripe", async (req, res) => {
-  let id = req.body.customerid;
-  const session = await stripe.billingPortal.sessions.create({
-    customer: id,
-  });
-  // const subscription = await stripe.subscriptions.create({
-  //   customer: id,
-  //   "billing_cycle_anchor": 1667029393,
-  //   items: [
-  //     {price: 'price_1LvxHNEAjIG7X6ReQpP8HsUA'},
-  //   ],
-  // });
-  // const customer = await stripe.customers.retrieve(
-  //   id
-  // );
-  // const paymentLink = await stripe.paymentLinks.create({
-  //   line_items: [
-  //     {
-  //       price: 'price_1LyPsI2eZvKYlo2CiUyLGPfP',
-  //       quantity: 1,
-  //     },
-  //   ],
-  // });
-  console.log(session);
-  res
-    .status(200)
-    .json({ data: session, message: "Generate Brand Subscription Link" });
-});
+//not in use
+// app.post("/api/getbrandsubscription/stripe", async (req, res) => {
+//   let id = req.body.customerid;
+//   const session = await stripe.billingPortal.sessions.create({
+//     customer: id,
+//   });
+//   // const subscription = await stripe.subscriptions.create({
+//   //   customer: id,
+//   //   "billing_cycle_anchor": 1667029393,
+//   //   items: [
+//   //     {price: 'price_1LvxHNEAjIG7X6ReQpP8HsUA'},
+//   //   ],
+//   // });
+//   // const customer = await stripe.customers.retrieve(
+//   //   id
+//   // );
+//   // const paymentLink = await stripe.paymentLinks.create({
+//   //   line_items: [
+//   //     {
+//   //       price: 'price_1LyPsI2eZvKYlo2CiUyLGPfP',
+//   //       quantity: 1,
+//   //     },
+//   //   ],
+//   // });
+//   console.log(session);
+//   res
+//     .status(200)
+//     .json({ data: session, message: "Generate Brand Subscription Link" });
+// });
 
 app.post("/api/generatepaymentlink/create", async (req, res) => {
   let id = req.body.influencerid;
@@ -1250,7 +1477,7 @@ app.get("/api/coupons", async (req, res) => {
   }
 });
 //1.Campaign using id
-app.get("/api/home", async (req, res) => {
+app.post("/api/home", async (req, res) => {
   try {
     const gallerySnapshot = await Firebase.Gallery.get();
     let gallery = [];
@@ -1278,9 +1505,13 @@ app.get("/api/home", async (req, res) => {
     //influencer
     const snapshotInfl = await Firebase.Influencer.get();
     let influencerlist = [];
+    let isMember = false;
     snapshotInfl.docs.map((doc) => {
       if (doc.data().status === "accepted") {
         influencerlist.push({ id: doc.id, ...doc.data() });
+      }
+      if (doc.id === req.body.id) {
+        isMember = doc.data().pinkskymember.isMember;
       }
     });
 
@@ -1303,6 +1534,7 @@ app.get("/api/home", async (req, res) => {
     });
 
     res.status(200).json({
+      isMember: isMember,
       gallerylist: gallery.sort((a, b) => b.createdDate - a.createdDate),
       exhibitiongallerylist: exhibitiongallery.sort(
         (a, b) => b.createdDate - a.createdDate
@@ -2372,7 +2604,7 @@ app.post("/api/influencer/create", async (req, res) => {
           .auth()
           .getUser(influencerData.isNonInfluencer.toString());
 
-        await Firebase.admin.auth().updateUser(getUserByUuid?.uid, {  
+        await Firebase.admin.auth().updateUser(getUserByUuid?.uid, {
           password: createUser.password,
           emailVerified: false,
           disabled: false,
@@ -2687,166 +2919,166 @@ app.post("/api/brand/create", async (req, res) => {
           let interval = 9000;
           let lengthOfArray = instagramPostDetails.length - 1;
           let brandArr = [];
-          let customer = stripe.customers.create({
-            description: brandData.companyname,
-            email: brandData.email,
-          });
-          customer
-            .then((striperesponse) => {
-              console.log("customer", striperesponse);
-              console.log("lengthOfArray", lengthOfArray);
-              instagramPostDetails.forEach((file, index) => {
-                setTimeout(() => {
-                  console.log("hi people", interval * index);
+          // let customer = stripe.customers.create({
+          //   description: brandData.companyname,
+          //   email: brandData.email,
+          // });
+          // customer
+          //   .then((striperesponse) => {
+          //     console.log("customer", striperesponse);
+          console.log("lengthOfArray", lengthOfArray);
+          instagramPostDetails.forEach((file, index) => {
+            setTimeout(() => {
+              console.log("hi people", interval * index);
 
-                  const d = new Date();
-                  let month = d.getMonth() + 1;
-                  let date = d.getDate();
-                  let year = d.getFullYear();
-                  let time = d.getTime();
-                  const fileName =
-                    index +
-                    "_" +
-                    createUser.name +
-                    "_" +
-                    month +
-                    "_" +
-                    date +
-                    "_" +
-                    year +
-                    "_" +
-                    time +
-                    ".jpeg";
-                  let filePath = "./images/" + fileName;
-                  const options = {
-                    url: file.display_url,
-                    method: "GET",
-                  };
-                  console.log("fileName", fileName);
-                  let getDownloadURL = "";
-                  request(options, async (err, resp, body) => {
-                    if (resp.statusCode === 200) {
-                      console.log("res.statusCode", resp.statusCode);
-                      var bucket = Firebase.admin.storage().bucket();
+              const d = new Date();
+              let month = d.getMonth() + 1;
+              let date = d.getDate();
+              let year = d.getFullYear();
+              let time = d.getTime();
+              const fileName =
+                index +
+                "_" +
+                createUser.name +
+                "_" +
+                month +
+                "_" +
+                date +
+                "_" +
+                year +
+                "_" +
+                time +
+                ".jpeg";
+              let filePath = "./images/" + fileName;
+              const options = {
+                url: file.display_url,
+                method: "GET",
+              };
+              console.log("fileName", fileName);
+              let getDownloadURL = "";
+              request(options, async (err, resp, body) => {
+                if (resp.statusCode === 200) {
+                  console.log("res.statusCode", resp.statusCode);
+                  var bucket = Firebase.admin.storage().bucket();
 
-                      await bucket.upload(filePath);
-                      let fileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}`;
-                      console.log("------Here------");
-                      console.log(fileFirebaseURL);
+                  await bucket.upload(filePath);
+                  let fileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}`;
+                  console.log("------Here------");
+                  console.log(fileFirebaseURL);
 
-                      axios
-                        .get(fileFirebaseURL)
-                        .then((response) => {
-                          getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}?alt=media&token=${response.data.downloadTokens}`;
-                          instagramPostDetails[index].new_url = getDownloadURL;
-                          console.log("index", index);
-                          fs.unlinkSync(filePath);
-                          if (index === lengthOfArray) {
-                            console.log("inside");
+                  axios
+                    .get(fileFirebaseURL)
+                    .then((response) => {
+                      getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/${fileName}?alt=media&token=${response.data.downloadTokens}`;
+                      instagramPostDetails[index].new_url = getDownloadURL;
+                      console.log("index", index);
+                      fs.unlinkSync(filePath);
+                      if (index === lengthOfArray) {
+                        console.log("inside");
 
-                            brandSchema = {
-                              ...brandSchema,
-                              customerid: striperesponse.id,
-                              // customerid: 12,
-                              imgURL: instagramPostDetails[0].new_url,
-                              message: [
-                                {
-                                  statusID: "100",
-                                  influencerID: "",
-                                  influencerName: "",
-                                },
-                              ],
+                        brandSchema = {
+                          ...brandSchema,
+                          // customerid: striperesponse.id,
+                          // customerid: 12,
+                          imgURL: instagramPostDetails[0].new_url,
+                          message: [
+                            {
+                              statusID: "100",
+                              influencerID: "",
+                              influencerName: "",
+                            },
+                          ],
 
-                              createdDate: new Date(),
-                              updatedDate: new Date(),
-                            };
+                          createdDate: new Date(),
+                          updatedDate: new Date(),
+                        };
+                      }
+
+                      Firebase.Brand.add(brandSchema);
+                      setTimeout(async () => {
+                        console.log("inside2");
+
+                        const snapshot = await Firebase.Brand.get();
+
+                        snapshot.docs.map((doc) => {
+                          if (doc.data().email === createUser.email) {
+                            brandArr.push({ id: doc.id, ...doc.data() });
                           }
-
-                          Firebase.Brand.add(brandSchema);
-                          setTimeout(async () => {
-                            console.log("inside2");
-
-                            const snapshot = await Firebase.Brand.get();
-
-                            snapshot.docs.map((doc) => {
-                              if (doc.data().email === createUser.email) {
-                                brandArr.push({ id: doc.id, ...doc.data() });
-                              }
-                            });
-
-                            res.status(200).json({
-                              message: {
-                                displayName: createUser.name,
-                                id: brandArr[0].id,
-                                email: createUser.email,
-                                type: "Posted Brand",
-                              },
-                            });
-                          }, 4000);
-                        })
-                        .catch((error) => {
-                          throw error;
                         });
-                    }
-                  }).pipe(fs.createWriteStream(filePath));
-                }, index * interval);
 
-                // if (response.data.data.is_private === false) {
-                //   brandSchema = {
-                //     ...brandData,
-                //     imgURL: response.data.data.profile_pic_url_hd,
-                //     instagram: {
-                //       id: response.data.data.id,
-                //       is_business_account: response.data.data.is_business_account,
-                //       external_url: response.data.data.external_url,
-                //       followers: response.data.data.edge_followed_by.count,
-                //       edge_follow: response.data.data.edge_follow.count,
-                //       is_private: response.data.data.is_private,
-                //       is_verified: response.data.data.is_verified,
-                //     },
-                //     message: [
-                //       { statusID: "100", influencerID: "", influencerName: "" },
-                //     ],
+                        res.status(200).json({
+                          message: {
+                            displayName: createUser.name,
+                            id: brandArr[0].id,
+                            email: createUser.email,
+                            type: "Posted Brand",
+                          },
+                        });
+                      }, 4000);
+                    })
+                    .catch((error) => {
+                      throw error;
+                    });
+                }
+              }).pipe(fs.createWriteStream(filePath));
+            }, index * interval);
 
-                //     createdDate: new Date(),
-                //     updatedDate: new Date(),
-                //   };
-                // }
+            // if (response.data.data.is_private === false) {
+            //   brandSchema = {
+            //     ...brandData,
+            //     imgURL: response.data.data.profile_pic_url_hd,
+            //     instagram: {
+            //       id: response.data.data.id,
+            //       is_business_account: response.data.data.is_business_account,
+            //       external_url: response.data.data.external_url,
+            //       followers: response.data.data.edge_followed_by.count,
+            //       edge_follow: response.data.data.edge_follow.count,
+            //       is_private: response.data.data.is_private,
+            //       is_verified: response.data.data.is_verified,
+            //     },
+            //     message: [
+            //       { statusID: "100", influencerID: "", influencerName: "" },
+            //     ],
 
-                // if (brandSchema != null) {
-                //   setTimeout(async () => {
-                //     const response = await Firebase.Brand.add(brandSchema);
-                //     // console.log("response", response.data);
-                //     const snapshot = await Firebase.Brand.get();
-                //     const brandData = [];
-                //     snapshot.docs.map((doc) => {
-                //       if (doc.data().email === createUser.email) {
-                //         brandData.push({ id: doc.id, ...doc.data() });
-                //       }
-                //     });
-                //     res.status(200).json({
-                //       message: {
-                //         displayName: createUser.name,
-                //         id: brandData[0].id,
-                //         email: createUser.email,
-                //         type: "Posted Brand",
-                //       },
-                //     });
-                //   }, 2000);
-                // } else {
-                //   res.status(401).json({ message: "Instagram Private account" });
-                // }
-                // }
-                // })
-                // .catch(function (error) {
-                //   throw error;
-                // });
-              });
-            })
-            .catch((err) => {
-              throw err;
-            });
+            //     createdDate: new Date(),
+            //     updatedDate: new Date(),
+            //   };
+            // }
+
+            // if (brandSchema != null) {
+            //   setTimeout(async () => {
+            //     const response = await Firebase.Brand.add(brandSchema);
+            //     // console.log("response", response.data);
+            //     const snapshot = await Firebase.Brand.get();
+            //     const brandData = [];
+            //     snapshot.docs.map((doc) => {
+            //       if (doc.data().email === createUser.email) {
+            //         brandData.push({ id: doc.id, ...doc.data() });
+            //       }
+            //     });
+            //     res.status(200).json({
+            //       message: {
+            //         displayName: createUser.name,
+            //         id: brandData[0].id,
+            //         email: createUser.email,
+            //         type: "Posted Brand",
+            //       },
+            //     });
+            //   }, 2000);
+            // } else {
+            //   res.status(401).json({ message: "Instagram Private account" });
+            // }
+            // }
+            // })
+            // .catch(function (error) {
+            //   throw error;
+            // });
+          });
         }
+        //     .catch((err) => {
+        //       throw err;
+        //     });
+        // }
       }
     }
   } catch (error) {
