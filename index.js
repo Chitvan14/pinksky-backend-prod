@@ -1506,12 +1506,22 @@ app.post("/api/home", async (req, res) => {
     const snapshotInfl = await Firebase.Influencer.get();
     let influencerlist = [];
     let isMember = false;
+    let status = "new";
     snapshotInfl.docs.map((doc) => {
       if (doc.data().status === "accepted") {
         influencerlist.push({ id: doc.id, ...doc.data() });
       }
       if (doc.id === req.body.id) {
         isMember = doc.data().pinkskymember.isMember;
+        status= doc.data().status;
+      }
+    });
+
+    const snapshotBrand = await Firebase.Brand.get();
+    snapshotBrand.docs.map((doc) => {
+     
+      if (doc.id === req.body.id) {
+        status= doc.data().status;
       }
     });
 
@@ -1535,6 +1545,7 @@ app.post("/api/home", async (req, res) => {
 
     res.status(200).json({
       isMember: isMember,
+      status:status,
       gallerylist: gallery.sort((a, b) => b.createdDate - a.createdDate),
       exhibitiongallerylist: exhibitiongallery.sort(
         (a, b) => b.createdDate - a.createdDate
