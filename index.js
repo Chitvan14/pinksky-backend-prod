@@ -49,97 +49,101 @@ app.use(cors());
 // RAZORPAY SECTION
 // 1. Webhook callback
 app.post("/api/verify/razorpay", async (req, res) => {
-  const secret = process.env.WEBHOOK_SECRET;
+  try {
+    const secret = process.env.WEBHOOK_SECRET;
 
-  const crypto = require("crypto");
+    const crypto = require("crypto");
 
-  const shasum = crypto.createHmac("sha256", secret);
-  shasum.update(JSON.stringify(req.body));
-  const digest = shasum.digest("hex");
+    const shasum = crypto.createHmac("sha256", secret);
+    shasum.update(JSON.stringify(req.body));
+    const digest = shasum.digest("hex");
 
-  if (digest === req.headers["x-razorpay-signature"]) {
-    // require("fs").writeFileSync(
-    //   "payment2.json",
-    //   JSON.stringify(req.body, null, 4)
-    // );
+    if (digest === req.headers["x-razorpay-signature"]) {
+      // require("fs").writeFileSync(
+      //   "payment2.json",
+      //   JSON.stringify(req.body, null, 4)
+      // );
+      console.log("something");
+      if (req.body.event === "subscription.activated") {
+        const updating = await Firebase.Brand.doc(
+          req.body.payload.subscription.entity.notes.pinksky_id
+        ).update({
+          subscription: req.body,
+        });
+        res.status(200).json({ message: "Subscription Activated" });
+      }
 
-    if (req.body.event === "subscription.activated") {
-      const updating = await Firebase.Brand.doc(
-        req.body.payload.subscription.entity.notes.pinksky_id
-      ).update({
-        subscription: req.body,
-      });
-      res.status(200).json({ message: "Subscription Activated" });
-    }
-
-    if (req.body.event === "payment_link.paid") {
-      if (req.body.payload.payment_link.entity.notes.influencer === "true") {
-        const snapshot = await Firebase.Influencer.doc(
-          req.body.payload.payment_link.entity.notes.pinksky_id
-        ).get();
-        if (snapshot.data().pinkskymember.isMember !== true) {
-          const updated = await Firebase.Influencer.doc(
+      if (req.body.event === "payment_link.paid") {
+        if (req.body.payload.payment_link.entity.notes.influencer === "true") {
+          const snapshot = await Firebase.Influencer.doc(
             req.body.payload.payment_link.entity.notes.pinksky_id
-          ).update({
-            pinkskymember: {
-              isMember: true,
-              cooldown: new Date(
-                new Date().setFullYear(new Date().getFullYear() + 1)
-              ),
-              history: req.body,
-            },
-          });
-          res.status(200).json({ message: "Mapped User as member" });
-        }
-      } else if (
-        req.body.payload.payment_link.entity.notes.non_Influencer === "true"
-      ) {
-        const nonsnapshot = await Firebase.NonInfluencer.doc(
-          req.body.payload.payment_link.entity.notes.pinksky_id
-        ).get();
-        if (nonsnapshot.data().pinkskymember.isMember !== true) {
-          await Firebase.NonInfluencer.doc(
+          ).get();
+          if (snapshot.data().pinkskymember.isMember !== true) {
+            const updated = await Firebase.Influencer.doc(
+              req.body.payload.payment_link.entity.notes.pinksky_id
+            ).update({
+              pinkskymember: {
+                isMember: true,
+                cooldown: new Date(
+                  new Date().setFullYear(new Date().getFullYear() + 1)
+                ),
+                history: req.body,
+              },
+            });
+            res.status(200).json({ message: "Mapped User as member" });
+          }
+        } else if (
+          req.body.payload.payment_link.entity.notes.non_Influencer === "true"
+        ) {
+          const nonsnapshot = await Firebase.NonInfluencer.doc(
             req.body.payload.payment_link.entity.notes.pinksky_id
-          ).update({
-            pinkskymember: {
-              isMember: true,
-              cooldown: new Date(
-                new Date().setFullYear(new Date().getFullYear() + 1)
-              ),
-              history: req.body,
-            },
-          });
-          res.status(200).json({ message: "Mapped User as member" });
+          ).get();
+          if (nonsnapshot.data().pinkskymember.isMember !== true) {
+            await Firebase.NonInfluencer.doc(
+              req.body.payload.payment_link.entity.notes.pinksky_id
+            ).update({
+              pinkskymember: {
+                isMember: true,
+                cooldown: new Date(
+                  new Date().setFullYear(new Date().getFullYear() + 1)
+                ),
+                history: req.body,
+              },
+            });
+            res.status(200).json({ message: "Mapped User as member" });
+          }
         }
       }
     }
-  } else {
+  } catch (error) {
     res.status(500).json({
-      message: "Error Occured Webhook configuring! Malicious Happening.",
+      message:
+        "Error Occured Webhook configuring! Malicious Happening. " + error,
     });
   }
 });
 
 // 2. Pinksky subscription
 app.post("/api/subscription/razorpay", async (req, res) => {
-  let data = req.body;
-  let planid = "";
-  if (data.brandCategoryFormValue === "Cafe") {
-    planid = process.env.PLN_CAFE;
-  } else if (data.brandCategoryFormValue === "Club") {
-    planid = process.env.PLN_CLUB;
-  } else if (data.brandCategoryFormValue === "Booth") {
-    planid = process.env.PLN_BOOTH;
-  } else if (data.brandCategoryFormValue === "Salon") {
-    planid = process.env.PLN_SALON;
-  } else if (data.brandCategoryFormValue === "Gym") {
-    planid = process.env.PLN_GYM;
-  } else if (data.brandCategoryFormValue === "Professionals") {
-    planid = process.env.PLN_PROFESSIONAL;
-  } else {
-    //nothing
-  }
   try {
+    let data = req.body;
+    let planid = "";
+    if (data.brandCategoryFormValue === "Cafe") {
+      planid = process.env.PLN_CAFE;
+    } else if (data.brandCategoryFormValue === "Club") {
+      planid = process.env.PLN_CLUB;
+    } else if (data.brandCategoryFormValue === "Booth") {
+      planid = process.env.PLN_BOOTH;
+    } else if (data.brandCategoryFormValue === "Salon") {
+      planid = process.env.PLN_SALON;
+    } else if (data.brandCategoryFormValue === "Gym") {
+      planid = process.env.PLN_GYM;
+    } else if (data.brandCategoryFormValue === "Professionals") {
+      planid = process.env.PLN_PROFESSIONAL;
+    } else {
+      //nothing
+    }
+
     const options = {
       plan_id: planid,
       customer_notify: 1,
@@ -174,23 +178,29 @@ app.post("/api/subscription/razorpay", async (req, res) => {
 
 // 3. Pinsky coupons
 app.post("/api/getcouponmessage/razorpay", async (req, res) => {
-  let response = req.body;
-
   try {
+    let response = req.body;
+
     if (response.isMember === false) {
       let paymentLink = {};
-
-      const snapshot = await Firebase.Influencer.doc(
-        response.influencerid
-      ).get();
+      let snapshot = null;
+      if (response.isInfluencer === "true") {
+        snapshot = await Firebase.Influencer.doc(response.id).get();
+      }
+      if (response.isBrand === "true") {
+        snapshot = await Firebase.Brand.doc(response.id).get();
+      }
+      if (response.isNonInfluencer === "true") {
+        snapshot = await Firebase.NonInfluencer.doc(response.id).get();
+      }
       paymentLink = await razorpay.paymentLink.create({
-        amount: process.env.MEM_AMOUNT,
+        amount: parseInt(process.env.MEM_AMOUNT),
         currency: "INR",
         accept_partial: true,
         // first_min_partial_amount: 100,
         // description: "For XYZ purpose",
         customer: {
-          name: snapshot.data().name + " " + snapshot.data().surname,
+          name: snapshot.data().name,
           email: snapshot.data().email,
           contact: snapshot.data().whatsappnumber,
         },
@@ -200,13 +210,16 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
         },
         reminder_enable: true,
         notes: {
-          pinksky_id: response.influencerid,
+          pinksky_id: response.id,
           influencer: response.isInfluencer,
           non_Influencer: response.isNonInfluencer,
+          brand: response.isBrand,
         },
         // callback_url: "https://example-callback-url.com/",
         // callback_method: "get"
       });
+      console.log(paymentLink);
+
       res.status(200).json({
         url: paymentLink.short_url,
         message: "Generate Coupon Payment Link",
@@ -215,12 +228,14 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
     } else {
       const snapshot = await Firebase.Coupons.doc(response.data.id).get();
       await Firebase.Coupons.doc(response.data.id).update({
-        userCouponMapping: [
-          ...snapshot.data().userCouponMapping,
-          response.influencerid,
-        ],
+        userCouponMapping: [...snapshot.data().userCouponMapping, response.id],
       });
-      res.status(200).json({ message: "Notified" });
+      console.log("here 1");
+      setTimeout(() => {
+        console.log("here 2");
+
+        res.status(200).json({ message: "Notified" });
+      }, 2000);
     }
   } catch (error) {
     res.status(500).json(error);
@@ -415,6 +430,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
           category: doc.data().category,
           name: doc.data().name,
           number: doc.data().number,
+          userid: doc.data().userid,
         });
         await Firebase.RandomData.doc(doc.id).update({
           dbInserted: 1,
@@ -479,73 +495,78 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
 
 // 2. Sending data from spreadsheet to firebase
 app.get("/api/spreadsheettofirebase", async (req, res) => {
-  clientSpreadsheetToDB.read().then(
-    function (data) {
-      let value = JSON.parse(data);
-      let interval = 60000;
+  try {
+    clientSpreadsheetToDB.read().then(
+      function (data) {
+        let value = JSON.parse(data);
+        let interval = 60000;
 
-      value.forEach((item, index) => {
-        setTimeout(() => {
-          let addvalue = {
-            ...item,
-            admin: false,
-            campaignmapping: [],
-            eventmapping: [],
-            pinkskymember: {
-              isMember: false,
-              cooldown: null,
-            },
-            paymentdetails: {},
-            isTeam: "new",
-            status: "new",
-            dob: "",
-            address: "",
-            isNonInfluencer: "",
-            city: "",
-            category: [
-              {
-                href: "/influencer",
-                id: 2,
-                status: false,
-                label: "Lifestyle Category",
-                value: "Lifestyle",
-                icon: {
-                  _store: {},
-                  key: null,
-                  _owner: null,
-                  type: "img",
-                  ref: null,
-                  props: {
-                    loading: "lazy",
-                    src: "/static/media/healthy-lifestyle.adbd2600d92cbd99718b.png",
-                    width: "25px",
-                    height: "25px",
+        value.forEach((item, index) => {
+          setTimeout(() => {
+            let addvalue = {
+              ...item,
+              admin: false,
+              campaignmapping: [],
+              eventmapping: [],
+              pinkskymember: {
+                isMember: false,
+                cooldown: null,
+              },
+              paymentdetails: {},
+              isTeam: "new",
+              status: "new",
+              dob: "",
+              address: "",
+              isNonInfluencer: "",
+              city: "",
+              category: [
+                {
+                  href: "/influencer",
+                  id: 2,
+                  status: false,
+                  label: "Lifestyle Category",
+                  value: "Lifestyle",
+                  icon: {
+                    _store: {},
+                    key: null,
+                    _owner: null,
+                    type: "img",
+                    ref: null,
+                    props: {
+                      loading: "lazy",
+                      src: "/static/media/healthy-lifestyle.adbd2600d92cbd99718b.png",
+                      width: "25px",
+                      height: "25px",
+                    },
                   },
                 },
-              },
-            ],
-          };
-          axios
-            .post(
-              process.env.NODE_ENV === "Production"
-                ? process.env.BASE_URL_PRODUCTION
-                : process.env.BASE_URL_LOCAL + "influencer/create",
-              addvalue
-            )
-            .then((response) => {
-              res.status(200).json(response.data);
-            })
-            .catch((error) => {
-              console.log(error);
-              res.status(500).json(error.response.data);
-            });
-        }, index * interval);
-      });
-    },
-    function (error) {
-      console.log(error);
-    }
-  );
+              ],
+            };
+            axios
+              .post(
+                process.env.NODE_ENV === "Production"
+                  ? process.env.BASE_URL_PRODUCTION
+                  : process.env.BASE_URL_LOCAL +
+                      "influencer/create?isProfileCompleted=0",
+                addvalue
+              )
+              .then((response) => {
+                res.status(200).json(response.data);
+              })
+              .catch((error) => {
+                console.log(error);
+                res.status(500).json(error.response.data);
+              });
+          }, index * interval);
+        });
+      },
+      function (error) {
+        console.log(error);
+      }
+    );
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 // AUTHENTICATION SECTION
@@ -1052,6 +1073,7 @@ app.post("/api/home", async (req, res) => {
         }
       }
     });
+
     //campaign
     const snapshot = await Firebase.Campaign.get();
     let campaignlist = [];
@@ -1076,9 +1098,17 @@ app.post("/api/home", async (req, res) => {
       }
     });
 
+    const snapshotNonInfluencer = await Firebase.NonInfluencer.get();
+    snapshotNonInfluencer.docs.map((doc) => {
+      if (doc.id === req.body.id) {
+        isMember = doc.data()?.pinkskymember?.isMember;
+      }
+    });
+
     const snapshotBrand = await Firebase.Brand.get();
     snapshotBrand.docs.map((doc) => {
       if (doc.id === req.body.id) {
+        isMember = doc.data()?.pinkskymember?.isMember;
         status = doc.data().status;
       }
     });
@@ -1127,8 +1157,9 @@ app.post("/api/home", async (req, res) => {
 
 // 3. Admin Pages
 app.post("/api/admin/pinksky", async (req, res) => {
-  let data = req.body;
   try {
+    let data = req.body;
+
     const getAdmin = await Firebase.Influencer.doc(data.adminid).get();
     console.log("entered", getAdmin.data().admin);
 
@@ -1616,9 +1647,10 @@ app.post("/api/admin/pinksky", async (req, res) => {
 // FILTER SECTION
 // 1. City filter
 app.post("/api/city/filter", async (req, res) => {
-  const data = req.body;
-  console.log(data.city);
   try {
+    const data = req.body;
+    console.log(data.city);
+
     let cityvaluearray = [];
     cityArrWithAllCity.map((m) => {
       if (m.value.toLowerCase().indexOf(data.city) !== -1) {
@@ -1638,8 +1670,9 @@ app.post("/api/city/filter", async (req, res) => {
 
 // 2. Admin brand filter
 app.post("/api/brands/filter", async (req, res) => {
-  let data = req.body;
   try {
+    let data = req.body;
+
     const snapshot = await Firebase.Brand.get();
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
@@ -1669,8 +1702,9 @@ app.post("/api/brands/filter", async (req, res) => {
 
 // 3. Admin event filter
 app.post("/api/events/filter", async (req, res) => {
-  let data = req.body;
   try {
+    let data = req.body;
+
     const snapshot = await Firebase.Event.get();
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
@@ -1701,8 +1735,9 @@ app.post("/api/events/filter", async (req, res) => {
 
 // 4. Admin coupons filter
 app.post("/api/coupons/filter", async (req, res) => {
-  let data = req.body;
   try {
+    let data = req.body;
+
     const snapshot = await Firebase.Coupons.get();
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
@@ -1735,8 +1770,9 @@ app.post("/api/coupons/filter", async (req, res) => {
 
 // 5. Influencer filter
 app.post("/api/influencer/filter", async (req, res) => {
-  let data = req.body;
   try {
+    let data = req.body;
+
     const snapshot = await Firebase.Influencer.get();
     let list = [];
 
@@ -1864,9 +1900,9 @@ app.post("/api/influencer/filter", async (req, res) => {
 
 // 6. Campaign filter
 app.post("/api/campaign/filter", async (req, res) => {
-  let data = req.body;
-
   try {
+    let data = req.body;
+
     const snapshot = await Firebase.Campaign.get();
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
@@ -1966,24 +2002,31 @@ app.post("/api/campaign/filter", async (req, res) => {
 // REGISTER SECTION
 // 1. Influencer registeration
 app.post("/api/influencer/create", async (req, res) => {
-  let influencerData = req.body;
-  console.log("influencerData", req.body);
+  let userResponse = undefined;
 
-  const createUser = {
-    email: influencerData.email,
-    password: influencerData.password,
-    name: "Influencer_" + influencerData.name + "_" + influencerData.surname,
-  };
-  console.log("createUser", createUser);
-  let userResponse = null;
+  let influencerData = req.body;
   try {
+    let isProfileCompletedQuery = req.query.isProfileCompleted;
+    console.log("influencerData", req.body);
+
+    const createUser = {
+      email: influencerData.email,
+      password: influencerData.password,
+      name:
+        isProfileCompletedQuery +
+        "_Influencer_" +
+        influencerData.name.replace(" ", "") +
+        "_" +
+        influencerData.surname.replace(" ", ""),
+    };
+    console.log("createUser", createUser);
+
     //login here
     if (createUser.email != undefined && createUser.password != undefined) {
-      console.log(influencerData.isNonInfluencer);
-      if (influencerData.isNonInfluencer.length > 2) {
+      if (influencerData.isNonInfluencer.uuid.toString().length > 2) {
         let getUserByUuid = await Firebase.admin
           .auth()
-          .getUser(influencerData.isNonInfluencer.toString());
+          .getUser(influencerData.isNonInfluencer.uuid.toString());
 
         await Firebase.admin.auth().updateUser(getUserByUuid?.uid, {
           password: createUser.password,
@@ -1996,6 +2039,7 @@ app.post("/api/influencer/create", async (req, res) => {
           email: influencerData.email,
           uid: getUserByUuid?.uid,
         };
+        console.log("def", userResponse);
       } else {
         console.log("abc");
         userResponse = await Firebase.admin.auth().createUser({
@@ -2008,7 +2052,7 @@ app.post("/api/influencer/create", async (req, res) => {
       }
 
       console.log("userResponse email");
-      if (userResponse.email != undefined && userResponse.uid != undefined) {
+      if (userResponse.email !== undefined && userResponse.uid !== undefined) {
         let influencerSchema = null;
         const options = {
           method: "GET",
@@ -2139,7 +2183,7 @@ app.post("/api/influencer/create", async (req, res) => {
                   console.log(fileFirebaseURL);
                   axios
                     .get(fileFirebaseURL)
-                    .then((response) => {
+                    .then(async (response) => {
                       getDownloadURL =
                         process.env.FIRESTORE_URL +
                         `${fileName}?alt=media&token=${response.data.downloadTokens}`;
@@ -2148,50 +2192,102 @@ app.post("/api/influencer/create", async (req, res) => {
                       fs.unlinkSync(filePath);
                       if (index === lengthOfArray) {
                         console.log("inside");
+                        if (
+                          influencerData.isNonInfluencer.uuid.toString()
+                            .length > 2
+                        ) {
+                          const snapshotNonInfluencer =
+                            await Firebase.NonInfluencer.doc(
+                              influencerData.isNonInfluencer.id.toString()
+                            ).get();
+                          influencerSchema = {
+                            ...influencerSchema,
+                            ...snapshotNonInfluencer.data().pinkskymember,
+                            isProfileCompleted: isProfileCompletedQuery,
+                            imgURL1: instagramPostDetails[0].new_url,
+                            imgURL2: instagramPostDetails[1].new_url,
+                            imgURL3: instagramPostDetails[2].new_url,
+                            imgURL4: instagramPostDetails[3].new_url,
+                            imgURL5: instagramPostDetails[4].new_url,
+                            message: [
+                              {
+                                statusID: "100",
+                                campaignID: "",
+                                campaignName: "",
+                              },
+                            ],
+                            createdDate: new Date(),
+                            updatedDate: new Date(),
+                          };
+                        } else {
+                          influencerSchema = {
+                            ...influencerSchema,
+                            isProfileCompleted: isProfileCompletedQuery,
+                            imgURL1: instagramPostDetails[0].new_url,
+                            imgURL2: instagramPostDetails[1].new_url,
+                            imgURL3: instagramPostDetails[2].new_url,
+                            imgURL4: instagramPostDetails[3].new_url,
+                            imgURL5: instagramPostDetails[4].new_url,
+                            message: [
+                              {
+                                statusID: "100",
+                                campaignID: "",
+                                campaignName: "",
+                              },
+                            ],
+                            createdDate: new Date(),
+                            updatedDate: new Date(),
+                          };
+                        }
 
-                        influencerSchema = {
-                          ...influencerSchema,
-                          imgURL1: instagramPostDetails[0].new_url,
-                          imgURL2: instagramPostDetails[1].new_url,
-                          imgURL3: instagramPostDetails[2].new_url,
-                          imgURL4: instagramPostDetails[3].new_url,
-                          imgURL5: instagramPostDetails[4].new_url,
-
-                          message: [
-                            {
-                              statusID: "100",
-                              campaignID: "",
-                              campaignName: "",
-                            },
-                          ],
-                          createdDate: new Date(),
-                          updatedDate: new Date(),
-                        };
                         console.log("influencerSchema", influencerSchema);
                         Firebase.Influencer.add(influencerSchema);
                         setTimeout(async () => {
                           console.log("inside2");
+
                           const snapshot = await Firebase.Influencer.get();
                           snapshot.docs.map((doc) => {
                             if (doc.data().email === createUser.email) {
                               influencerArr.push({ id: doc.id, ...doc.data() });
                             }
                           });
-
+                          //setting up coupon from noninfluencer
+                          if (
+                            influencerData.isNonInfluencer.uuid.toString()
+                              .length > 2 &&
+                            influencerSchema.pinkskymember.isMember === true
+                          ) {
+                            const snapshotCoupon = await Firebase.Coupons.get();
+                            snapshotCoupon.docs.map(async (doc) => {
+                              if (
+                                doc
+                                  .data()
+                                  .userCouponMapping.includes(
+                                    influencerData.isNonInfluencer.id.toString()
+                                  )
+                              ) {
+                                await Firebase.Coupons.doc(doc.id).update({
+                                  userCouponMapping: [
+                                    ...doc.data().userCouponMapping,
+                                    influencerArr[0].id,
+                                  ],
+                                });
+                              }
+                            });
+                          }
                           res.status(200).json({
                             message: {
                               displayName: createUser.name,
                               id: influencerArr[0].id,
                               // email: createUser.email,
                               email: influencerArr[0].email,
-
                               type: "Posted Influencer",
                               uuid: userResponse?.uid,
                               member: false,
                               status: "new",
                             },
                           });
-                        }, 4000);
+                        }, 3000);
                       }
                     })
                     .catch((error) => {
@@ -2202,6 +2298,11 @@ app.post("/api/influencer/create", async (req, res) => {
             }, index * interval);
           });
         }
+      } else {
+        res.status(500).json({
+          message:
+            "Something Went wrong. User response is not defined. Please try again.",
+        });
       }
     }
   } catch (error) {
@@ -2213,7 +2314,7 @@ app.post("/api/influencer/create", async (req, res) => {
       });
     } else {
       console.log(userResponse?.uid);
-      if (influencerData.isNonInfluencer.length > 2) {
+      if (influencerData.isNonInfluencer.uuid.length > 2) {
         //non influencer is safe
       } else {
         await Firebase.admin.auth().deleteUser(userResponse?.uid);
@@ -2226,15 +2327,16 @@ app.post("/api/influencer/create", async (req, res) => {
 
 // 2. Brand registeration
 app.post("/api/brand/create", async (req, res) => {
-  let brandData = req.body;
-  console.log("brandData", req.body);
-  const createUser = {
-    email: brandData.email,
-    password: brandData.password,
-    name: "Brand_" + brandData.companyname,
-  };
-  console.log("createUser", createUser);
   try {
+    let brandData = req.body;
+    console.log("brandData", req.body);
+    const createUser = {
+      email: brandData.email,
+      password: brandData.password,
+      name: "Brand_" + brandData.companyname.replace(" ", ""),
+    };
+    console.log("createUser", createUser);
+
     if (createUser.email != undefined && createUser.password != undefined) {
       const userResponse = await Firebase.admin.auth().createUser({
         email: createUser.email,
@@ -2411,15 +2513,15 @@ app.post("/api/brand/create", async (req, res) => {
 
 // 3. Non-influencer registeration
 app.post("/api/noninfluencer/create", async (req, res) => {
-  let data = req.body;
-
-  const createUser = {
-    email: data.email,
-    password: data.password,
-    name: "Non_Influencer_" + data.name,
-  };
-
   try {
+    let data = req.body;
+
+    const createUser = {
+      email: data.email,
+      password: data.password,
+      name: "Non_Influencer_" + data.name.replace(" ", ""),
+    };
+
     const userResponse = await Firebase.admin.auth().createUser({
       email: createUser.email,
       password: createUser.password,
@@ -2469,29 +2571,30 @@ app.post(
   "/api/campaign/create",
   Firebase.multer.single("file"),
   async (req, res) => {
-    let { file, body } = req;
-    let campaignFile = file;
-    let campaignFileSplit = campaignFile.fileRef.metadata.id.split("/");
-    let campaignFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${campaignFileSplit[0]}/o/${campaignFileSplit[1]}`;
-    console.log("campaignFileSplit", campaignFileSplit);
-    console.log("campaignFileFirebaseURL", campaignFileFirebaseURL);
-    let getDownloadURL = "";
-    await axios
-      .get(campaignFileFirebaseURL)
-      .then((response) => {
-        getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${campaignFileSplit[0]}/o/${campaignFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
-      })
-      .catch((error) => {
-        res.status(500).json({ message: error });
-      });
-    var object = JSON.parse(body.data);
-    let campaignData = {
-      ...object,
-      getDownloadURL: getDownloadURL,
-      createdDate: new Date(),
-      updatedDate: new Date(),
-    };
     try {
+      let { file, body } = req;
+      let campaignFile = file;
+      let campaignFileSplit = campaignFile.fileRef.metadata.id.split("/");
+      let campaignFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${campaignFileSplit[0]}/o/${campaignFileSplit[1]}`;
+      console.log("campaignFileSplit", campaignFileSplit);
+      console.log("campaignFileFirebaseURL", campaignFileFirebaseURL);
+      let getDownloadURL = "";
+      await axios
+        .get(campaignFileFirebaseURL)
+        .then((response) => {
+          getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${campaignFileSplit[0]}/o/${campaignFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
+        })
+        .catch((error) => {
+          res.status(500).json({ message: error });
+        });
+      var object = JSON.parse(body.data);
+      let campaignData = {
+        ...object,
+        getDownloadURL: getDownloadURL,
+        createdDate: new Date(),
+        updatedDate: new Date(),
+      };
+
       setTimeout(async () => {
         const response = await Firebase.Campaign.add(campaignData);
         console.log("response", response.data);
@@ -2509,29 +2612,30 @@ app.post(
   "/api/event/create",
   Firebase.multer.single("file"),
   async (req, res) => {
-    let { file, body } = req;
-    let couponFile = file;
-    let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
-    let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}`;
-    console.log("couponFileSplit", couponFileSplit);
-    console.log("couponFileFirebaseURL", couponFileFirebaseURL);
-    let getDownloadURL = "";
-    await axios
-      .get(couponFileFirebaseURL)
-      .then((response) => {
-        getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
-      })
-      .catch((error) => {
-        res.status(500).json({ message: error });
-      });
-    var object = JSON.parse(body.data);
-    let eventData = {
-      ...object,
-      getDownloadURL: getDownloadURL,
-      createdDate: new Date(),
-      updatedDate: new Date(),
-    };
     try {
+      let { file, body } = req;
+      let couponFile = file;
+      let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
+      let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}`;
+      console.log("couponFileSplit", couponFileSplit);
+      console.log("couponFileFirebaseURL", couponFileFirebaseURL);
+      let getDownloadURL = "";
+      await axios
+        .get(couponFileFirebaseURL)
+        .then((response) => {
+          getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
+        })
+        .catch((error) => {
+          res.status(500).json({ message: error });
+        });
+      var object = JSON.parse(body.data);
+      let eventData = {
+        ...object,
+        getDownloadURL: getDownloadURL,
+        createdDate: new Date(),
+        updatedDate: new Date(),
+      };
+
       setTimeout(async () => {
         const response = await Firebase.Event.add(eventData);
 
@@ -2549,29 +2653,30 @@ app.post(
   "/api/coupon/create",
   Firebase.multer.single("file"),
   async (req, res) => {
-    let { file, body } = req;
-    let couponFile = file;
-    let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
-    let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}`;
-    console.log("couponFileSplit", couponFileSplit);
-    console.log("couponFileFirebaseURL", couponFileFirebaseURL);
-    let getDownloadURL = "";
-    await axios
-      .get(couponFileFirebaseURL)
-      .then((response) => {
-        getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
-      })
-      .catch((error) => {
-        res.status(500).json({ message: error });
-      });
-    var object = JSON.parse(body.data);
-    let couponData = {
-      ...object,
-      url: getDownloadURL,
-      createdDate: new Date(),
-      updatedDate: new Date(),
-    };
     try {
+      let { file, body } = req;
+      let couponFile = file;
+      let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
+      let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}`;
+      console.log("couponFileSplit", couponFileSplit);
+      console.log("couponFileFirebaseURL", couponFileFirebaseURL);
+      let getDownloadURL = "";
+      await axios
+        .get(couponFileFirebaseURL)
+        .then((response) => {
+          getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
+        })
+        .catch((error) => {
+          res.status(500).json({ message: error });
+        });
+      var object = JSON.parse(body.data);
+      let couponData = {
+        ...object,
+        url: getDownloadURL,
+        createdDate: new Date(),
+        updatedDate: new Date(),
+      };
+
       setTimeout(async () => {
         const response = await Firebase.Coupons.add(couponData);
         console.log("response", response.data);
@@ -2589,31 +2694,32 @@ app.post(
   "/api/gallery/create",
   Firebase.multer.single("file"),
   async (req, res) => {
-    let { file, body } = req;
-    let couponFile = file;
-    let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
-    let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}`;
-    console.log("couponFileSplit", couponFileSplit);
-    console.log("couponFileFirebaseURL", couponFileFirebaseURL);
-    let getDownloadURL = "";
-    await axios
-      .get(couponFileFirebaseURL)
-      .then((response) => {
-        getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
-      })
-      .catch((error) => {
-        res.status(500).json({ message: error });
-      });
-    var object = JSON.parse(body.data);
-
-    let couponData = {
-      ...object,
-
-      url: getDownloadURL,
-      createdDate: new Date(),
-      updatedDate: new Date(),
-    };
     try {
+      let { file, body } = req;
+      let couponFile = file;
+      let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
+      let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}`;
+      console.log("couponFileSplit", couponFileSplit);
+      console.log("couponFileFirebaseURL", couponFileFirebaseURL);
+      let getDownloadURL = "";
+      await axios
+        .get(couponFileFirebaseURL)
+        .then((response) => {
+          getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
+        })
+        .catch((error) => {
+          res.status(500).json({ message: error });
+        });
+      var object = JSON.parse(body.data);
+
+      let couponData = {
+        ...object,
+
+        url: getDownloadURL,
+        createdDate: new Date(),
+        updatedDate: new Date(),
+      };
+
       setTimeout(async () => {
         const response = await Firebase.Gallery.add(couponData);
         console.log("response", response.data);
@@ -2631,24 +2737,24 @@ app.post(
   "/api/firestorelink/create",
   Firebase.multer.single("file"),
   async (req, res) => {
-    let { file } = req;
-    let newFile = file;
-    let newFileSplit = newFile.fileRef.metadata.id.split("/");
-    let newFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/${newFileSplit[1]}`;
-    console.log("newFileSplit", newFileSplit);
-    console.log("newFileFirebaseURL", newFileFirebaseURL);
-    let getDownloadURL = "";
-    await axios
-      .get(newFileFirebaseURL)
-      .then((response) => {
-        getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/${newFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
-        console.log("getDownloadURL", getDownloadURL);
-      })
-      .catch((error) => {
-        res.status(500).json({ message: error });
-      });
-
     try {
+      let { file } = req;
+      let newFile = file;
+      let newFileSplit = newFile.fileRef.metadata.id.split("/");
+      let newFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/${newFileSplit[1]}`;
+      console.log("newFileSplit", newFileSplit);
+      console.log("newFileFirebaseURL", newFileFirebaseURL);
+      let getDownloadURL = "";
+      await axios
+        .get(newFileFirebaseURL)
+        .then((response) => {
+          getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/${newFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
+          console.log("getDownloadURL", getDownloadURL);
+        })
+        .catch((error) => {
+          res.status(500).json({ message: error });
+        });
+
       setTimeout(() => {
         console.log("up");
         res
@@ -2665,10 +2771,11 @@ app.post(
 
 // 6. Accept Handle
 app.put("/api/acceptstatus/update", async (req, res) => {
-  console.log("hello");
-  const data = req.body;
-  console.log("Here");
   try {
+    console.log("hello");
+    const data = req.body;
+    console.log("Here");
+
     //checked
     if (data.type === "influencerNewRequest") {
       const id = data.id;
@@ -2889,11 +2996,12 @@ app.put(
   "/api/acceptstatus/update/formdata",
   Firebase.multer.single("file"),
   async (req, res) => {
-    console.log("hello");
-    const data = req.body;
-    var object = JSON.parse(data.data);
-    console.log("Here");
     try {
+      console.log("hello");
+      const data = req.body;
+      var object = JSON.parse(data.data);
+      console.log("Here");
+
       //checked
       if (object.type === "influencerCampaignPaymentRequest") {
         let campaignFile = req.file;
@@ -2950,9 +3058,10 @@ app.put(
 
 // 8. Reject Handle
 app.put("/api/rejectstatus/update", async (req, res) => {
-  let data = req.body;
-  console.log(req.body);
   try {
+    let data = req.body;
+    console.log(req.body);
+
     if (data.type === "influencerNewRequest") {
       const id = req.body.id;
       const snapshot = await Firebase.Influencer.get();
@@ -3137,10 +3246,11 @@ app.put("/api/rejectstatus/update", async (req, res) => {
 
 // 9. Remove Campaign - In-active
 app.put("/api/removecampaign/update", async (req, res) => {
-  const id = req.body.id;
-  delete req.body.id;
-  const data = { isActive: 0 };
   try {
+    const id = req.body.id;
+    delete req.body.id;
+    const data = { isActive: 0 };
+
     await Firebase.Campaign.doc(id).update(data);
     res.status(200).json({ message: "Updated Campaign" });
   } catch (error) {
@@ -3150,11 +3260,11 @@ app.put("/api/removecampaign/update", async (req, res) => {
 
 // 10. Remove Event - In-active
 app.put("/api/removeevent/update", async (req, res) => {
-  const id = req.body.id;
-  delete req.body.id;
-  const data = { isActive: 0 };
-
   try {
+    const id = req.body.id;
+    delete req.body.id;
+    const data = { isActive: 0 };
+
     await Firebase.Event.doc(id).update(data);
     res.status(200).json({ message: "Updated Event" });
   } catch (error) {
@@ -3164,10 +3274,11 @@ app.put("/api/removeevent/update", async (req, res) => {
 
 // 11. Remove Coupons - In-active
 app.put("/api/removecoupon/update", async (req, res) => {
-  const id = req.body.id;
-  delete req.body.id;
-  const data = { isActive: 0 };
   try {
+    const id = req.body.id;
+    delete req.body.id;
+    const data = { isActive: 0 };
+
     await Firebase.Coupons.doc(id).update(data);
     res.status(200).json({ message: "Updated Coupon" });
   } catch (error) {
@@ -3177,14 +3288,15 @@ app.put("/api/removecoupon/update", async (req, res) => {
 
 // 12. Add more into gallery
 app.put("/api/gallery/update", async (req, res) => {
-  const id = req.body.id;
-  delete req.body.id;
-  const data = req.body;
-
-  let snapshot = await Firebase.Gallery.doc(id).get();
-  let highlightData = [...snapshot.data().highlights, ...data.highlights];
-  console.log(highlightData);
   try {
+    const id = req.body.id;
+    delete req.body.id;
+    const data = req.body;
+
+    let snapshot = await Firebase.Gallery.doc(id).get();
+    let highlightData = [...snapshot.data().highlights, ...data.highlights];
+    console.log(highlightData);
+
     await Firebase.Gallery.doc(id).update({ highlights: highlightData });
     res.status(200).json({ message: "Updated Coupon" });
   } catch (error) {
@@ -3195,9 +3307,10 @@ app.put("/api/gallery/update", async (req, res) => {
 // MODAL FETCHING DATA SECTION
 // 1. Name + Number data create
 app.post("/api/randomdata/create", async (req, res) => {
-  const data = req.body;
-  console.log(data);
   try {
+    const data = req.body;
+    console.log(data);
+
     await Firebase.RandomData.add(data);
     res.status(200).json({ message: "Posted RandomData" });
   } catch (error) {
@@ -3208,9 +3321,10 @@ app.post("/api/randomdata/create", async (req, res) => {
 
 // 2. Feedback data create
 app.post("/api/feedbackdata/create", async (req, res) => {
-  const data = req.body;
-  console.log(data);
   try {
+    const data = req.body;
+    console.log(data);
+
     await Firebase.Feedback.add(data);
     res.status(200).json({ message: "Posted Feedback" });
   } catch (error) {
@@ -3221,14 +3335,15 @@ app.post("/api/feedbackdata/create", async (req, res) => {
 
 // 3. Pinkskypopup data create
 app.post("/api/pinkskypopupentry/create", async (req, res) => {
-  let data = req.body;
-
-  let pinkskypopupentryData = {
-    ...data,
-    createdDate: new Date(),
-    updatedDate: new Date(),
-  };
   try {
+    let data = req.body;
+
+    let pinkskypopupentryData = {
+      ...data,
+      createdDate: new Date(),
+      updatedDate: new Date(),
+    };
+
     setTimeout(async () => {
       const response = await Firebase.PinkskyPopup.add(pinkskypopupentryData);
 
@@ -3242,9 +3357,9 @@ app.post("/api/pinkskypopupentry/create", async (req, res) => {
 
 // 4. Adding payment details influencers
 app.post("/api/influencerpayment/create", async (req, res) => {
-  let data = req.body;
-
   try {
+    let data = req.body;
+
     const response = await Firebase.Influencer.doc(data.influencerid).get();
     let paymentdetails = {
       upi: data.upi,
@@ -3263,12 +3378,12 @@ app.post("/api/influencerpayment/create", async (req, res) => {
 
 // 4. Updating influencers details
 app.put("/api/influencer/update", async (req, res) => {
-  const data = req.body;
-  const id = req.body.body.id;
-  console.log(data);
-  delete req.body.body.id;
-  let message = "";
   try {
+    const data = req.body;
+    const id = req.body.body.id;
+    console.log(data);
+    delete req.body.body.id;
+    let message = "";
     message = "Updated Influencer";
 
     await Firebase.Influencer.doc(id).update(data.body);
@@ -3280,12 +3395,13 @@ app.put("/api/influencer/update", async (req, res) => {
 
 // 5. Updating Brand details
 app.put("/api/brand/update", async (req, res) => {
-  const data = req.body;
-  const id = req.body.body.id;
-  console.log(data);
-  delete req.body.body.id;
-  let message = "";
   try {
+    const data = req.body;
+    const id = req.body.body.id;
+    console.log(data);
+    delete req.body.body.id;
+    let message = "";
+
     message = "Updated Brand";
 
     await Firebase.Brand.doc(id).update(data.body);
@@ -3298,9 +3414,10 @@ app.put("/api/brand/update", async (req, res) => {
 // MAPPING SECTION
 // 1. Mapping brand with influencer - Hire me
 app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
-  const data = req.body;
-  console.log(data);
   try {
+    const data = req.body;
+    console.log(data);
+
     const snapshot = await Firebase.Brand.get();
     let brandData = [];
     let brandDataMessage = [];
@@ -3345,8 +3462,9 @@ app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
 
 // 2. Mapping influencer with event - Join now
 app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
-  const data = req.body;
   try {
+    const data = req.body;
+
     const snapshot = await Firebase.Influencer.doc(data.influencerId).get();
     let influencerData = [...snapshot.data().eventmapping];
     let influencerDataMessage = [...snapshot.data().message];
@@ -3391,8 +3509,9 @@ app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
 
 // 3. Mapping influencer with campaign - Apply Now
 app.put("/api/mappinginfluencerwithcampaign/update", async (req, res) => {
-  const data = req.body;
   try {
+    const data = req.body;
+
     const snapshot = await Firebase.Influencer.get();
     let influencerData = [];
     let influencerDataMessage = [];
@@ -3444,9 +3563,10 @@ app.put("/api/mappinginfluencerwithcampaign/update", async (req, res) => {
 
 // 4. Mapping influencer with campaign adding deliverable links - Send it
 app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
-  const data = req.body;
-  console.log(data);
   try {
+    const data = req.body;
+    console.log(data);
+
     let snapshot = await Firebase.Influencer.doc(data.influencerId).get();
 
     const campaignsnapshot = await Firebase.Campaign.doc(data.campaignId).get();
