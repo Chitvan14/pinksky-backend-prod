@@ -46,6 +46,66 @@ const PORT =
 app.use(express.json());
 app.use(cors());
 
+// WHATSAPP SECTION
+// 1. sending template message
+app.post("/api/template/whatsapp", async (req, res) => {
+  try {
+    let queryType = req.query.type;
+    let queryTo = req.query.to;
+    var data = {};
+    
+    //coupon
+    if (queryType === "coupon") {
+      data = JSON.stringify({
+        messaging_product: "whatsapp",
+        to: queryTo,
+        type: "template",
+        template: {
+          name: "sample_shipping_confirmation",
+          language: {
+            code: "en_US",
+          },
+          components: [
+            {
+              type: "body",
+              parameters: [
+                {
+                  type: "text",
+                  text: "something",
+                },
+              ],
+            },
+          ],
+        },
+      });
+    }
+
+    const size = Object.keys(data).length;
+    if (data > 0) {
+      var config = {
+        method: "post",
+        url: process.env.WAPP_SENDMESSTEXT_UATURL_PRMNTOKN,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: process.env.WAPP_AUTH_PRMNTOKN,
+        },
+        data: data,
+      };
+
+      axios(config)
+        .then(function (response) {
+          // console.log(JSON.stringify(response.data));
+          res.status(200).json({ data: response.data, status: 1 });
+        })
+        .catch(function (error) {
+          res.status(200).json({ data: error, status: 0 });
+        });
+    }
+  } catch (error) {
+    res.status(200).json({ data: error, status: 0 });
+  }
+});
+
 // RAZORPAY SECTION
 // 1. Webhook callback
 app.post("/api/verify/razorpay", async (req, res) => {
@@ -127,6 +187,7 @@ app.post("/api/verify/razorpay", async (req, res) => {
 app.post("/api/subscription/razorpay", async (req, res) => {
   try {
     let data = req.body;
+    console.log(data);
     let planid = "";
     if (data.brandCategoryFormValue === "Cafe") {
       planid = process.env.PLN_CAFE;
@@ -627,7 +688,6 @@ app.post("/api/signin", async (req, res) => {
               "X-RapidAPI-Host": process.env.RapidAPIHost,
             },
           };
-          console.log("inside1", options);
 
           await axios
             .request(options)
@@ -1228,12 +1288,14 @@ app.post("/api/admin/pinksky", async (req, res) => {
             });
           } else if (doc.data().status === "accepted") {
             console.log("influencerlist6", doc.id);
-            console.log("influencerlist6?",doc.data()?.campaignmapping);
-            
+            console.log("influencerlist6?", doc.data()?.campaignmapping);
 
-            if (doc.data()?.campaignmapping === undefined || doc.data()?.campaignmapping.length === 0){
-              localcampaignmapping=[];
-            }else {
+            if (
+              doc.data()?.campaignmapping === undefined ||
+              doc.data()?.campaignmapping.length === 0
+            ) {
+              localcampaignmapping = [];
+            } else {
               console.log("influencerlist66");
               doc.data().campaignmapping.map((nesitem) => {
                 console.log("influencerlist666");
@@ -1252,9 +1314,12 @@ app.post("/api/admin/pinksky", async (req, res) => {
             }
 
             console.log("influencerlist7");
-            if (doc.data()?.eventmapping === undefined|| doc.data()?.eventmapping.length === 0){
+            if (
+              doc.data()?.eventmapping === undefined ||
+              doc.data()?.eventmapping.length === 0
+            ) {
               localeventmapping = [];
-            }else {
+            } else {
               console.log("influencerlist77");
               doc.data().eventmapping.map((nesitem) => {
                 console.log("influencerlist777");
@@ -3040,12 +3105,23 @@ app.put(
 
         let campaignmapping = [];
 
+        // await snapshot.data().campaignmapping.map((camp) => {
+        //   if (camp.paymentStatus === "initiated") {
+        //     campaignmapping.push({
+        //       ...camp,
+        //       paymentURL: getDownloadURL,
+        //       paymentStatus: "completed",
+        //     });
+        //   } else {
+        //     campaignmapping.push(...camp);
+        //   }
+        // });
         await snapshot.data().campaignmapping.map((camp) => {
-          if (camp.paymentStatus === "initiated") {
+          if (camp.paymentStatus === "new") {
             campaignmapping.push({
               ...camp,
               paymentURL: getDownloadURL,
-              paymentStatus: "completed",
+              paymentStatus: "accepted",
             });
           } else {
             campaignmapping.push(...camp);
