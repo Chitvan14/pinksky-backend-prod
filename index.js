@@ -3,6 +3,7 @@ const cors = require("cors");
 const axios = require("axios");
 const request = require("request");
 const fs = require("fs");
+const nodemailer = require("nodemailer");
 const { Firebase } = require("./config.js");
 const cityArrWithAllCity = require("./city");
 require("dotenv").config();
@@ -46,14 +47,20 @@ const PORT =
 app.use(express.json());
 app.use(cors());
 
-// WHATSAPP SECTION
-// 1. sending template message
+// WHATSAPP AND EMAIL SECTION
+// 1. sending messages
 app.post("/api/template/whatsapp", async (req, res) => {
   try {
     let queryType = req.query.type;
     let queryTo = req.query.to;
     var data = {};
-
+    var transporter = nodemailer.createTransport({
+      service: process.env.EML_PROVIDER,
+      auth: {
+        user: process.env.EML_USER,
+        pass: process.env.EML_PASS,
+      },
+    });
     //coupon
     if (queryType === "coupon") {
       data = JSON.stringify({
@@ -78,10 +85,17 @@ app.post("/api/template/whatsapp", async (req, res) => {
           ],
         },
       });
+
+      var mailOptions = {
+        from: process.env.EML_USER,
+        to: "gargchitvan99@gmail.com",
+        subject: "Test Coupon Email",
+        text: `Hi there, is this thing working? <strong>This is strong string.</strong>`,
+      };
     }
 
     const size = Object.keys(data).length;
-    if (data > 0) {
+    if (size > 0) {
       var config = {
         method: "post",
         url: process.env.WAPP_SENDMESSTEXT_UATURL_PRMNTOKN,
@@ -95,7 +109,18 @@ app.post("/api/template/whatsapp", async (req, res) => {
       axios(config)
         .then(function (response) {
           // console.log(JSON.stringify(response.data));
-          res.status(200).json({ data: response.data, status: 1 });
+          transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+              res.status(200).json({ data: error, status: 0 });
+            } else {
+              res
+                .status(200)
+                .json({
+                  data: { whatsapp: response.data, email: info.response },
+                  status: 1,
+                });
+            }
+          });
         })
         .catch(function (error) {
           res.status(200).json({ data: error, status: 0 });
