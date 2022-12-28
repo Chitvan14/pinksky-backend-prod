@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const path = require("path");
 const request = require("request");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
@@ -113,12 +114,10 @@ app.post("/api/template/whatsapp", async (req, res) => {
             if (error) {
               res.status(200).json({ data: error, status: 0 });
             } else {
-              res
-                .status(200)
-                .json({
-                  data: { whatsapp: response.data, email: info.response },
-                  status: 1,
-                });
+              res.status(200).json({
+                data: { whatsapp: response.data, email: info.response },
+                status: 1,
+              });
             }
           });
         })
@@ -951,7 +950,8 @@ app.post("/api/signin", async (req, res) => {
                 "_" +
                 time +
                 ".jpeg";
-              let filePath = "./images/" + fileName;
+              let filePath = path.join("/", "images", fileName);
+              //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
                 method: "GET",
@@ -2274,7 +2274,8 @@ app.post("/api/influencer/create", async (req, res) => {
                 "_" +
                 time +
                 ".jpeg";
-              let filePath = "./images/" + fileName;
+              let filePath = path.join("/", "images", fileName);
+              //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
                 method: "GET",
@@ -2533,7 +2534,8 @@ app.post("/api/brand/create", async (req, res) => {
                 "_" +
                 time +
                 ".jpeg";
-              let filePath = "./images/" + fileName;
+              let filePath = path.join("/", "images", fileName);
+              //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
                 method: "GET",

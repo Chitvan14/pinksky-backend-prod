@@ -22,6 +22,7 @@
     "multer-firebase-storage": "^3.0.3",
     "nodemailer": "^6.8.0",
     "nodemon": "^2.0.20",
+    "path": "^0.12.7",
     "razorpay": "^2.8.4",
     "request": "^2.88.2",
     "sheetdb-node": "^0.0.12",
