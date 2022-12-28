@@ -53,7 +53,7 @@ app.post("/api/template/whatsapp", async (req, res) => {
     let queryType = req.query.type;
     let queryTo = req.query.to;
     var data = {};
-    
+
     //coupon
     if (queryType === "coupon") {
       data = JSON.stringify({
@@ -1736,14 +1736,17 @@ app.post("/api/city/filter", async (req, res) => {
     cityArrWithAllCity.map((m) => {
       if (m.value.toLowerCase().indexOf(data.city) !== -1) {
         cityvaluearray.push({ ...m, status: true });
-      } else {
-        cityvaluearray.push({ ...m, status: false });
       }
+      // else {
+      //   cityvaluearray.push({ ...m, status: false });
+      // }
     });
-    res.status(200).json({
-      data: cityvaluearray.filter((f) => f.status === true).slice(0, 10),
-      message: "Filtered City",
-    });
+    setTimeout(() => {
+      res.status(200).json({
+        data: cityvaluearray,
+        message: "Filtered City",
+      });
+    }, 1200);
   } catch (error) {
     res.status(500).json({ message: error });
   }
