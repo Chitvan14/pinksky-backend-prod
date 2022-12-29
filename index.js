@@ -2137,6 +2137,7 @@ app.post("/api/influencer/create", async (req, res) => {
   try {
     let isProfileCompletedQuery = req.query.isProfileCompleted;
     console.log("influencerData", req.body);
+    console.log("isProfileCompletedQuery", isProfileCompletedQuery);
 
     const createUser = {
       email: influencerData.email,
@@ -2282,8 +2283,6 @@ app.post("/api/influencer/create", async (req, res) => {
               let year = d.getFullYear();
               let time = d.getTime();
               const fileName =
-                index +
-                "_" +
                 createUser.name +
                 "_" +
                 month +
@@ -2293,8 +2292,10 @@ app.post("/api/influencer/create", async (req, res) => {
                 year +
                 "_" +
                 time +
+                "_" +
+                index +
                 ".jpeg";
-              let filePath = path.join(__dirname, "/images", fileName);
+              let filePath = path.join(__dirname, fileName);
               //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
@@ -2428,6 +2429,7 @@ app.post("/api/influencer/create", async (req, res) => {
               })
                 .on("error", (error) => {
                   res.status(502).send(error.message);
+                  //delete user also
                 })
                 .pipe(fs.createWriteStream(filePath));
             }, index * interval);
