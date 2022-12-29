@@ -196,6 +196,26 @@ app.post("/api/verify/razorpay", async (req, res) => {
             });
             res.status(200).json({ message: "Mapped User as member" });
           }
+        }else if (
+          req.body.payload.payment_link.entity.notes.brand === "true"
+        ) {
+          const brandsnapshot = await Firebase.Brand.doc(
+            req.body.payload.payment_link.entity.notes.pinksky_id
+          ).get();
+          if (brandsnapshot.data().pinkskymember.isMember !== true) {
+            await Firebase.Brand.doc(
+              req.body.payload.payment_link.entity.notes.pinksky_id
+            ).update({
+              pinkskymember: {
+                isMember: true,
+                cooldown: new Date(
+                  new Date().setFullYear(new Date().getFullYear() + 1)
+                ),
+                history: req.body,
+              },
+            });
+            res.status(200).json({ message: "Mapped User as member" });
+          }
         }
       }
     }
@@ -292,6 +312,7 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
         notify: {
           sms: true,
           email: true,
+          whatsapp: true
         },
         reminder_enable: true,
         notes: {
@@ -950,8 +971,8 @@ app.post("/api/signin", async (req, res) => {
                 "_" +
                 time +
                 ".jpeg";
-              let filePath = path.join("/", "images", fileName);
-              //let filePath = "./images/" + fileName;
+                let filePath = path.join(__dirname, "/images", fileName);
+                //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
                 method: "GET",
@@ -1314,7 +1335,6 @@ app.post("/api/admin/pinksky", async (req, res) => {
           } else if (doc.data().status === "accepted") {
             console.log("influencerlist6", doc.id);
             console.log("influencerlist6?", doc.data()?.campaignmapping);
-
             if (
               doc.data()?.campaignmapping === undefined ||
               doc.data()?.campaignmapping.length === 0
@@ -2274,8 +2294,8 @@ app.post("/api/influencer/create", async (req, res) => {
                 "_" +
                 time +
                 ".jpeg";
-              let filePath = path.join("/", "images", fileName);
-              //let filePath = "./images/" + fileName;
+                let filePath = path.join(__dirname, "/images", fileName);
+                //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
                 method: "GET",
@@ -2534,7 +2554,7 @@ app.post("/api/brand/create", async (req, res) => {
                 "_" +
                 time +
                 ".jpeg";
-              let filePath = path.join("/", "images", fileName);
+              let filePath = path.join(__dirname, "/images", fileName);
               //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
