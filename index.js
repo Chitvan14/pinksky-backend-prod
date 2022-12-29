@@ -959,8 +959,6 @@ app.post("/api/signin", async (req, res) => {
               let year = d.getFullYear();
               let time = d.getTime();
               const fileName =
-                index +
-                "_" +
                 userResponse.user.displayName +
                 "_" +
                 month +
@@ -970,6 +968,8 @@ app.post("/api/signin", async (req, res) => {
                 year +
                 "_" +
                 time +
+                "_" +
+                index +
                 ".jpeg";
               let filePath = path.join(__dirname, "/images", fileName);
               //let filePath = "./images/" + fileName;
@@ -2295,7 +2295,7 @@ app.post("/api/influencer/create", async (req, res) => {
                 "_" +
                 index +
                 ".jpeg";
-              let filePath = path.join(__dirname, fileName);
+              let filePath = path.join(__dirname, "/images", fileName);
               //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
@@ -2548,8 +2548,6 @@ app.post("/api/brand/create", async (req, res) => {
               let year = d.getFullYear();
               let time = d.getTime();
               const fileName =
-                index +
-                "_" +
                 createUser.name +
                 "_" +
                 month +
@@ -2559,6 +2557,8 @@ app.post("/api/brand/create", async (req, res) => {
                 year +
                 "_" +
                 time +
+                "_" +
+                index +
                 ".jpeg";
               let filePath = path.join(__dirname, "/images", fileName);
               //let filePath = "./images/" + fileName;
