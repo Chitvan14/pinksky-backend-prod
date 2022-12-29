@@ -196,7 +196,7 @@ app.post("/api/verify/razorpay", async (req, res) => {
             });
             res.status(200).json({ message: "Mapped User as member" });
           }
-        }else if (
+        } else if (
           req.body.payload.payment_link.entity.notes.brand === "true"
         ) {
           const brandsnapshot = await Firebase.Brand.doc(
@@ -312,7 +312,7 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
         notify: {
           sms: true,
           email: true,
-          whatsapp: true
+          whatsapp: true,
         },
         reminder_enable: true,
         notes: {
@@ -971,8 +971,8 @@ app.post("/api/signin", async (req, res) => {
                 "_" +
                 time +
                 ".jpeg";
-                let filePath = path.join(__dirname, "/images", fileName);
-                //let filePath = "./images/" + fileName;
+              let filePath = path.join(__dirname, "/images", fileName);
+              //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
                 method: "GET",
@@ -2294,8 +2294,8 @@ app.post("/api/influencer/create", async (req, res) => {
                 "_" +
                 time +
                 ".jpeg";
-                let filePath = path.join(__dirname, "/images", fileName);
-                //let filePath = "./images/" + fileName;
+              let filePath = path.join(__dirname, "/images", fileName);
+              //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
                 method: "GET",
@@ -2425,7 +2425,11 @@ app.post("/api/influencer/create", async (req, res) => {
                       throw error;
                     });
                 }
-              }).pipe(fs.createWriteStream(filePath));
+              })
+                .on("error", (error) => {
+                  res.status(502).send(error.message);
+                })
+                .pipe(fs.createWriteStream(filePath));
             }, index * interval);
           });
         }
