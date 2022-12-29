@@ -706,7 +706,7 @@ app.post("/api/signin", async (req, res) => {
       .catch((error) => {
         throw error;
       });
-    console.log("userResponse.user.displayName", userResponse.user);
+    // console.log("userResponse.user.displayName", userResponse.user);
     if (userResponse.user.displayName != null) {
       if (userResponse.user.displayName.indexOf("Brand") != -1) {
         //Brand
@@ -889,7 +889,7 @@ app.post("/api/signin", async (req, res) => {
 
               response.data.data.edge_owner_to_timeline_media.edges.map(
                 (item) => {
-                  console.log(item);
+                  // console.log(item);
                   sum =
                     sum +
                     item.node.edge_media_to_comment.count +
