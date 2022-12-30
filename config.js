@@ -3,15 +3,17 @@ const admin = require("firebase-admin");
 const credientials = require("./pinksky-8804c-firebase-adminsdk-vy5o9-4b658e5d2c.json");
 const Multer = require("multer");
 const FirebaseStorage = require("multer-firebase-storage");
-require("dotenv").config();
+// require("dotenv").config();
+const environments =  require('./environments.js');
+
 const firebaseConfig = {
-  apiKey: process.env.apiKey,
-  authDomain: process.env.authDomain,
-  databaseURL: process.env.databaseURL,
-  projectId: process.env.projectId,
-  storageBucket: process.env.storageBucket,
-  messagingSenderId: process.env.messagingSenderId,
-  appId: process.env.appId,
+  apiKey: environments.apiKey,
+  authDomain: environments.authDomain,
+  databaseURL: environments.databaseURL,
+  projectId: environments.projectId,
+  storageBucket: environments.storageBucket,
+  messagingSenderId: environments.messagingSenderId,
+  appId: environments.appId,
 };
 firebase.initializeApp(firebaseConfig);
 admin.initializeApp({

@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "local": "set NODE_ENV=local&& nodemon index.js",
+    "dev": "set NODE_ENV=development&& nodemon index.js",
+    "prod": "set NODE_ENV=production&& nodemon index.js"
   },
   "keywords": [],
   "author": "",

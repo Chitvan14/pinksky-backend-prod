@@ -2,48 +2,47 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 const path = require("path");
+const environments =  require('./environments.js');
 const request = require("request");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
 const { Firebase } = require("./config.js");
 const cityArrWithAllCity = require("./city");
-require("dotenv").config();
-
+// require("dotenv").config();
 const Razorpay = require("razorpay");
 const razorpay = new Razorpay({
-  key_id: process.env.KEY_ID,
-  key_secret: process.env.KEY_SECRET,
+  key_id: environments.KEY_ID,
+  key_secret: environments.KEY_SECRET,
 });
 
 const sheetdb = require("sheetdb-node");
 const clientBrand = sheetdb({
-  address: process.env.SPREADSHEET + "?sheet=Brand",
+  address: environments.SPREADSHEET + "?sheet=Brand",
 });
 const clientSpreadsheetToDB = sheetdb({
-  address: process.env.SPREADSHEET + "?sheet=SpreadsheetToDB",
+  address: environments.SPREADSHEET + "?sheet=SpreadsheetToDB",
 });
 const clientInfluencer = sheetdb({
-  address: process.env.SPREADSHEET + "?sheet=Influencer",
+  address: environments.SPREADSHEET + "?sheet=Influencer",
 });
 const clientCampaign = sheetdb({
-  address: process.env.SPREADSHEET + "?sheet=Campaign",
+  address: environments.SPREADSHEET + "?sheet=Campaign",
 });
 const clientNonInfluencer = sheetdb({
-  address: process.env.SPREADSHEET + "?sheet=NonInfluencer",
+  address: environments.SPREADSHEET + "?sheet=NonInfluencer",
 });
 const clientPinkskyPopup = sheetdb({
-  address: process.env.SPREADSHEET + "?sheet=PinkskyPopup",
+  address: environments.SPREADSHEET + "?sheet=PinkskyPopup",
 });
 const clientNamePhonenumber = sheetdb({
-  address: process.env.SPREADSHEET + "?sheet=NamePhonenumber",
+  address: environments.SPREADSHEET + "?sheet=NamePhonenumber",
 });
 const clientFeedback = sheetdb({
-  address: process.env.SPREADSHEET + "?sheet=Feedback",
+  address: environments.SPREADSHEET + "?sheet=Feedback",
 });
 
 const app = express();
-const PORT =
-  process.env.NODE_ENV === "Production" ? process.env.PORT || 5000 : 5000;
+const PORT =environments.PORT;
 
 app.use(express.json());
 app.use(cors());
@@ -56,10 +55,10 @@ app.post("/api/template/whatsapp", async (req, res) => {
     let queryTo = req.query.to;
     var data = {};
     var transporter = nodemailer.createTransport({
-      service: process.env.EML_PROVIDER,
+      service: environments.EML_PROVIDER,
       auth: {
-        user: process.env.EML_USER,
-        pass: process.env.EML_PASS,
+        user: environments.EML_USER,
+        pass: environments.EML_PASS,
       },
     });
     //coupon
@@ -88,7 +87,7 @@ app.post("/api/template/whatsapp", async (req, res) => {
       });
 
       var mailOptions = {
-        from: process.env.EML_USER,
+        from: environments.EML_USER,
         to: "gargchitvan99@gmail.com",
         subject: "Test Coupon Email",
         text: `Hi there, is this thing working? <strong>This is strong string.</strong>`,
@@ -99,10 +98,10 @@ app.post("/api/template/whatsapp", async (req, res) => {
     if (size > 0) {
       var config = {
         method: "post",
-        url: process.env.WAPP_SENDMESSTEXT_UATURL_PRMNTOKN,
+        url: environments.WAPP_SENDMESSTEXT_UATURL_PRMNTOKN,
         headers: {
           "Content-Type": "application/json",
-          Authorization: process.env.WAPP_AUTH_PRMNTOKN,
+          Authorization: environments.WAPP_AUTH_PRMNTOKN,
         },
         data: data,
       };
@@ -134,7 +133,7 @@ app.post("/api/template/whatsapp", async (req, res) => {
 // 1. Webhook callback
 app.post("/api/verify/razorpay", async (req, res) => {
   try {
-    const secret = process.env.WEBHOOK_SECRET;
+    const secret = environments.WEBHOOK_SECRET;
 
     const crypto = require("crypto");
 
@@ -234,17 +233,17 @@ app.post("/api/subscription/razorpay", async (req, res) => {
     console.log(data);
     let planid = "";
     if (data.brandCategoryFormValue === "Cafe") {
-      planid = process.env.PLN_CAFE;
+      planid = environments.PLN_CAFE;
     } else if (data.brandCategoryFormValue === "Club") {
-      planid = process.env.PLN_CLUB;
+      planid = environments.PLN_CLUB;
     } else if (data.brandCategoryFormValue === "Booth") {
-      planid = process.env.PLN_BOOTH;
+      planid = environments.PLN_BOOTH;
     } else if (data.brandCategoryFormValue === "Salon") {
-      planid = process.env.PLN_SALON;
+      planid = environments.PLN_SALON;
     } else if (data.brandCategoryFormValue === "Gym") {
-      planid = process.env.PLN_GYM;
+      planid = environments.PLN_GYM;
     } else if (data.brandCategoryFormValue === "Professionals") {
-      planid = process.env.PLN_PROFESSIONAL;
+      planid = environments.PLN_PROFESSIONAL;
     } else {
       //nothing
     }
@@ -274,7 +273,7 @@ app.post("/api/subscription/razorpay", async (req, res) => {
     res.status(200).json({
       url: response.short_url,
       message: "Generate Subscribe Link",
-      heading: process.env.FRNT_SUBSCRIPTION_HEADING,
+      heading: environments.FRNT_SUBSCRIPTION_HEADING,
     });
   } catch (error) {
     res.status(500).json(error);
@@ -299,7 +298,7 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
         snapshot = await Firebase.NonInfluencer.doc(response.id).get();
       }
       paymentLink = await razorpay.paymentLink.create({
-        amount: parseInt(process.env.MEM_AMOUNT),
+        amount: parseInt(environments.MEM_AMOUNT),
         currency: "INR",
         accept_partial: true,
         // first_min_partial_amount: 100,
@@ -329,7 +328,7 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
       res.status(200).json({
         url: paymentLink.short_url,
         message: "Generate Coupon Payment Link",
-        heading: process.env.FRNT_SUBSCRIPTION_HEADING,
+        heading: environments.FRNT_SUBSCRIPTION_HEADING,
       });
     } else {
       const snapshot = await Firebase.Coupons.doc(response.data.id).get();
@@ -592,7 +591,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     if (isValid === 1) {
       res
         .status(200)
-        .json({ message: "Excel Updated", url: process.env.SPREADSHEET_URL });
+        .json({ message: "Excel Updated", url: environments.SPREADSHEET_URL });
     }
   } catch (err) {
     res.status(500).json(err);
@@ -650,9 +649,7 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
             };
             axios
               .post(
-                process.env.NODE_ENV === "Production"
-                  ? process.env.BASE_URL_PRODUCTION
-                  : process.env.BASE_URL_LOCAL +
+                environments.BASE_URL +
                       "influencer/create?isProfileCompleted=0",
                 addvalue
               )
@@ -727,10 +724,10 @@ app.post("/api/signin", async (req, res) => {
           let brandSchema = null;
           const options = {
             method: "GET",
-            url: process.env.RAPID_USERINFO_URL + brandData[0].instagramurl,
+            url: environments.RAPID_USERINFO_URL + brandData[0].instagramurl,
             headers: {
-              "X-RapidAPI-Key": process.env.RapidAPIKey,
-              "X-RapidAPI-Host": process.env.RapidAPIHost,
+              "X-RapidAPI-Key": environments.RapidAPIKey,
+              "X-RapidAPI-Host": environments.RapidAPIHost,
             },
           };
 
@@ -874,10 +871,10 @@ app.post("/api/signin", async (req, res) => {
           const options = {
             method: "GET",
             url:
-              process.env.RAPID_USERINFO_URL + influencerData[0].instagramurl,
+              environments.RAPID_USERINFO_URL + influencerData[0].instagramurl,
             headers: {
-              "X-RapidAPI-Key": process.env.RapidAPIKey,
-              "X-RapidAPI-Host": process.env.RapidAPIHost,
+              "X-RapidAPI-Key": environments.RapidAPIKey,
+              "X-RapidAPI-Host": environments.RapidAPIHost,
             },
           };
           let instagramPostDetails = [];
@@ -985,14 +982,14 @@ app.post("/api/signin", async (req, res) => {
                   var bucket = Firebase.admin.storage().bucket();
 
                   await bucket.upload(filePath);
-                  let fileFirebaseURL = process.env.FIRESTORE_URL + fileName;
+                  let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
                   console.log("------Here------");
                   console.log(fileFirebaseURL);
                   axios
                     .get(fileFirebaseURL)
                     .then((response) => {
                       getDownloadURL =
-                        process.env.FIRESTORE_URL +
+                        environments.FIRESTORE_URL +
                         `${fileName}?alt=media&token=${response.data.downloadTokens}`;
                       instagramPostDetails[index].new_url = getDownloadURL;
                       console.log("index", index);
@@ -1806,7 +1803,7 @@ app.post("/api/brands/filter", async (req, res) => {
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
 
-    if (data.inputValue.toLowerCase() === process.env.ADMIN_BRAND_FILTER_TEXT) {
+    if (data.inputValue.toLowerCase() === environments.ADMIN_BRAND_FILTER_TEXT) {
       namesorted = list;
     } else if (data.inputValue !== "") {
       namesorted = list.filter((item) => {
@@ -1838,7 +1835,7 @@ app.post("/api/events/filter", async (req, res) => {
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
     console.log("step 1");
-    if (data.inputValue.toLowerCase() === process.env.ADMIN_EVENT_FILTER_TEXT) {
+    if (data.inputValue.toLowerCase() === environments.ADMIN_EVENT_FILTER_TEXT) {
       namesorted = list;
     } else if (data.inputValue !== "") {
       console.log("step 2");
@@ -1872,7 +1869,7 @@ app.post("/api/coupons/filter", async (req, res) => {
     let namesorted;
     console.log("step 1");
     if (
-      data.inputValue.toLowerCase() === process.env.ADMIN_COUPON_FILTER_TEXT
+      data.inputValue.toLowerCase() === environments.ADMIN_COUPON_FILTER_TEXT
     ) {
       namesorted = list;
     } else if (data.inputValue !== "") {
@@ -1922,7 +1919,7 @@ app.post("/api/influencer/filter", async (req, res) => {
     let citysorted;
 
     if (
-      data.inputValue.toLowerCase() === process.env.ADMIN_INFLUENCER_FILTER_TEXT
+      data.inputValue.toLowerCase() === environments.ADMIN_INFLUENCER_FILTER_TEXT
     ) {
       namesorted = list;
     } else if (data.inputValue !== "") {
@@ -2186,10 +2183,10 @@ app.post("/api/influencer/create", async (req, res) => {
         let influencerSchema = null;
         const options = {
           method: "GET",
-          url: process.env.RAPID_USERINFO_URL + influencerData.instagramurl,
+          url: environments.RAPID_USERINFO_URL + influencerData.instagramurl,
           headers: {
-            "X-RapidAPI-Key": process.env.RapidAPIKey,
-            "X-RapidAPI-Host": process.env.RapidAPIHost,
+            "X-RapidAPI-Key": environments.RapidAPIKey,
+            "X-RapidAPI-Host": environments.RapidAPIHost,
           },
         };
 
@@ -2309,14 +2306,14 @@ app.post("/api/influencer/create", async (req, res) => {
                   var bucket = Firebase.admin.storage().bucket();
 
                   await bucket.upload(filePath);
-                  let fileFirebaseURL = process.env.FIRESTORE_URL + fileName;
+                  let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
                   console.log("------Here------");
                   console.log(fileFirebaseURL);
                   axios
                     .get(fileFirebaseURL)
                     .then(async (response) => {
                       getDownloadURL =
-                        process.env.FIRESTORE_URL +
+                        environments.FIRESTORE_URL +
                         `${fileName}?alt=media&token=${response.data.downloadTokens}`;
                       instagramPostDetails[index].new_url = getDownloadURL;
                       console.log("index", index);
@@ -2407,31 +2404,28 @@ app.post("/api/influencer/create", async (req, res) => {
                               }
                             });
                           }
-                          res.status(200).json({
-                            message: {
-                              displayName: createUser.name,
-                              id: influencerArr[0].id,
-                              // email: createUser.email,
-                              email: influencerArr[0].email,
-                              type: "Posted Influencer",
-                              uuid: userResponse?.uid,
-                              member: false,
-                              status: "new",
-                            },
-                          });
-                        }, 3000);
+                          setTimeout(() => {
+                            res.status(200).json({
+                              message: {
+                                displayName: createUser.name,
+                                id: influencerArr[0].id,
+                                // email: createUser.email,
+                                email: influencerArr[0].email,
+                                type: "Posted Influencer",
+                                uuid: userResponse?.uid,
+                                member: false,
+                                status: "new",
+                              },
+                            });
+                          }, 1000);
+                        }, 2000);
                       }
                     })
                     .catch((error) => {
                       throw error;
                     });
                 }
-              })
-                .on("error", (error) => {
-                  res.status(502).send(error.message);
-                  //delete user also
-                })
-                .pipe(fs.createWriteStream(filePath));
+              }).pipe(fs.createWriteStream(filePath));
             }, index * interval);
           });
         }
@@ -2488,10 +2482,10 @@ app.post("/api/brand/create", async (req, res) => {
         let brandSchema = null;
         const options = {
           method: "GET",
-          url: process.env.RAPID_USERINFO_URL + brandData.instagramurl,
+          url: environments.RAPID_USERINFO_URL + brandData.instagramurl,
           headers: {
-            "X-RapidAPI-Key": process.env.RapidAPIKey,
-            "X-RapidAPI-Host": process.env.RapidAPIHost,
+            "X-RapidAPI-Key": environments.RapidAPIKey,
+            "X-RapidAPI-Host": environments.RapidAPIHost,
           },
         };
         let instagramPostDetails = [];
@@ -2574,7 +2568,7 @@ app.post("/api/brand/create", async (req, res) => {
                   var bucket = Firebase.admin.storage().bucket();
 
                   await bucket.upload(filePath);
-                  let fileFirebaseURL = process.env.FIRESTORE_URL + fileName;
+                  let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
                   console.log("------Here------");
                   console.log(fileFirebaseURL);
 
@@ -2582,7 +2576,7 @@ app.post("/api/brand/create", async (req, res) => {
                     .get(fileFirebaseURL)
                     .then((response) => {
                       getDownloadURL =
-                        process.env.FIRESTORE_URL +
+                        environments.FIRESTORE_URL +
                         `${fileName}?alt=media&token=${response.data.downloadTokens}`;
                       instagramPostDetails[index].new_url = getDownloadURL;
                       console.log("index", index);
