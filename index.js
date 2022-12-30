@@ -356,7 +356,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     const snapshot = await Firebase.Influencer.get();
     let influencerData = [];
     snapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
         influencerData.push({
           id: doc.id,
           city: doc.data().city,
@@ -391,7 +391,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     const brandsnapshot = await Firebase.Brand.get();
     let brandData = [];
     brandsnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
         brandData.push({
           id: doc.id,
           companyname: doc.data().companyname,
@@ -427,7 +427,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     const campaignsnapshot = await Firebase.Campaign.get();
     let campaignData = [];
     campaignsnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
         campaignData.push({
           id: doc.id,
           brandcategory: doc.data().brandcategory,
@@ -460,7 +460,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     const noninfluencersnapshot = await Firebase.NonInfluencer.get();
     let noninfluencerData = [];
     noninfluencersnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
         noninfluencerData.push({
           id: doc.id,
           email: doc.data().email,
@@ -492,7 +492,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     const pinkskyPopupsnapshot = await Firebase.PinkskyPopup.get();
     let pinkskyPopupData = [];
     pinkskyPopupsnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
         pinkskyPopupData.push({
           id: doc.id,
           targetage: doc.data().age,
@@ -529,7 +529,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     const randomDatasnapshot = await Firebase.RandomData.get();
     let randomData = [];
     randomDatasnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
         randomData.push({
           id: doc.id,
           category: doc.data().category,
@@ -561,7 +561,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     const feedbackDatasnapshot = await Firebase.Feedback.get();
     let feedbackData = [];
     feedbackDatasnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted == undefined) {
+      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
         feedbackData.push({
           id: doc.id,
 
@@ -838,7 +838,7 @@ app.post("/api/signin", async (req, res) => {
         });
 
         let isMember = false;
-        if (influencerData[0].pinkskymember.cooldown == null) {
+        if (influencerData[0].pinkskymember.cooldown === null) {
           console.log("Here 1");
           isMember = false;
         } else {
@@ -1267,7 +1267,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
     console.log("entered", getAdmin.data().admin);
 
     if (getAdmin.data().admin) {
-      if (data.changesTrigger == "" || data.changesTrigger == undefined) {
+      if (data.changesTrigger === "" || data.changesTrigger === undefined) {
         //globalAdmin = false;
         console.log("step00");
         const snapshotGallerydata = await Firebase.Gallery.get();
@@ -1466,7 +1466,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           gallerylist: gallerylist,
           message: "Fetched Admin",
         });
-      } else if (data.changesTrigger == "influencer") {
+      } else if (data.changesTrigger === "influencer") {
         console.log("step2");
         const snapshotCamp = await Firebase.Campaign.get();
         let rawcampaignlist = [];
@@ -1542,7 +1542,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           gallerylist: [],
           message: "Fetched Admin",
         });
-      } else if (data.changesTrigger == "brand") {
+      } else if (data.changesTrigger === "brand") {
         console.log("step2");
         const snapshotCamp = await Firebase.Campaign.get();
 
@@ -1674,7 +1674,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           gallerylist: [],
           message: "Fetched Admin",
         });
-      } else if (data.changesTrigger == "campaign") {
+      } else if (data.changesTrigger === "campaign") {
         console.log("step2");
         const snapshotCamp = await Firebase.Campaign.get();
         let campaignlist = [];
@@ -1694,7 +1694,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           gallerylist: [],
           message: "Fetched Admin",
         });
-      } else if (data.changesTrigger == "event") {
+      } else if (data.changesTrigger === "event") {
         const snapshotevent = await Firebase.Event.get();
         let eventlist = [];
 
@@ -1713,7 +1713,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           gallerylist: [],
           message: "Fetched Admin",
         });
-      } else if (data.changesTrigger == "member") {
+      } else if (data.changesTrigger === "member") {
         console.log("step1");
         const snapshotCoupon = await Firebase.Coupons.get();
         let couponlist = [];
@@ -1734,7 +1734,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           gallerylist: [],
           message: "Fetched Admin",
         });
-      } else if (data.changesTrigger == "gallery") {
+      } else if (data.changesTrigger === "gallery") {
         const snapshotGallerydata = await Firebase.Gallery.get();
         let gallerylist = [];
         console.log("step0");
@@ -2197,6 +2197,7 @@ app.post("/api/influencer/create", async (req, res) => {
         await axios
           .request(options)
           .then(function (response) {
+            console.log("response.data.data Publick account?",response.data.data);
             if (response.data.data.is_private === false) {
               let sum = 0;
               let count = 0;
@@ -2437,7 +2438,7 @@ app.post("/api/influencer/create", async (req, res) => {
       }
     }
   } catch (error) {
-    if (userResponse?.uid == undefined || userResponse?.uid == "") {
+    if (userResponse?.uid === undefined || userResponse?.uid === "") {
       res.status(500).json({
         message:
           createUser.email +
@@ -2945,7 +2946,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       });
 
       let objIndex = influencerData.findIndex(
-        (obj) => obj.campaignId == data.campaignid
+        (obj) => obj.campaignId === data.campaignid
       );
 
       influencerData[objIndex].status = "accepted";
@@ -2979,7 +2980,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       console.log("inside influencerCampaignPaymentRequest 2");
       let objIndex = snapshot
         .data()
-        .campaignmapping.findIndex((obj) => obj.campaignId == data.campaignid);
+        .campaignmapping.findIndex((obj) => obj.campaignId === data.campaignid);
 
       influencerData[objIndex].paymentStatus = "accepted";
 
@@ -3036,7 +3037,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       let brandDataMessage = [...snapshot.data().message];
       console.log("step1");
       let objIndex = brandData.findIndex(
-        (obj) => obj.influencerId == data.influencerid
+        (obj) => obj.influencerId === data.influencerid
       );
       brandData[objIndex].status = "accepted";
       const influencersnapshot = await Firebase.Influencer.doc(
@@ -3067,7 +3068,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
 
       console.log("influencerData before", influencerData);
       let objIndex = influencerData.findIndex(
-        (obj) => obj.eventId == data.eventid
+        (obj) => obj.eventId === data.eventid
       );
       influencerData[objIndex].status = "accepted";
       const eventsnapshot = await Firebase.Event.doc(data.eventid).get();
@@ -3108,7 +3109,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       let brandDataMessage = [...snapshot.data().message];
 
       let objIndex = brandDataMessage.findIndex(
-        (obj) => obj.launchName == data.details.launchName
+        (obj) => obj.launchName === data.details.launchName
       );
 
       brandDataMessage[objIndex].isShowAdmin = false;
@@ -3238,7 +3239,7 @@ app.put("/api/rejectstatus/update", async (req, res) => {
       });
       console.log("influencerData before", influencerData);
       let objIndex = influencerData.findIndex(
-        (obj) => obj.campaignId == data.campaignid
+        (obj) => obj.campaignId === data.campaignid
       );
       influencerData[objIndex].status = "rejected";
       const campaignsnapshot = await Firebase.Campaign.doc(
@@ -3318,7 +3319,7 @@ app.put("/api/rejectstatus/update", async (req, res) => {
       let brandDataMessage = [...snapshot.data().message];
       console.log("step1");
       let objIndex = brandData.findIndex(
-        (obj) => obj.influencerId == data.influencerid
+        (obj) => obj.influencerId === data.influencerid
       );
       brandData[objIndex].status = "rejected";
       const influencersnapshot = await Firebase.Influencer.doc(
@@ -3346,7 +3347,7 @@ app.put("/api/rejectstatus/update", async (req, res) => {
 
       console.log("influencerData before", influencerData);
       let objIndex = influencerData.findIndex(
-        (obj) => obj.eventId == data.eventid
+        (obj) => obj.eventId === data.eventid
       );
       influencerData[objIndex].status = "rejected";
       const eventsnapshot = await Firebase.Event.doc(data.eventid).get();
@@ -3616,7 +3617,7 @@ app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
     console.log("step1");
     if (influencerData.find((item) => item.eventId === data.eventId)) {
       let objIndex = influencerData.findIndex(
-        (obj) => obj.eventId == data.eventId
+        (obj) => obj.eventId === data.eventId
       );
       influencerData[objIndex].status = "new";
       influencerData[objIndex].eventId = data.eventId;
@@ -3672,7 +3673,7 @@ app.put("/api/mappinginfluencerwithcampaign/update", async (req, res) => {
 
     if (influencerData.find((item) => item.campaignId === data.campaignId)) {
       let objIndex = influencerData.findIndex(
-        (obj) => obj.campaignId == data.campaignId
+        (obj) => obj.campaignId === data.campaignId
       );
       influencerData[objIndex].status = "new";
       influencerData[objIndex].biddingprice = data.biddingprice;
