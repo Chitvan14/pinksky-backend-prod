@@ -7,8 +7,7 @@ const request = require("request");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
 const { Firebase } = require("./config.js");
-const cityArrWithAllCity = require("./city");
-// require("dotenv").config();
+
 const Razorpay = require("razorpay");
 const razorpay = new Razorpay({
   key_id: environments.KEY_ID,
@@ -1769,30 +1768,30 @@ app.post("/api/admin/pinksky", async (req, res) => {
 
 // FILTER SECTION
 // 1. City filter
-app.post("/api/city/filter", async (req, res) => {
-  try {
-    const data = req.body;
-    console.log(data.city);
+// app.post("/api/city/filter", async (req, res) => {
+//   try {
+//     const data = req.body;
+//     console.log(data.city);
 
-    let cityvaluearray = [];
-    cityArrWithAllCity.map((m) => {
-      if (m.value.toLowerCase().indexOf(data.city) !== -1) {
-        cityvaluearray.push({ ...m, status: true });
-      }
-      // else {
-      //   cityvaluearray.push({ ...m, status: false });
-      // }
-    });
-    setTimeout(() => {
-      res.status(200).json({
-        data: cityvaluearray,
-        message: "Filtered City",
-      });
-    }, 1200);
-  } catch (error) {
-    res.status(500).json({ message: error });
-  }
-});
+//     let cityvaluearray = [];
+//     cityArrWithAllCity.map((m) => {
+//       if (m.value.toLowerCase().indexOf(data.city) !== -1) {
+//         cityvaluearray.push({ ...m, status: true });
+//       }
+//       // else {
+//       //   cityvaluearray.push({ ...m, status: false });
+//       // }
+//     });
+//     setTimeout(() => {
+//       res.status(200).json({
+//         data: cityvaluearray,
+//         message: "Filtered City",
+//       });
+//     }, 1200);
+//   } catch (error) {
+//     res.status(500).json({ message: error });
+//   }
+// });
 
 // 2. Admin brand filter
 app.post("/api/brands/filter", async (req, res) => {
@@ -2491,6 +2490,7 @@ app.post("/api/brand/create", async (req, res) => {
         };
         let instagramPostDetails = [];
         let onGoingStatus = 200;
+        console.log("options ",options);
         await axios
           .request(options)
           .then(function (response) {
@@ -2556,6 +2556,7 @@ app.post("/api/brand/create", async (req, res) => {
                 index +
                 ".jpeg";
               let filePath = path.join(__dirname, "/images", fileName);
+              console.log("filePath",filePath);
               //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
