@@ -2,11 +2,14 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 const path = require("path");
-const environments =  require('./environments.js');
+const environments = require("./environments.js");
 const request = require("request");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
+const hbs = require("nodemailer-express-handlebars");
 const { Firebase } = require("./config.js");
+const viewPath = path.resolve(__dirname, "./templates/views/");
+const partialsPath = path.resolve(__dirname, "./templates/partials");
 
 const Razorpay = require("razorpay");
 const razorpay = new Razorpay({
@@ -41,13 +44,67 @@ const clientFeedback = sheetdb({
 });
 
 const app = express();
-const PORT =environments.PORT;
+const PORT = environments.PORT;
 
 app.use(express.json());
 app.use(cors());
 
 // WHATSAPP AND EMAIL SECTION
-// 1. sending messages
+// 1. creating mail to send
+const sendMail = (sendType, sendTo) => {
+  var transporter = nodemailer.createTransport({
+    service: environments.EML_PROVIDER,
+    auth: {
+      user: environments.EML_USER,
+      pass: environments.EML_PASS,
+    },
+  });
+
+  transporter.use(
+    "compile",
+    hbs({
+      viewEngine: {
+        extName: ".handlebars",
+        // partialsDir: viewPath,
+        layoutsDir: viewPath,
+        defaultLayout: false,
+        partialsDir: partialsPath,
+        express,
+      },
+      viewPath: viewPath,
+      extName: ".handlebars",
+    })
+  );
+  let templateName = "";
+  let subject = "";
+  if (sendType === "sendingCouponDetails") {
+    templateName = "index";
+    subject = "Sending Email using Node.js";
+  }
+
+  var mailOptions = {
+    from: environments.EML_USER,
+    to: sendTo,
+    subject: subject,
+    template: templateName,
+    // attachments: [
+    //   { filename: 'abc.jpg', path: path.resolve(__dirname, './image/abc.jpg')}
+    // ]
+  };
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
+};
+// app.post("/api/template/check", async (req, res) => {
+//   // let queryTo = req.query.to;
+//   sendMail("sendingCouponDetails", "gargchitvan99@gmail.com");
+//   res.json("mail sent");
+// });
+// 2. sending messages
 app.post("/api/template/whatsapp", async (req, res) => {
   try {
     let queryType = req.query.type;
@@ -85,12 +142,12 @@ app.post("/api/template/whatsapp", async (req, res) => {
         },
       });
 
-      var mailOptions = {
-        from: environments.EML_USER,
-        to: "gargchitvan99@gmail.com",
-        subject: "Test Coupon Email",
-        text: `Hi there, is this thing working? <strong>This is strong string.</strong>`,
-      };
+      // var mailOptions = {
+      //   from: environments.EML_USER,
+      //   to: "gargchitvan99@gmail.com",
+      //   subject: "Test Coupon Email",
+      //   text: `Hi there, is this thing working? <strong>This is strong string.</strong>`,
+      // };
     }
 
     const size = Object.keys(data).length;
@@ -108,16 +165,19 @@ app.post("/api/template/whatsapp", async (req, res) => {
       axios(config)
         .then(function (response) {
           // console.log(JSON.stringify(response.data));
-          transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-              res.status(200).json({ data: error, status: 0 });
-            } else {
-              res.status(200).json({
-                data: { whatsapp: response.data, email: info.response },
-                status: 1,
-              });
-            }
-          });
+          // transporter.sendMail(mailOptions, function (error, info) {
+          //   if (error) {
+          //   } else {
+          //     res.status(200).json({
+          //       data: { whatsapp: response.data, email: info.response },
+          //       status: 1,
+          //     });
+          //   }
+          // });
+          if (queryType === "coupon") {
+            sendMail("sendingCouponDetails", "gargchitvan@gmail.com");
+          }
+          res.status(200).json({ data: error, status: 0 });
         })
         .catch(function (error) {
           res.status(200).json({ data: error, status: 0 });
@@ -327,7 +387,7 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
       res.status(200).json({
         url: paymentLink.short_url,
         message: "Generate Coupon Payment Link",
-        heading: environments.FRNT_SUBSCRIPTION_HEADING,
+        heading: environments.FRNT_MEMBERSHIP_HEADING,
       });
     } else {
       const snapshot = await Firebase.Coupons.doc(response.data.id).get();
@@ -649,7 +709,7 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
             axios
               .post(
                 environments.BASE_URL +
-                      "influencer/create?isProfileCompleted=0",
+                  "influencer/create?isProfileCompleted=0",
                 addvalue
               )
               .then((response) => {
@@ -890,6 +950,7 @@ app.post("/api/signin", async (req, res) => {
                     sum +
                     item.node.edge_media_to_comment.count +
                     item.node.edge_liked_by.count;
+
                   if (count <= 4) {
                     console.log("item.node.shortcode", item.node.shortcode);
                     let itemData = {
@@ -1802,7 +1863,9 @@ app.post("/api/brands/filter", async (req, res) => {
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
 
-    if (data.inputValue.toLowerCase() === environments.ADMIN_BRAND_FILTER_TEXT) {
+    if (
+      data.inputValue.toLowerCase() === environments.ADMIN_BRAND_FILTER_TEXT
+    ) {
       namesorted = list;
     } else if (data.inputValue !== "") {
       namesorted = list.filter((item) => {
@@ -1834,7 +1897,9 @@ app.post("/api/events/filter", async (req, res) => {
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
     console.log("step 1");
-    if (data.inputValue.toLowerCase() === environments.ADMIN_EVENT_FILTER_TEXT) {
+    if (
+      data.inputValue.toLowerCase() === environments.ADMIN_EVENT_FILTER_TEXT
+    ) {
       namesorted = list;
     } else if (data.inputValue !== "") {
       console.log("step 2");
@@ -1918,7 +1983,8 @@ app.post("/api/influencer/filter", async (req, res) => {
     let citysorted;
 
     if (
-      data.inputValue.toLowerCase() === environments.ADMIN_INFLUENCER_FILTER_TEXT
+      data.inputValue.toLowerCase() ===
+      environments.ADMIN_INFLUENCER_FILTER_TEXT
     ) {
       namesorted = list;
     } else if (data.inputValue !== "") {
@@ -2130,23 +2196,22 @@ app.post("/api/influencer/create", async (req, res) => {
   let userResponse = undefined;
 
   let influencerData = req.body;
+  let isProfileCompletedQuery = req.query.isProfileCompleted;
+  console.log("influencerData", req.body);
+  console.log("isProfileCompletedQuery", isProfileCompletedQuery);
+
+  const createUser = {
+    email: influencerData.email,
+    password: influencerData.password,
+    name:
+      isProfileCompletedQuery +
+      "_Influencer_" +
+      influencerData.name.replace(" ", "") +
+      "_" +
+      influencerData.surname.replace(" ", ""),
+  };
+  console.log("createUser", createUser);
   try {
-    let isProfileCompletedQuery = req.query.isProfileCompleted;
-    console.log("influencerData", req.body);
-    console.log("isProfileCompletedQuery", isProfileCompletedQuery);
-
-    const createUser = {
-      email: influencerData.email,
-      password: influencerData.password,
-      name:
-        isProfileCompletedQuery +
-        "_Influencer_" +
-        influencerData.name.replace(" ", "") +
-        "_" +
-        influencerData.surname.replace(" ", ""),
-    };
-    console.log("createUser", createUser);
-
     //login here
     if (createUser.email != undefined && createUser.password != undefined) {
       if (influencerData.isNonInfluencer.uuid.toString().length > 2) {
@@ -2196,36 +2261,56 @@ app.post("/api/influencer/create", async (req, res) => {
         await axios
           .request(options)
           .then(function (response) {
-            console.log("response.data.data Publick account?",response.data.data);
+            // console.log(
+            //   "response.data.data Publick account?",
+            //   response.data.data
+            // );
             if (response.data.data.is_private === false) {
               let sum = 0;
               let count = 0;
-
-              response.data.data.edge_owner_to_timeline_media.edges.map(
-                (item) => {
-                  // console.log(item);
-                  sum =
-                    sum +
-                    item.node.edge_media_to_comment.count +
-                    item.node.edge_liked_by.count;
-                  if (count <= 4) {
-                    console.log("item.node.shortcode", item.node.shortcode);
-                    let itemData = {
-                      id: item.node.id,
-                      shortcode: item.node.shortcode,
-                      display_url: item.node.display_url,
-                      caption:
-                        item.node.edge_media_to_caption.edges[0].node.text,
-                      edge_media_to_comment:
-                        item.node.edge_media_to_comment.count,
-                      edge_liked_by: item.node.edge_liked_by.count,
-                    };
-
-                    instagramPostDetails.push(itemData);
-                  }
-                  count++;
-                }
+              console.log(
+                "response.data.data.edge_owner_to_timeline_media.edges",
+                response.data.data.edge_owner_to_timeline_media.edges.length
               );
+              if (
+                response.data.data.edge_owner_to_timeline_media.edges.length > 4
+              ) {
+                response.data.data.edge_owner_to_timeline_media.edges.map(
+                  (item) => {
+                    // console.log(item);
+                    console.log(count);
+                    sum =
+                      sum +
+                      item?.node.edge_media_to_comment.count +
+                      item?.node.edge_liked_by.count;
+
+                    if (count <= 4) {
+                      console.log(
+                        "item.node.shortcode - ",
+                        item?.node.shortcode
+                      );
+                      let itemData = {
+                        id: item?.node.id,
+                        shortcode: item?.node.shortcode,
+                        display_url: item?.node.display_url,
+                        caption:
+                          item?.node.edge_media_to_caption.edges[0]?.node.text,
+                        edge_media_to_comment:
+                          item?.node.edge_media_to_comment.count,
+                        edge_liked_by: item?.node.edge_liked_by.count,
+                      };
+
+                      instagramPostDetails.push(itemData);
+                    }
+                    count++;
+                  }
+                );
+              } else {
+                const err = new TypeError(
+                  "We cant't calculate your profile. Please login in with public instagram profile with more than 5 posts."
+                );
+                throw err;
+              }
 
               let engagementRate =
                 sum / response.data.data.edge_followed_by.count;
@@ -2333,11 +2418,11 @@ app.post("/api/influencer/create", async (req, res) => {
                             pinkskymember:
                               snapshotNonInfluencer.data().pinkskymember,
                             isProfileCompleted: isProfileCompletedQuery,
-                            imgURL1: instagramPostDetails[0].new_url,
-                            imgURL2: instagramPostDetails[1].new_url,
-                            imgURL3: instagramPostDetails[2].new_url,
-                            imgURL4: instagramPostDetails[3].new_url,
-                            imgURL5: instagramPostDetails[4].new_url,
+                            imgURL1: instagramPostDetails[0]?.new_url,
+                            imgURL2: instagramPostDetails[1]?.new_url,
+                            imgURL3: instagramPostDetails[2]?.new_url,
+                            imgURL4: instagramPostDetails[3]?.new_url,
+                            imgURL5: instagramPostDetails[4]?.new_url,
                             message: [
                               {
                                 statusID: "100",
@@ -2352,11 +2437,11 @@ app.post("/api/influencer/create", async (req, res) => {
                           influencerSchema = {
                             ...influencerSchema,
                             isProfileCompleted: isProfileCompletedQuery,
-                            imgURL1: instagramPostDetails[0].new_url,
-                            imgURL2: instagramPostDetails[1].new_url,
-                            imgURL3: instagramPostDetails[2].new_url,
-                            imgURL4: instagramPostDetails[3].new_url,
-                            imgURL5: instagramPostDetails[4].new_url,
+                            imgURL1: instagramPostDetails[0]?.new_url,
+                            imgURL2: instagramPostDetails[1]?.new_url,
+                            imgURL3: instagramPostDetails[2]?.new_url,
+                            imgURL4: instagramPostDetails[3]?.new_url,
+                            imgURL5: instagramPostDetails[4]?.new_url,
                             message: [
                               {
                                 statusID: "100",
@@ -2371,6 +2456,7 @@ app.post("/api/influencer/create", async (req, res) => {
 
                         console.log("influencerSchema", influencerSchema);
                         Firebase.Influencer.add(influencerSchema);
+                        console.log("hello");
                         setTimeout(async () => {
                           console.log("inside2");
 
@@ -2441,7 +2527,7 @@ app.post("/api/influencer/create", async (req, res) => {
       res.status(500).json({
         message:
           createUser.email +
-          " is already an pinksky user. Try sigging up with another id.",
+          " is already an pinksky user. Try sigging up with another user id.",
       });
     } else {
       console.log(userResponse?.uid);
@@ -2460,11 +2546,15 @@ app.post("/api/influencer/create", async (req, res) => {
 app.post("/api/brand/create", async (req, res) => {
   try {
     let brandData = req.body;
+    let isProfileCompletedQuery = req.query.isProfileCompleted;
     console.log("brandData", req.body);
     const createUser = {
       email: brandData.email,
       password: brandData.password,
-      name: "Brand_" + brandData.companyname.replace(" ", ""),
+      name:
+        isProfileCompletedQuery +
+        "_Brand_" +
+        brandData.companyname.replace(" ", ""),
     };
     console.log("createUser", createUser);
 
@@ -2490,7 +2580,7 @@ app.post("/api/brand/create", async (req, res) => {
         };
         let instagramPostDetails = [];
         let onGoingStatus = 200;
-        console.log("options ",options);
+        console.log("options ", options);
         await axios
           .request(options)
           .then(function (response) {
@@ -2556,7 +2646,7 @@ app.post("/api/brand/create", async (req, res) => {
                 index +
                 ".jpeg";
               let filePath = path.join(__dirname, "/images", fileName);
-              console.log("filePath",filePath);
+              console.log("filePath", filePath);
               //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
@@ -2588,7 +2678,7 @@ app.post("/api/brand/create", async (req, res) => {
 
                         brandSchema = {
                           ...brandSchema,
-
+                          isProfileCompleted: isProfileCompletedQuery,
                           imgURL: instagramPostDetails[0].new_url,
                           message: [
                             {
@@ -2608,26 +2698,27 @@ app.post("/api/brand/create", async (req, res) => {
                         console.log("inside2");
 
                         const snapshot = await Firebase.Brand.get();
+                        setTimeout(() => {
+                          snapshot.docs.map((doc) => {
+                            if (doc.data().email === createUser.email) {
+                              brandArr.push({ id: doc.id, ...doc.data() });
+                            }
+                          });
 
-                        snapshot.docs.map((doc) => {
-                          if (doc.data().email === createUser.email) {
-                            brandArr.push({ id: doc.id, ...doc.data() });
-                          }
-                        });
-
-                        res.status(200).json({
-                          message: {
-                            displayName: createUser.name,
-                            id: brandArr[0].id,
-                            // email: createUser.email,
-                            email: brandArr[0].email,
-                            type: "Posted Brand",
-                            uuid: userResponse?.uid,
-                            member: false,
-                            status: "new",
-                          },
-                        });
-                      }, 4000);
+                          res.status(200).json({
+                            message: {
+                              displayName: createUser.name,
+                              id: brandArr[0].id,
+                              // email: createUser.email,
+                              email: brandArr[0].email,
+                              type: "Posted Brand",
+                              uuid: userResponse?.uid,
+                              member: false,
+                              status: "new",
+                            },
+                          });
+                        }, 1000);
+                      }, 2000);
                     })
                     .catch((error) => {
                       throw error;
@@ -2640,8 +2731,22 @@ app.post("/api/brand/create", async (req, res) => {
       }
     }
   } catch (error) {
-    console.log("error", error);
-    res.status(500).json({ message: error.message });
+    // console.log("error", error);
+    // res.status(500).json({ message: error.message });
+    if (userResponse?.uid === undefined || userResponse?.uid === "") {
+      res.status(500).json({
+        message:
+          createUser.email +
+          " is already an pinksky user. Try sigging up with another user id.",
+      });
+    } else {
+      console.log(userResponse?.uid);
+
+      await Firebase.admin.auth().deleteUser(userResponse?.uid);
+
+      console.log("error", error.message);
+      res.status(500).json({ message: error.message });
+    }
   }
 });
 
@@ -3526,13 +3631,34 @@ app.put("/api/influencer/update", async (req, res) => {
   try {
     const data = req.body;
     const id = req.body.body.id;
-    console.log(data);
     delete req.body.body.id;
-    let message = "";
-    message = "Updated Influencer";
+    let updatedCookies = {};
+    let displayName = data?.cookies.displayName;
+    let updatedDisplayName = displayName;
 
+    if (data.flagSignOut === 1 && displayName.slice(0, 1) === "0") {
+      updatedDisplayName =
+        displayName.slice(0, 1) === "0" &&
+        "1" + displayName.slice(1, displayName.length);
+      console.log("updatedDisplayName", updatedDisplayName);
+      await Firebase.admin.auth().updateUser(data?.cookies.uuid, {
+        displayName: updatedDisplayName,
+      });
+    }
+    if (data.flagSignOut === 0 && displayName.slice(0, 1) === "1") {
+      updatedDisplayName =
+        displayName.slice(0, 1) === "1" &&
+        "0" + displayName.slice(1, displayName.length);
+      await Firebase.admin.auth().updateUser(data?.cookies.uuid, {
+        displayName: updatedDisplayName,
+      });
+    }
+    updatedCookies = { ...data?.cookies, displayName: updatedDisplayName };
+    console.log("here?");
     await Firebase.Influencer.doc(id).update(data.body);
-    res.status(200).json({ message: message });
+    res
+      .status(200)
+      .json({ message: "Updated Influencer", updatedCookies: updatedCookies });
   } catch (error) {
     res.status(500).json({ message: error });
   }
@@ -3543,17 +3669,51 @@ app.put("/api/brand/update", async (req, res) => {
   try {
     const data = req.body;
     const id = req.body.body.id;
-    console.log(data);
     delete req.body.body.id;
-    let message = "";
+    let updatedCookies = {};
+    let displayName = data?.cookies.displayName;
+    let updatedDisplayName = displayName;
 
-    message = "Updated Brand";
-
+    if (data.flagSignOut === 1 && displayName.slice(0, 1) === "0") {
+      updatedDisplayName =
+        displayName.slice(0, 1) === "0" &&
+        "1" + displayName.slice(1, displayName.length);
+      console.log("updatedDisplayName", updatedDisplayName);
+      await Firebase.admin.auth().updateUser(data?.cookies.uuid, {
+        displayName: updatedDisplayName,
+      });
+    }
+    if (data.flagSignOut === 0 && displayName.slice(0, 1) === "1") {
+      updatedDisplayName =
+        displayName.slice(0, 1) === "1" &&
+        "0" + displayName.slice(1, displayName.length);
+      await Firebase.admin.auth().updateUser(data?.cookies.uuid, {
+        displayName: updatedDisplayName,
+      });
+    }
+    updatedCookies = { ...data?.cookies, displayName: updatedDisplayName };
+    console.log("here?");
     await Firebase.Brand.doc(id).update(data.body);
-    res.status(200).json({ message: message });
+    res
+      .status(200)
+      .json({ message: "Updated Brand", updatedCookies: updatedCookies });
   } catch (error) {
     res.status(500).json({ message: error });
   }
+  // try {
+  //   const data = req.body;
+  //   const id = req.body.body.id;
+  //   console.log(data);
+  //   delete req.body.body.id;
+  //   let message = "";
+
+  //   message = "Updated Brand";
+
+  //   await Firebase.Brand.doc(id).update(data.body);
+  //   res.status(200).json({ message: message });
+  // } catch (error) {
+  //   res.status(500).json({ message: error });
+  // }
 });
 
 // MAPPING SECTION
