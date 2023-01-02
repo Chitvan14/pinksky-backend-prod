@@ -48,6 +48,7 @@ const PORT = environments.PORT;
 
 app.use(express.json());
 app.use(cors());
+// console.log(  {path: path.resolve(__dirname, `${process.env.NODE_ENV}.env`)})
 
 // WHATSAPP AND EMAIL SECTION
 // 1. creating mail to send
@@ -2556,7 +2557,7 @@ app.post("/api/influencer/create", async (req, res) => {
         });
       }
 
-      console.log("userResponse email");
+      console.log("userResponse email", environments.NODE_ENV,userResponse.email,userResponse.uid);
       if (userResponse.email !== undefined && userResponse.uid !== undefined) {
         let influencerSchema = null;
         const options = {
@@ -3507,9 +3508,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         message: influencerDataMessage,
       });
       res.status(200).json({ message: "Accept Event with Influencer" });
-    } 
-    
-    else if (data.type === "influencerPinkskyTeamNewRequest") {
+    } else if (data.type === "influencerPinkskyTeamNewRequest") {
       let snapshot = await Firebase.Influencer.doc(data.influencerid).get();
 
       let influencerDataMessage = [
