@@ -1,7 +1,5 @@
 node_modules
 environment.js
-development.env
 local.env
-production.env
 dotenv
 pinksky-8804c-firebase-adminsdk-vy5o9-4b658e5d2c.json
