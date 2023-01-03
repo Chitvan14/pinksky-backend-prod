@@ -1465,7 +1465,7 @@ app.post("/api/influencer", async (req, res) => {
       res
         .status(200)
         .json({ data: [influencerprofiledata], message: "Fetched Influencer" });
-    }, 2000);
+    }, 1500);
   } catch (error) {
     res.status(500).json({ message: error });
   }
@@ -2557,7 +2557,12 @@ app.post("/api/influencer/create", async (req, res) => {
         });
       }
 
-      console.log("userResponse email", environments.NODE_ENV,userResponse.email,userResponse.uid);
+      console.log(
+        "userResponse email",
+        environments.NODE_ENV,
+        userResponse.email,
+        userResponse.uid
+      );
       if (userResponse.email !== undefined && userResponse.uid !== undefined) {
         let influencerSchema = null;
         const options = {
@@ -3572,48 +3577,55 @@ app.put(
             res.status(500).json({ message: error });
           });
 
-        console.log("1");
-        let snapshot = await Firebase.Influencer.doc(object.influencerid).get();
+        setTimeout(async () => {
+          console.log("1");
+          let snapshot = await Firebase.Influencer.doc(
+            object.influencerid
+          ).get();
 
-        let campaignmapping = [];
+          let campaignmapping = [];
 
-        // await snapshot.data().campaignmapping.map((camp) => {
-        //   if (camp.paymentStatus === "initiated") {
-        //     campaignmapping.push({
-        //       ...camp,
-        //       paymentURL: getDownloadURL,
-        //       paymentStatus: "completed",
-        //     });
-        //   } else {
-        //     campaignmapping.push(...camp);
-        //   }
-        // });
-        await snapshot.data().campaignmapping.map((camp) => {
-          if (camp.paymentStatus === "new") {
-            campaignmapping.push({
-              ...camp,
-              paymentURL: getDownloadURL,
-              paymentStatus: "accepted",
-            });
-          } else {
-            campaignmapping.push(...camp);
-          }
-        });
-        console.log("3");
-        let influencerDataMessage = [];
-
-        snapshot.data().message.map((item) => {
-          if (item.statusID === "401") {
-            influencerDataMessage.push({ ...item, paymentURL: getDownloadURL });
-          } else {
-            influencerDataMessage.push({ ...item });
-          }
-        }),
-          await Firebase.Influencer.doc(object.influencerid).update({
-            campaignmapping: campaignmapping,
-            message: influencerDataMessage,
+          // await snapshot.data().campaignmapping.map((camp) => {
+          //   if (camp.paymentStatus === "initiated") {
+          //     campaignmapping.push({
+          //       ...camp,
+          //       paymentURL: getDownloadURL,
+          //       paymentStatus: "completed",
+          //     });
+          //   } else {
+          //     campaignmapping.push(...camp);
+          //   }
+          // });
+          await snapshot.data().campaignmapping.map((camp) => {
+            if (camp.paymentStatus === "new") {
+              campaignmapping.push({
+                ...camp,
+                paymentURL: getDownloadURL,
+                paymentStatus: "accepted",
+              });
+            } else {
+              campaignmapping.push(...camp);
+            }
           });
-        res.status(200).json({ message: "Updated Influencer with payment" });
+          console.log("3");
+          let influencerDataMessage = [];
+
+          snapshot.data().message.map((item) => {
+            if (item.statusID === "401") {
+              influencerDataMessage.push({
+                ...item,
+                paymentURL: getDownloadURL,
+              });
+            } else {
+              influencerDataMessage.push({ ...item });
+            }
+          }),
+            await Firebase.Influencer.doc(object.influencerid).update({
+              campaignmapping: campaignmapping,
+              message: influencerDataMessage,
+            });
+          res.status(200).json({ message: "Updated Influencer with payment" });
+        }, 1500);
       }
     } catch (error) {
       res.status(500).json({ message: error });
