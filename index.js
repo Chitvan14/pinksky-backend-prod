@@ -6,10 +6,11 @@ const environments = require("./environments.js");
 const request = require("request");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
-const hbs = require("nodemailer-express-handlebars");
+// const hbs = require("nodemailer-express-handlebars");
 const { Firebase } = require("./firebaseconfig.js");
-const viewPath = path.resolve(__dirname, "./templates/views/");
-const partialsPath = path.resolve(__dirname, "./templates/partials");
+// const viewPath = path.resolve(__dirname, "./templates/views/");
+// const partialsPath = path.resolve(__dirname, "./templates/partials");
+var emailtemplate = require("./emailtemplate.js");
 
 const Razorpay = require("razorpay");
 const razorpay = new Razorpay({
@@ -48,7 +49,6 @@ const PORT = environments.PORT;
 
 app.use(express.json());
 app.use(cors());
-// console.log(  {path: path.resolve(__dirname, `${process.env.NODE_ENV}.env`)})
 
 // WHATSAPP AND EMAIL SECTION
 // 1. creating mail to send
@@ -60,27 +60,13 @@ const sendMail = (sendType, data) => {
       pass: environments.EML_PASS,
     },
   });
-  transporter.use(
-    "compile",
-    hbs({
-      viewEngine: {
-        extName: ".handlebars",
-        // partialsDir: viewPath,
-        layoutsDir: viewPath,
-        defaultLayout: false,
-        partialsDir: partialsPath,
-        express,
-      },
-      viewPath: viewPath,
-
-      extName: ".handlebars",
-    })
-  );
-  let templateName = "";
+  let html = "";
   let subject = "";
-
+  if (sendType === "test") {
+    html = emailtemplate(sendType, data);
+    subject = "Sending Email for testing";
+  }
   if (sendType === "sendingCouponDetails") {
-    templateName = "index";
     subject = "Sending Email using Node.js";
   }
 
@@ -88,10 +74,7 @@ const sendMail = (sendType, data) => {
     from: environments.EML_USER,
     to: data.receivermail,
     subject: subject,
-    template: templateName,
-    // attachments: [
-    //   { filename: 'abc.jpg', path: path.resolve(__dirname, './image/abc.jpg')}
-    // ]
+    html: html,
   };
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
@@ -101,7 +84,13 @@ const sendMail = (sendType, data) => {
     }
   });
 };
-
+// app.get("/api/testmail", (req, res) => {
+//   sendMail("test", {
+//     receivermail: "gargchitvan99@gmail.com",
+//     name: "chitvan garg",
+//   });
+//   res.json("done");
+// });
 const sendWhatsappMess = (sendType, data) => {
   var dataString = {};
   if (sendType === "sendingCouponDetails") {
@@ -3596,7 +3585,7 @@ app.post(
           //     campaignmapping.push(...camp);
           //   }
           // });
-           snapshot.data().campaignmapping.map((camp) => {
+          snapshot.data().campaignmapping.map((camp) => {
             if (camp.paymentStatus === "accepted") {
               campaignmapping.push({
                 ...camp,
@@ -3604,7 +3593,7 @@ app.post(
                 paymentStatus: "completed",
               });
             } else {
-              campaignmapping.push({...camp});
+              campaignmapping.push({ ...camp });
             }
           });
           console.log("3");
@@ -3624,7 +3613,7 @@ app.post(
               campaignmapping: campaignmapping,
               message: influencerDataMessage,
             });
-            console.log("5");
+          console.log("5");
 
           res.status(200).json({ message: "Updated Influencer with payment" });
         }, 1500);
