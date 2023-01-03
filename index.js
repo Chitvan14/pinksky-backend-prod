@@ -3551,7 +3551,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
 });
 
 // 7. Accept Handle Form Data
-app.put(
+app.post(
   "/api/acceptstatus/update/formdata",
   Firebase.multer.single("file"),
   async (req, res) => {
@@ -3596,15 +3596,15 @@ app.put(
           //     campaignmapping.push(...camp);
           //   }
           // });
-          await snapshot.data().campaignmapping.map((camp) => {
-            if (camp.paymentStatus === "new") {
+           snapshot.data().campaignmapping.map((camp) => {
+            if (camp.paymentStatus === "accepted") {
               campaignmapping.push({
                 ...camp,
                 paymentURL: getDownloadURL,
-                paymentStatus: "accepted",
+                paymentStatus: "completed",
               });
             } else {
-              campaignmapping.push(...camp);
+              campaignmapping.push({...camp});
             }
           });
           console.log("3");
@@ -3624,6 +3624,8 @@ app.put(
               campaignmapping: campaignmapping,
               message: influencerDataMessage,
             });
+            console.log("5");
+
           res.status(200).json({ message: "Updated Influencer with payment" });
         }, 1500);
       }
