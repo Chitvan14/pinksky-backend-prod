@@ -2510,9 +2510,9 @@ app.post("/api/influencer/create", async (req, res) => {
     name:
       isProfileCompletedQuery +
       "_Influencer_" +
-      influencerData.name.replace(" ", "") +
+      influencerData.name.replace(/\s/g, "") +
       "_" +
-      influencerData.surname.replace(" ", ""),
+      influencerData.surname.replace(/\s/g, ""),
   };
   console.log("createUser", createUser);
   try {
@@ -2863,7 +2863,7 @@ app.post("/api/brand/create", async (req, res) => {
       name:
         isProfileCompletedQuery +
         "_Brand_" +
-        brandData.companyname.replace(" ", ""),
+        brandData.companyname.replace(/\s/g, ""),
     };
     console.log("createUser", createUser);
 
@@ -3067,7 +3067,7 @@ app.post("/api/noninfluencer/create", async (req, res) => {
     const createUser = {
       email: data.email,
       password: data.password,
-      name: "Non_Influencer_" + data.name.replace(" ", ""),
+      name: "Non_Influencer_" + data.name.replace(/\s/g, ""),
     };
 
     const userResponse = await Firebase.admin.auth().createUser({
