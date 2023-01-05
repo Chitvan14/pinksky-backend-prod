@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 const path = require("path");
+const shortid = require("shortid");
 const environments = require("./environments.js");
 const request = require("request");
 const fs = require("fs");
@@ -84,13 +85,29 @@ const sendMail = (sendType, data) => {
     }
   });
 };
-// app.get("/api/testmail", (req, res) => {
-//   sendMail("test", {
-//     receivermail: "gargchitvan99@gmail.com",
-//     name: "chitvan garg",
-//   });
-//   res.json("done");
-// });
+app.get("/api/testmail", (req, res) => {
+  // console.log(shortid.characters('CYRVKhpyzZG0rz8AQWmqa50QbKKNByoJ2GxIRCF1'));
+
+  // sendMail("test", {
+  //   receivermail: "gargchitvan99@gmail.com",
+  //   name: "chitvan garg",
+  // });
+  // var data = [{ id: 1 }, { id: 2 }];
+
+  // // Encrypt
+  // var ciphertext = CryptoJS.AES.encrypt(
+  //   JSON.stringify(data),
+  //   "12345678"
+  // ).toString();
+  // console.log(ciphertext); // [{id: 1}, {id: 2}]
+
+  // // Decrypt
+  // var bytes = CryptoJS.AES.decrypt(ciphertext, "12345678");
+  // var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+
+  // console.log(decryptedData); // [{id: 1}, {id: 2}]
+  res.json("done");
+});
 const sendWhatsappMess = (sendType, data) => {
   var dataString = {};
   if (sendType === "sendingCouponDetails") {
@@ -331,6 +348,7 @@ app.post("/api/subscription/razorpay", async (req, res) => {
     let data = req.body;
     console.log(data);
     let planid = "";
+    //add month and category cmp,imp
     if (data.brandCategoryFormValue === "Cafe") {
       planid = environments.PLN_CAFE;
     } else if (data.brandCategoryFormValue === "Club") {
@@ -431,10 +449,22 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
       });
     } else {
       const snapshot = await Firebase.Coupons.doc(response.data.id).get();
+      const influesnapshot = await Firebase.Influencer.doc(response.id).get();
+
       await Firebase.Coupons.doc(response.data.id).update({
-        userCouponMapping: [...snapshot.data().userCouponMapping, response.id],
+        userCouponMapping: [
+          ...snapshot.data().userCouponMapping,
+          {
+            influencerid: response.id,
+            shortid: shortid.generate(),
+            name:
+              influesnapshot.data().name + ", " + influesnapshot.data().surname,
+          },
+        ],
       });
       console.log("here 1");
+      //send mail and message with short id, coupon details and influencer detials to
+      // influencer, brand, pinksky 3 mails/messages
       setTimeout(() => {
         console.log("here 2");
 
@@ -1502,15 +1532,103 @@ app.post("/api/brand", async (req, res) => {
   }
 });
 
+// 3. Advance Brand - Event, Campaign, Coupon Mappings
+app.post("/api/brand/advance", async (req, res) => {
+  try {
+    console.log("2 ");
+
+    //coupons
+    const couponsnapshot = await Firebase.Coupons.get();
+    let couponsArr = [];
+    couponsnapshot.docs.map((item) => {
+      if (item.data().brandcategory.id === req.body.id) {
+        couponsArr.push({
+          ...item.data(),
+          id: item.id,
+        });
+      }
+    });
+    console.log("3 ");
+
+    const campaignsnapshot = await Firebase.Campaign.get();
+    let campaignArr = [];
+    campaignsnapshot.docs.map((item) => {
+      if (item.data().brandcategory.id === req.body.id) {
+        campaignArr.push({
+          ...item.data(),
+          id: item.id,
+        });
+      }
+    });
+    console.log("4 ");
+
+    const eventsnapshot = await Firebase.Event.get();
+    let eventArr = [];
+    eventsnapshot.docs.map((item) => {
+      if (item.data().brandcategory.id === req.body.id) {
+        eventArr.push({
+          ...item.data(),
+          id: item.id,
+        });
+      }
+    });
+    //campaign from influencer
+    //  const couponsnapshot = await Firebase.Coupons.get();
+    //  let couponsArr = [];
+    //  couponsnapshot.docs.map((item) => {
+    //    if (
+    //      item.data().brandcategory.id === req.body.id
+    //    ) {
+    //      couponsArr.push({
+    //        ...item.data(),
+    //        id: item.id,
+    //      });
+    //    }
+    //  });
+    console.log("5 ");
+    // setTimeout(() => {
+    res.status(200).json({
+      data: {
+        couponsArr: couponsArr,
+        campaignArr: campaignArr,
+        eventArr: eventArr,
+      },
+      message: "Fetched Advanced Brand",
+    });
+    // }, 2000);
+  } catch (error) {
+    console.log("1 ");
+
+    res.status(500).json({ message: error });
+  }
+});
+
 // COUPON, HOME, ADMIN PAGE SECTION
 // 1. Coupons Page
 app.get("/api/coupons", async (req, res) => {
   try {
     const snapshotcoupon = await Firebase.Coupons.get();
     let couponlist = [];
+    // var todayDate = new Date().toLocalDateString();
+    var q = new Date();
+    var m = q.getMonth();
+    var d = q.getDay();
+    var y = q.getFullYear();
+
+    var date = new Date(y, m, d);
+
     snapshotcoupon.docs.map((doc) => {
       if (doc.data().isActive === 1) {
-        couponlist.push({ id: doc.id, ...doc.data() });
+        // var varDate = new Date(doc.data().date).toLocalDateString();
+        // if (varDate <= todayDate) {
+        //   console.log("working");
+        // }
+        var mydate = new Date(doc.data().date.toString());
+        console.log("mydate >= date", mydate >= date);
+        console.log("mydate,date", { mydate, date });
+        if (mydate >= date) {
+          couponlist.push({ id: doc.id, ...doc.data() });
+        }
       }
     });
 
@@ -1590,11 +1708,21 @@ app.post("/api/home", async (req, res) => {
     });
 
     //coupon
+    var q = new Date();
+    var m = q.getMonth();
+    var d = q.getDay();
+    var y = q.getFullYear();
+
+    var date = new Date(y, m, d);
     const snapshotcoupon = await Firebase.Coupons.get();
     let couponlist = [];
     snapshotcoupon.docs.map((doc) => {
       if (doc.data().isActive === 1) {
-        couponlist.push({ id: doc.id, ...doc.data() });
+        var mydate = new Date(doc.data().date.toString());
+
+        if (mydate >= date) {
+          couponlist.push({ id: doc.id, ...doc.data() });
+        }
       }
     });
 
@@ -3347,7 +3475,20 @@ app.put("/api/acceptstatus/update", async (req, res) => {
     //checked
     else if (data.type === "influencerCampaignRequest") {
       const data = req.body;
+      const snapshotcampaign = await Firebase.Campaign.doc(
+        data.campaignid
+      ).get();
+      // const influesnapshot = await Firebase.Influencer.doc(data.influencerid).get();
 
+      await Firebase.Campaign.doc(data.campaignid).update({
+        userCampaignMapping: [
+          ...snapshotcampaign.data().userCampaignMapping,
+          {
+            influencerid: data.influencerid,
+            closingPrice: data.closingPrice,
+          },
+        ],
+      });
       const snapshot = await Firebase.Influencer.get();
 
       let influencerData = [];
@@ -3475,6 +3616,16 @@ app.put("/api/acceptstatus/update", async (req, res) => {
     //working
     else if (data.type === "influencerEventRequest") {
       const data = req.body;
+      const snapshotevent = await Firebase.Event.doc(data.eventid).get();
+
+      await Firebase.Event.doc(data.eventid).update({
+        userEventMapping: [
+          ...snapshotevent.data().userEventMapping,
+          {
+            influencerid: data.influencerid,
+          },
+        ],
+      });
       const snapshot = await Firebase.Influencer.doc(data.influencerid).get();
       let influencerData = [];
       let influencerDataMessage = [];
@@ -3869,6 +4020,35 @@ app.put("/api/gallery/update", async (req, res) => {
     res.status(200).json({ message: "Updated Coupon" });
   } catch (error) {
     res.status(500).json({ message: error });
+  }
+});
+
+app.post("/api/brandname", async (req, res) => {
+  let data = req.body;
+  console.log(data);
+  try {
+    let snapshot = await Firebase.Brand.get();
+    let companynames = [];
+    snapshot.docs.map((item) => {
+      if (
+        item
+          .data()
+          .companyname.toLowerCase()
+          .indexOf(data.value.toLowerCase()) !== -1 &&
+        item.data().status === "accepted"
+      ) {
+        companynames.push({
+          category: item.data().category[0].label,
+          companyname: item.data().companyname,
+          id: item.id,
+        });
+      }
+    });
+    console.log(companynames);
+
+    res.json({ message: companynames });
+  } catch (error) {
+    res.json({ message: error });
   }
 });
 
