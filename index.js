@@ -262,12 +262,19 @@ app.post("/api/verify/razorpay", async (req, res) => {
       //   "payment2.json",
       //   JSON.stringify(req.body, null, 4)
       // );
-      console.log("something");
+      console.log("something ", req.body.event);
       if (req.body.event === "subscription.activated") {
         const updating = await Firebase.Brand.doc(
           req.body.payload.subscription.entity.notes.pinksky_id
+        ).get();
+
+        await Firebase.Brand.doc(
+          req.body.payload.subscription.entity.notes.pinksky_id
         ).update({
-          subscription: req.body,
+          subscription:
+            updating.data().subscription.length > 0
+              ? [...updating.data().subscription, req.body]
+              : [req.body],
         });
         res.status(200).json({ message: "Subscription Activated" });
       }
@@ -335,6 +342,7 @@ app.post("/api/verify/razorpay", async (req, res) => {
       }
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       message:
         "Error Occured Webhook configuring! Malicious Happening. " + error,
@@ -348,50 +356,84 @@ app.post("/api/subscription/razorpay", async (req, res) => {
     let data = req.body;
     console.log(data);
     let planid = "";
-    //add month and category cmp,imp
-    if (data.brandCategoryFormValue === "Cafe") {
-      planid = environments.PLN_CAFE;
-    } else if (data.brandCategoryFormValue === "Club") {
-      planid = environments.PLN_CLUB;
-    } else if (data.brandCategoryFormValue === "Booth") {
-      planid = environments.PLN_BOOTH;
-    } else if (data.brandCategoryFormValue === "Salon") {
-      planid = environments.PLN_SALON;
-    } else if (data.brandCategoryFormValue === "Gym") {
-      planid = environments.PLN_GYM;
-    } else if (data.brandCategoryFormValue === "Professionals") {
-      planid = environments.PLN_PROFESSIONAL;
+
+    const snapshot = await Firebase.Brand.doc(data.id).get();
+    if (snapshot.data().subscription.length > 0) {
+      res.status(200).json({
+        message: "AlreadySubscribed",
+      });
     } else {
-      //nothing
+      planid =
+        data.plans === "PLNIMPCAFE6"
+          ? environments.PLNIMPCAFE6
+          : data.plans === "PLNCMPCAFE6"
+          ? environments.PLNCMPCAFE6
+          : data.plans === "PLNIMPCLUB6"
+          ? environments.PLNIMPCLUB6
+          : data.plans === "PLNCMPCLUB6"
+          ? environments.PLNCMPCLUB6
+          : data.plans === "PLNIMPBOOTH6"
+          ? environments.PLNIMPBOOTH6
+          : data.plans === "PLNCMPBOOTH6"
+          ? environments.PLNCMPBOOTH6
+          : data.plans === "PLNIMPSALON6"
+          ? environments.PLNIMPSALON6
+          : data.plans === "PLNCMPSALON6"
+          ? environments.PLNCMPSALON6
+          : data.plans === "PLNIMPGYM6"
+          ? environments.PLNIMPGYM6
+          : data.plans === "PLNCMPGYM6"
+          ? environments.PLNCMPGYM6
+          : data.plans === "PLNIMPPROFESSIONAL6"
+          ? environments.PLNIMPPROFESSIONAL6
+          : data.plans === "PLNCMPPROFESSIONAL6"
+          ? environments.PLNCMPPROFESSIONAL6
+          : data.plans === "PLNIMPCAFE12"
+          ? environments.PLNIMPCAFE12
+          : data.plans === "PLNCMPCAFE12"
+          ? environments.PLNCMPCAFE12
+          : data.plans === "PLNIMPCLUB12"
+          ? environments.PLNIMPCLUB12
+          : data.plans === "PLNCMPCLUB12"
+          ? environments.PLNCMPCLUB12
+          : data.plans === "PLNIMPBOOTH12"
+          ? environments.PLNIMPBOOTH12
+          : data.plans === "PLNCMPBOOTH12"
+          ? environments.PLNCMPBOOTH12
+          : data.plans === "PLNIMPSALON12"
+          ? environments.PLNIMPSALON12
+          : data.plans === "PLNCMPSALON12"
+          ? environments.PLNCMPSALON12
+          : data.plans === "PLNIMPGYM12"
+          ? environments.PLNIMPGYM12
+          : data.plans === "PLNCMPGYM12"
+          ? environments.PLNCMPGYM12
+          : data.plans === "PLNIMPPROFESSIONAL12"
+          ? environments.PLNIMPPROFESSIONAL12
+          : data.plans === "PLNCMPPROFESSIONAL12"
+          ? environments.PLNCMPPROFESSIONAL12
+          : "";
+
+      console.log(planid);
+      const options = {
+        plan_id: planid,
+        customer_notify: 1,
+        quantity: 1,
+        total_count: data.monthFormValue,
+        notes: {
+          pinksky_id: data.id,
+          displayName: data.displayName,
+          comments: "",
+        },
+      };
+      const response = await razorpay.subscriptions.create(options);
+
+      res.status(200).json({
+        url: response.short_url,
+        message: "SubscriptionLink",
+        heading: environments.FRNT_SUBSCRIPTION_HEADING,
+      });
     }
-
-    const options = {
-      plan_id: planid,
-      customer_notify: 1,
-      quantity: 1,
-      total_count: data.monthFormValue.split(" ")[0],
-      // start_at: 1495995837,
-      // addons: [
-      //   {
-      //     item: {
-      //       name: "Delivery charges",
-      //       amount: 30000,
-      //       currency: "INR"
-      //     }
-      //   }
-      // ],
-      notes: {
-        pinksky_id: data.id,
-        displayName: data.displayName,
-      },
-    };
-    const response = await razorpay.subscriptions.create(options);
-
-    res.status(200).json({
-      url: response.short_url,
-      message: "Generate Subscribe Link",
-      heading: environments.FRNT_SUBSCRIPTION_HEADING,
-    });
   } catch (error) {
     res.status(500).json(error);
   }
@@ -1857,13 +1899,15 @@ app.post("/api/admin/pinksky", async (req, res) => {
               console.log("influencerlist77");
               doc.data().eventmapping.map((nesitem) => {
                 console.log("influencerlist777");
-
-                localeventmapping.push({
-                  ...nesitem,
-                  name:
-                    raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
-                      .name || "",
-                });
+                raweventlist.filter((fun) => fun.id === nesitem.eventId)
+                  .length > 0 &&
+                  localeventmapping.push({
+                    ...nesitem,
+                    name:
+                      raweventlist.filter(
+                        (fun) => fun.id === nesitem.eventId
+                      )[0].name || "",
+                  });
               });
             }
             console.log("influencerlist1");
@@ -4212,6 +4256,41 @@ app.put("/api/brand/update", async (req, res) => {
   // } catch (error) {
   //   res.status(500).json({ message: error });
   // }
+});
+
+// 5. Updating Brand's Comments details
+app.put("/api/brandcomments/update", async (req, res) => {
+  const data = req.body;
+  console.log(data);
+  const id = data.id;
+  delete req.body.id;
+  const snaps = await Firebase.Brand.doc(id).get();
+  let arr = [];
+  // console.log(snaps.data());
+  snaps.data().subscription.map((item) => {
+    item.payload.subscription.entity.id === data.subid
+      ? arr.push({
+          ...item,
+          payload: {
+            ...item.payload,
+            subscription: {
+              entity: {
+                ...item.payload.subscription.entity,
+                notes: {
+                  ...item.payload.subscription.entity.notes,
+                  comments: data.comments,
+                },
+              },
+            },
+          },
+        })
+      : arr.push({ ...item });
+  });
+  // console.log(arr);
+  setTimeout(async () => {
+    await Firebase.Brand.doc(id).update({ subscription: arr });
+    res.status(200).json({ message: "Updated Comments in Brand" });
+  }, 2000);
 });
 
 // MAPPING SECTION
