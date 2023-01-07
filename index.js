@@ -73,8 +73,8 @@ const sendMail = (sendType, data) => {
   html = emailtemplate(sendType, data);
   var mailOptions = {
     from: environments.EML_USER,
-    to: data.tomail,
-    // to: environments.EML_USER,
+    // to: data.tomail,
+    to: environments.EML_USER,
     subject: data.subjectmail,
     html: html,
     cc: data.ccmail,
