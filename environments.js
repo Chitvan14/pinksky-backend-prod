@@ -10,6 +10,8 @@ module.exports = {
   NODE_ENV: process.env.NODE_ENV,
   PORT: process.env.PORT,
   BASE_URL: process.env.BASE_URL,
+  LAUNCHING_MAIL:process.env.LAUNCHING_MAIL,
+
   apiKey: process.env.apiKey,
   authDomain: process.env.authDomain,
   databaseURL: process.env.databaseURL,
@@ -63,4 +65,5 @@ module.exports = {
   EML_USER: process.env.EML_USER,
   EML_PASS: process.env.EML_PASS,
   EML_PROVIDER: process.env.EML_PROVIDER,
+  EML_HREF_WEBSITE:process.env.EML_HREF_WEBSITE
 };

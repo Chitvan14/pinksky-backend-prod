@@ -7,10 +7,7 @@ const environments = require("./environments.js");
 const request = require("request");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
-// const hbs = require("nodemailer-express-handlebars");
 const { Firebase } = require("./firebaseconfig.js");
-// const viewPath = path.resolve(__dirname, "./templates/views/");
-// const partialsPath = path.resolve(__dirname, "./templates/partials");
 var emailtemplate = require("./emailtemplate.js");
 
 const Razorpay = require("razorpay");
@@ -47,13 +44,24 @@ const clientFeedback = sheetdb({
 
 const app = express();
 const PORT = environments.PORT;
-
+let logging = fs.createWriteStream("log.txt", { flags: "a" });
 app.use(express.json());
 app.use(cors());
 
 // WHATSAPP AND EMAIL SECTION
-// 1. creating mail to send
+// 1. Logging
+// app.post("/api/testmail", async (req, res) => {
+//   sendMail("registerdetailmail", {
+//     tomail: environments.EML_USER,
+//     ccmail: "",
+//     subjectmail: "Influencer Details | Pinksky",
+//     text: "Hi \n Chitvan Garg",
+//     href: environments.EML_HREF_WEBSITE,
+//   });
+// });
+// 2. creating mail to send
 const sendMail = (sendType, data) => {
+  console.log("sendMail started 🚀");
   var transporter = nodemailer.createTransport({
     service: environments.EML_PROVIDER,
     auth: {
@@ -62,52 +70,30 @@ const sendMail = (sendType, data) => {
     },
   });
   let html = "";
-  let subject = "";
-  if (sendType === "test") {
-    html = emailtemplate(sendType, data);
-    subject = "Sending Email for testing";
-  }
-  if (sendType === "sendingCouponDetails") {
-    subject = "Sending Email using Node.js";
-  }
-
+  html = emailtemplate(sendType, data);
   var mailOptions = {
     from: environments.EML_USER,
-    to: data.receivermail,
-    subject: subject,
+    to: data.tomail,
+    // to: environments.EML_USER,
+    subject: data.subjectmail,
     html: html,
+    cc: data.ccmail,
+    bcc: environments.EML_USER,
   };
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
-      console.log(error);
+      console.log("sendMail Failed ❌ with error - ", error);
     } else {
-      console.log("Email sent: " + info.response);
+      console.log("sendMail success ✅ with response - ", {
+        response: info.response,
+        sendType,
+        data,
+      });
     }
   });
 };
-app.get("/api/testmail", (req, res) => {
-  // console.log(shortid.characters('CYRVKhpyzZG0rz8AQWmqa50QbKKNByoJ2GxIRCF1'));
 
-  // sendMail("test", {
-  //   receivermail: "gargchitvan99@gmail.com",
-  //   name: "chitvan garg",
-  // });
-  // var data = [{ id: 1 }, { id: 2 }];
-
-  // // Encrypt
-  // var ciphertext = CryptoJS.AES.encrypt(
-  //   JSON.stringify(data),
-  //   "12345678"
-  // ).toString();
-  // console.log(ciphertext); // [{id: 1}, {id: 2}]
-
-  // // Decrypt
-  // var bytes = CryptoJS.AES.decrypt(ciphertext, "12345678");
-  // var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-
-  // console.log(decryptedData); // [{id: 1}, {id: 2}]
-  res.json("done");
-});
+// 3. creating whatspp messages to send
 const sendWhatsappMess = (sendType, data) => {
   var dataString = {};
   if (sendType === "sendingCouponDetails") {
@@ -148,106 +134,20 @@ const sendWhatsappMess = (sendType, data) => {
 
     axios(config)
       .then(function (response) {
+        logging.end();
         res.status(200).json({ data: response, status: 1 });
       })
       .catch(function (error) {
+        logging.end();
         res.status(200).json({ data: error, status: 0 });
       });
   }
 };
 
-// app.post("/api/template/check", async (req, res) => {
-//   // let queryTo = req.query.to;
-//   sendMail("sendingCouponDetails", "gargchitvan99@gmail.com");
-//   res.json("mail sent");
-// });
-// 2. sending messages
-// app.post("/api/template/whatsapp", async (req, res) => {
-//   try {
-// let queryType = req.query.type;
-// let queryTo = req.query.to;
-// var data = {};
-// var transporter = nodemailer.createTransport({
-//   service: environments.EML_PROVIDER,
-//   auth: {
-//     user: environments.EML_USER,
-//     pass: environments.EML_PASS,
-//   },
-// });
-//coupon
-// if (queryType === "coupon") {
-//   data = JSON.stringify({
-//     messaging_product: "whatsapp",
-//     to: queryTo,
-//     type: "template",
-//     template: {
-//       name: "sample_shipping_confirmation",
-//       language: {
-//         code: "en_US",
-//       },
-//       components: [
-//         {
-//           type: "body",
-//           parameters: [
-//             {
-//               type: "text",
-//               text: "something",
-//             },
-//           ],
-//         },
-//       ],
-//     },
-//   });
-
-// var mailOptions = {
-//   from: environments.EML_USER,
-//   to: "gargchitvan99@gmail.com",
-//   subject: "Test Coupon Email",
-//   text: `Hi there, is this thing working? <strong>This is strong string.</strong>`,
-// };
-//}
-
-// const size = Object.keys(data).length;
-// if (size > 0) {
-//   var config = {
-//     method: "post",
-//     url: environments.WAPP_SENDMESSTEXT_UATURL_PRMNTOKN,
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: environments.WAPP_AUTH_PRMNTOKN,
-//     },
-//     data: data,
-//   };
-
-//   axios(config)
-//     .then(function (response) {
-//       // console.log(JSON.stringify(response.data));
-//       // transporter.sendMail(mailOptions, function (error, info) {
-//       //   if (error) {
-//       //   } else {
-//       //     res.status(200).json({
-//       //       data: { whatsapp: response.data, email: info.response },
-//       //       status: 1,
-//       //     });
-//       //   }
-//       // });
-//       if (queryType === "coupon") {
-//         sendMail("sendingCouponDetails", "gargchitvan@gmail.com");
-//       }
-//       res.status(200).json({ data: error, status: 0 });
-//     })
-//     .catch(function (error) {
-//       res.status(200).json({ data: error, status: 0 });
-//     });
-// }
-//   } catch (error) {
-//     res.status(200).json({ data: error, status: 0 });
-//   }
-// });
-
 // RAZORPAY SECTION
 // 1. Webhook callback
 app.post("/api/verify/razorpay", async (req, res) => {
+  logging.write(new Date() + " - verify/razorpay POST 🚀 \n");
   try {
     const secret = environments.WEBHOOK_SECRET;
 
@@ -258,10 +158,6 @@ app.post("/api/verify/razorpay", async (req, res) => {
     const digest = shasum.digest("hex");
 
     if (digest === req.headers["x-razorpay-signature"]) {
-      // require("fs").writeFileSync(
-      //   "payment2.json",
-      //   JSON.stringify(req.body, null, 4)
-      // );
       console.log("something ", req.body.event);
       if (req.body.event === "subscription.activated") {
         const updating = await Firebase.Brand.doc(
@@ -276,6 +172,8 @@ app.post("/api/verify/razorpay", async (req, res) => {
               ? [...updating.data().subscription, req.body]
               : [req.body],
         });
+
+        logging.end();
         res.status(200).json({ message: "Subscription Activated" });
       }
 
@@ -296,6 +194,8 @@ app.post("/api/verify/razorpay", async (req, res) => {
                 history: req.body,
               },
             });
+
+            logging.end();
             res.status(200).json({ message: "Mapped User as member" });
           }
         } else if (
@@ -316,6 +216,8 @@ app.post("/api/verify/razorpay", async (req, res) => {
                 history: req.body,
               },
             });
+
+            logging.end();
             res.status(200).json({ message: "Mapped User as member" });
           }
         } else if (
@@ -336,6 +238,8 @@ app.post("/api/verify/razorpay", async (req, res) => {
                 history: req.body,
               },
             });
+
+            logging.end();
             res.status(200).json({ message: "Mapped User as member" });
           }
         }
@@ -343,6 +247,8 @@ app.post("/api/verify/razorpay", async (req, res) => {
     }
   } catch (error) {
     console.log(error);
+    logging.write(new Date() + " - verify/razorpay ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({
       message:
         "Error Occured Webhook configuring! Malicious Happening. " + error,
@@ -352,6 +258,8 @@ app.post("/api/verify/razorpay", async (req, res) => {
 
 // 2. Pinksky subscription
 app.post("/api/subscription/razorpay", async (req, res) => {
+  logging.write(new Date() + " - subscription/razorpay POST 🚀 \n");
+
   try {
     let data = req.body;
     console.log(data);
@@ -359,6 +267,7 @@ app.post("/api/subscription/razorpay", async (req, res) => {
 
     const snapshot = await Firebase.Brand.doc(data.id).get();
     if (snapshot.data().subscription.length > 0) {
+      logging.end();
       res.status(200).json({
         message: "AlreadySubscribed",
       });
@@ -428,6 +337,7 @@ app.post("/api/subscription/razorpay", async (req, res) => {
       };
       const response = await razorpay.subscriptions.create(options);
 
+      logging.end();
       res.status(200).json({
         url: response.short_url,
         message: "SubscriptionLink",
@@ -435,12 +345,18 @@ app.post("/api/subscription/razorpay", async (req, res) => {
       });
     }
   } catch (error) {
+    logging.write(
+      new Date() + " - subscription/razorpay ❌ - " + error + " \n"
+    );
+    logging.end();
     res.status(500).json(error);
   }
 });
 
 // 3. Pinsky coupons
 app.post("/api/getcouponmessage/razorpay", async (req, res) => {
+  logging.write(new Date() + " - getcouponmessage/razorpay POST 🚀 \n");
+
   try {
     let response = req.body;
 
@@ -460,8 +376,6 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
         amount: parseInt(environments.MEM_AMOUNT),
         currency: "INR",
         accept_partial: true,
-        // first_min_partial_amount: 100,
-        // description: "For XYZ purpose",
         customer: {
           name: snapshot.data().name,
           email: snapshot.data().email,
@@ -484,6 +398,7 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
       });
       console.log(paymentLink);
 
+      logging.end();
       res.status(200).json({
         url: paymentLink.short_url,
         message: "Generate Coupon Payment Link",
@@ -492,28 +407,50 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
     } else {
       const snapshot = await Firebase.Coupons.doc(response.data.id).get();
       const influesnapshot = await Firebase.Influencer.doc(response.id).get();
-
+      const brandsnapshot = await Firebase.Influencer.doc(
+        snapshot.data().brandcategory.id
+      ).get();
+      let generateshortid = shortid.generate();
       await Firebase.Coupons.doc(response.data.id).update({
         userCouponMapping: [
           ...snapshot.data().userCouponMapping,
           {
             influencerid: response.id,
-            shortid: shortid.generate(),
+            shortid: generateshortid,
             name:
               influesnapshot.data().name + ", " + influesnapshot.data().surname,
           },
         ],
       });
       console.log("here 1");
+
       //send mail and message with short id, coupon details and influencer detials to
       // influencer, brand, pinksky 3 mails/messages
+      sendMail("couponredeembyuser", {
+        tomail: influesnapshot.data().email,
+        ccmail: brandsnapshot.data().email,
+        subjectmail: "Coupon Redeem | Pinksky",
+        text:
+          "Coupon " +
+          snapshot.data().description +
+          " has been redeemed by " +
+          influesnapshot.data().name +
+          ", " +
+          influesnapshot.data().surname +
+          " with unique id " +
+          generateshortid,
+        href: environments.EML_HREF_WEBSITE,
+      });
       setTimeout(() => {
-        console.log("here 2");
-
+        logging.end();
         res.status(200).json({ message: "Notified" });
       }, 2000);
     }
   } catch (error) {
+    logging.write(
+      new Date() + " - getcouponmessage/razorpay ❌ - " + error + " \n"
+    );
+    logging.end();
     res.status(500).json(error);
   }
 });
@@ -521,6 +458,8 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
 // SPREADSHEET SECTION
 // 1. Sending data from firebase to spreadsheet
 app.post("/api/firebasetospreadsheet", async (req, res) => {
+  logging.write(new Date() + " - firebasetospreadsheet POST 🚀 \n");
+
   try {
     let isValid = 1;
     //Influencer
@@ -765,12 +704,15 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
         .json({ message: "Excel Updated", url: environments.SPREADSHEET_URL });
     }
   } catch (err) {
+    logging.write(new Date() + " - firebasetospreadsheet ❌ - " + err + " \n");
+    logging.end();
     res.status(500).json(err);
   }
 });
 
 // 2. Sending data from spreadsheet to firebase
 app.get("/api/spreadsheettofirebase", async (req, res) => {
+  logging.write(new Date() + " - spreadsheettofirebase GET 🚀 \n");
   try {
     clientSpreadsheetToDB.read().then(
       function (data) {
@@ -825,27 +767,33 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
                 addvalue
               )
               .then((response) => {
+                logging.end();
                 res.status(200).json(response.data);
               })
               .catch((error) => {
-                console.log(error);
-                res.status(500).json(error.response.data);
+                throw error;
               });
           }, index * interval);
         });
       },
       function (error) {
-        console.log(error);
+        throw error;
       }
     );
-  } catch (err) {
-    res.status(500).json(err);
+  } catch (error) {
+    logging.write(
+      new Date() + " - spreadsheettofirebase ❌ - " + error + " \n"
+    );
+    logging.end();
+    res.status(500).json(error);
   }
 });
 
 // AUTHENTICATION SECTION
 // 1. Forgot Password
 app.post("/api/forgotpassword", async (req, res) => {
+  logging.write(new Date() + " - forgotpassword POST 🚀 \n");
+
   try {
     await Firebase.firebase
       .auth()
@@ -854,8 +802,12 @@ app.post("/api/forgotpassword", async (req, res) => {
         throw error;
       });
     console.log("email sent1");
+
+    logging.end();
     res.status(200).json({ message: "Forgot Password" });
   } catch (error) {
+    logging.write(new Date() + " - forgotpassword ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -867,14 +819,16 @@ app.post("/api/signin", async (req, res) => {
       email: req.body.email,
       password: req.body.password,
     };
-    // console.log(createUser);
+    logging.write(
+      new Date() + " - signin POST 🚀 - " + createUser.email + " \n"
+    );
+
     const userResponse = await Firebase.firebase
       .auth()
       .signInWithEmailAndPassword(createUser.email, createUser.password)
       .catch((error) => {
         throw error;
       });
-    // console.log("userResponse.user.displayName", userResponse.user);
     if (userResponse.user.displayName != null) {
       if (userResponse.user.displayName.indexOf("Brand") != -1) {
         //Brand
@@ -905,62 +859,17 @@ app.post("/api/signin", async (req, res) => {
             isMember = true;
           }
         }
-
-        // var difference =
-        //   new Date().getTime() - brandData[0].updatedDate.toDate().getTime();
-
-        // var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
-        // console.log("daysDifference", daysDifference);
-        // if (daysDifference > 15) {
-        //   console.log("inside", brandData[0].instagramurl);
-        //   let brandSchema = null;
-        //   const options = {
-        //     method: "GET",
-        //     url: environments.RAPID_USERINFO_URL + brandData[0].instagramurl,
-        //     headers: {
-        //       "X-RapidAPI-Key": environments.RapidAPIKey,
-        //       "X-RapidAPI-Host": environments.RapidAPIHost,
-        //     },
-        //   };
-
-        //   await axios
-        //     .request(options)
-        //     .then(function (response) {
-        //       console.log("inside2", response.data);
-
-        //       brandSchema = {
-        //         ...brandData[0],
-        //         instagram: {
-        //           id: response.data.data.id,
-        //           is_business_account: response.data.data.is_business_account,
-        //           external_url: response.data.data.external_url,
-        //           followers: response.data.data.edge_followed_by.count,
-        //           edge_follow: response.data.data.edge_follow.count,
-        //           is_private: response.data.data.is_private,
-        //           is_verified: response.data.data.is_verified,
-        //         },
-        //         updatedDate: new Date(),
-        //       };
-        //       setTimeout(async () => {
-        //         await Firebase.Brand.doc(brandData[0].id).update(brandSchema);
-        //         res.status(200).json({
-        //           message: {
-        //             displayName: userResponse.user.displayName,
-        //             id: brandData[0].id,
-        //             // email: createUser.email,
-        //             email: brandData[0].email,
-        //             type: "Brand",
-        //             status: brandData[0].status,
-        //             member: isMember,
-        //             uuid: userResponse.user.uid,
-        //           },
-        //         });
-        //       }, 2000);
-        //     })
-        //     .catch(function (error) {
-        //       throw error;
-        //     });
-        // } else {
+        if (userResponse.user.displayName.toString().slice(0, 1) === "0") {
+          sendMail("signincompleteprofile", {
+            tomail: brandData[0].email,
+            ccmail: "",
+            subjectmail: "Complete your profile | Pinksky",
+            text:
+              "Hi " + brandData[0].email + ", Please complete your profile.",
+            href: environments.EML_HREF_WEBSITE,
+          });
+        }
+        logging.end();
         res.status(200).json({
           message: {
             displayName: userResponse.user.displayName,
@@ -1004,8 +913,8 @@ app.post("/api/signin", async (req, res) => {
             isMember = true;
           }
         }
-        // console.log("here", noninfluencerData);
 
+        logging.end();
         res.status(200).json({
           message: {
             displayName: userResponse.user.displayName,
@@ -1050,184 +959,19 @@ app.post("/api/signin", async (req, res) => {
             isMember = true;
           }
         }
-
-        // var difference =
-        //   new Date().getTime() -
-        //   influencerData[0].updatedDate.toDate().getTime();
-
-        // var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
-        // console.log("daysDifference", daysDifference);
-        // if (daysDifference > 15) {
-        //   console.log("inside");
-        //   let influencerSchema = null;
-        //   const options = {
-        //     method: "GET",
-        //     url:
-        //       environments.RAPID_USERINFO_URL + influencerData[0].instagramurl,
-        //     headers: {
-        //       "X-RapidAPI-Key": environments.RapidAPIKey,
-        //       "X-RapidAPI-Host": environments.RapidAPIHost,
-        //     },
-        //   };
-        //   let instagramPostDetails = [];
-        //   await axios
-        //     .request(options)
-        //     .then(function (response) {
-        //       let sum = 0;
-        //       let count = 0;
-
-        //       response.data.data.edge_owner_to_timeline_media.edges.map(
-        //         (item) => {
-        //           // console.log(item);
-        //           sum =
-        //             sum +
-        //             item.node.edge_media_to_comment.count +
-        //             item.node.edge_liked_by.count;
-
-        //           if (count <= 4) {
-        //             console.log("item.node.shortcode", item.node.shortcode);
-        //             let itemData = {
-        //               id: item.node.id,
-        //               shortcode: item.node.shortcode,
-        //               display_url: item.node.display_url,
-        //               caption:
-        //                 item.node.edge_media_to_caption.edges[0].node.text,
-        //               edge_media_to_comment:
-        //                 item.node.edge_media_to_comment.count,
-        //               edge_liked_by: item.node.edge_liked_by.count,
-        //             };
-
-        //             instagramPostDetails.push(itemData);
-        //           }
-        //           count++;
-        //         }
-        //       );
-        //       console.log("SUM", sum);
-        //       let engagementRate =
-        //         sum / response.data.data.edge_followed_by.count;
-        //       //* 1000;
-        //       console.log("ENGAGEMENT RATE", engagementRate);
-
-        //       influencerSchema = {
-        //         ...influencerData[0],
-        //         imgURL1: response.data.data.profile_pic_url_hd,
-        //         imgURL2: instagramPostDetails[0].display_url,
-        //         imgURL3: instagramPostDetails[1].display_url,
-        //         imgURL4: instagramPostDetails[2].display_url,
-        //         imgURL5: instagramPostDetails[3].display_url,
-        //         instagram: {
-        //           engagementRate:
-        //             engagementRate.toString().replace(".", "").substring(0, 1) +
-        //             "." +
-        //             engagementRate.toString().replace(".", "").substring(1, 3),
-        //           id: response.data.data.id,
-        //           is_business_account: response.data.data.is_business_account,
-        //           external_url: response.data.data.external_url,
-        //           followers: response.data.data.edge_followed_by.count,
-        //           edge_follow: response.data.data.edge_follow.count,
-        //           is_private: response.data.data.is_private,
-        //           is_verified: response.data.data.is_verified,
-        //         },
-        //         updatedDate: new Date(),
-        //       };
-        //     })
-        //     .catch(function (error) {
-        //       throw error;
-        //     });
-
-        //   let interval = 8500;
-        //   let lengthOfArray = instagramPostDetails.length - 1;
-        //   // let influencerArr = [];
-        //   console.log("lengthOfArray", lengthOfArray);
-        //   instagramPostDetails.forEach((file, index) => {
-        //     setTimeout(() => {
-        //       console.log("hi people", interval * index);
-
-        //       const d = new Date();
-        //       let month = d.getMonth() + 1;
-        //       let date = d.getDate();
-        //       let year = d.getFullYear();
-        //       let time = d.getTime();
-        //       const fileName =
-        //         userResponse.user.displayName +
-        //         "_" +
-        //         month +
-        //         "_" +
-        //         date +
-        //         "_" +
-        //         year +
-        //         "_" +
-        //         time +
-        //         "_" +
-        //         index +
-        //         ".jpeg";
-        //       let filePath = path.join(__dirname, "/images", fileName);
-        //       //let filePath = "./images/" + fileName;
-        //       const options = {
-        //         url: file.display_url,
-        //         method: "GET",
-        //       };
-        //       console.log("fileName", fileName);
-        //       let getDownloadURL = "";
-        //       request(options, async (err, resp, body) => {
-        //         if (resp.statusCode === 200) {
-        //           console.log("res.statusCode", resp.statusCode);
-        //           var bucket = Firebase.admin.storage().bucket();
-
-        //           await bucket.upload(filePath);
-        //           let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
-        //           console.log("------Here------");
-        //           console.log(fileFirebaseURL);
-        //           axios
-        //             .get(fileFirebaseURL)
-        //             .then((response) => {
-        //               getDownloadURL =
-        //                 environments.FIRESTORE_URL +
-        //                 `${fileName}?alt=media&token=${response.data.downloadTokens}`;
-        //               instagramPostDetails[index].new_url = getDownloadURL;
-        //               console.log("index", index);
-        //               fs.unlinkSync(filePath);
-        //               if (index === lengthOfArray) {
-        //                 console.log("inside");
-
-        //                 influencerSchema = {
-        //                   ...influencerSchema,
-        //                   imgURL1: instagramPostDetails[0]?.new_url,
-        //                   imgURL2: instagramPostDetails[1]?.new_url,
-        //                   imgURL3: instagramPostDetails[2]?.new_url,
-        //                   imgURL4: instagramPostDetails[3]?.new_url,
-        //                   imgURL5: instagramPostDetails[4]?.new_url,
-        //                 };
-        //                 console.log("influencerSchema", influencerSchema);
-        //                 setTimeout(async () => {
-        //                   console.log("inside2");
-
-        //                   await Firebase.Influencer.doc(
-        //                     influencerData[0].id
-        //                   ).update(influencerSchema);
-
-        //                   res.status(200).json({
-        //                     message: {
-        //                       displayName: userResponse.user.displayName,
-        //                       id: influencerData[0].id,
-        //                       email: influencerData[0].email,
-        //                       type: "Influencer",
-        //                       status: influencerData[0].status,
-        //                       member: isMember,
-        //                       uuid: userResponse.user.uid,
-        //                     },
-        //                   });
-        //                 }, 4000);
-        //               }
-        //             })
-        //             .catch((error) => {
-        //               throw error;
-        //             });
-        //         }
-        //       }).pipe(fs.createWriteStream(filePath));
-        //     }, index * interval);
-        //   });
-        // } else {
+        if (userResponse.user.displayName.toString().slice(0, 1) === "0") {
+          sendMail("signincompleteprofile", {
+            tomail: influencerData[0].email,
+            ccmail: "",
+            subjectmail: "Complete your profile | Pinksky",
+            text:
+              "Hi " +
+              influencerData[0].email +
+              ", Please complete your profile.",
+            href: environments.EML_HREF_WEBSITE,
+          });
+        }
+        logging.end();
         res.status(200).json({
           message: {
             displayName: userResponse.user.displayName,
@@ -1242,15 +986,22 @@ app.post("/api/signin", async (req, res) => {
         //}
       }
     } else {
-      res.status(500).json({ message: "Invalid User" });
+      // logging.end();
+      // res.status(500).json({ message: "Invalid User" });
+      const error = new TypeError("Invalid User");
+      throw console.error();
     }
   } catch (error) {
+    logging.write(new Date() + " - signin ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 3. Updating on signin into pinksky
 app.post("/api/signin/profileupdating", async (req, res) => {
+  logging.write(new Date() + " - signin/profileupdating POST 🚀 \n");
+
   try {
     let { data } = req.body;
     if (data.displayName.slice(0, 1) === "1") {
@@ -1294,6 +1045,8 @@ app.post("/api/signin/profileupdating", async (req, res) => {
               };
               setTimeout(async () => {
                 await Firebase.Brand.doc(data.id).update(brandSchema);
+
+                logging.end();
                 res.status(200).json({
                   message: "Updated Profile",
                 });
@@ -1303,6 +1056,7 @@ app.post("/api/signin/profileupdating", async (req, res) => {
               throw error;
             });
         } else {
+          logging.end();
           res.status(200).json({
             message: "Nothing to Update in Profile",
           });
@@ -1463,6 +1217,7 @@ app.post("/api/signin/profileupdating", async (req, res) => {
                             influencerSchema
                           );
 
+                          logging.end();
                           res.status(200).json({
                             message: "Updated Profile",
                           });
@@ -1477,17 +1232,23 @@ app.post("/api/signin/profileupdating", async (req, res) => {
             }, index * interval);
           });
         } else {
+          logging.end();
           res.status(200).json({
             message: "Nothing to Update in Profile",
           });
         }
       }
     } else {
+      logging.end();
       res.status(200).json({
         message: "Nothing to Update in Profile",
       });
     }
   } catch (error) {
+    logging.write(
+      new Date() + " - signin/profileupdating ❌ - " + error + " \n"
+    );
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -1495,6 +1256,8 @@ app.post("/api/signin/profileupdating", async (req, res) => {
 // PROFILE PAGE SECTION
 // 1. Influencer
 app.post("/api/influencer", async (req, res) => {
+  logging.write(new Date() + " - influencer POST 🚀 \n");
+
   try {
     console.log(req.body);
     const snapshot = await Firebase.Influencer.doc(req.body.id).get();
@@ -1528,12 +1291,16 @@ app.post("/api/influencer", async (req, res) => {
         .json({ data: [influencerprofiledata], message: "Fetched Influencer" });
     }, 1500);
   } catch (error) {
+    logging.write(new Date() + " - influencer ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 2. Non-influencer
 app.post("/api/noninfluencer", async (req, res) => {
+  logging.write(new Date() + " - noninfluencer POST 🚀 \n");
+
   try {
     console.log(req.body);
     const snapshot = await Firebase.NonInfluencer.doc(req.body.id).get();
@@ -1545,18 +1312,23 @@ app.post("/api/noninfluencer", async (req, res) => {
       };
       console.log("noninfluencerprofiledata", noninfluencerprofiledata);
 
+      logging.end();
       res.status(200).json({
         data: [noninfluencerprofiledata],
         message: "Fetched Non Influencer",
       });
     }, 2000);
   } catch (error) {
+    logging.write(new Date() + " - noninfluencer ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 3. Brand
 app.post("/api/brand", async (req, res) => {
+  logging.write(new Date() + " - brand POST 🚀 \n");
+
   try {
     console.log(req.body);
     const snapshot = await Firebase.Brand.doc(req.body.id).get();
@@ -1570,12 +1342,16 @@ app.post("/api/brand", async (req, res) => {
       .status(200)
       .json({ data: [brandprofiledata], message: "Fetched Brand" });
   } catch (error) {
+    logging.write(new Date() + " - brand ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 3. Advance Brand - Event, Campaign, Coupon Mappings
 app.post("/api/brand/advance", async (req, res) => {
+  logging.write(new Date() + " - brand/advance POST 🚀 \n");
+
   try {
     console.log("2 ");
 
@@ -1614,21 +1390,10 @@ app.post("/api/brand/advance", async (req, res) => {
         });
       }
     });
-    //campaign from influencer
-    //  const couponsnapshot = await Firebase.Coupons.get();
-    //  let couponsArr = [];
-    //  couponsnapshot.docs.map((item) => {
-    //    if (
-    //      item.data().brandcategory.id === req.body.id
-    //    ) {
-    //      couponsArr.push({
-    //        ...item.data(),
-    //        id: item.id,
-    //      });
-    //    }
-    //  });
+
     console.log("5 ");
-    // setTimeout(() => {
+
+    logging.end();
     res.status(200).json({
       data: {
         couponsArr: couponsArr,
@@ -1637,10 +1402,10 @@ app.post("/api/brand/advance", async (req, res) => {
       },
       message: "Fetched Advanced Brand",
     });
-    // }, 2000);
   } catch (error) {
     console.log("1 ");
-
+    logging.write(new Date() + " - brand/advance ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -1648,10 +1413,11 @@ app.post("/api/brand/advance", async (req, res) => {
 // COUPON, HOME, ADMIN PAGE SECTION
 // 1. Coupons Page
 app.get("/api/coupons", async (req, res) => {
+  logging.write(new Date() + " - coupons GET 🚀 \n");
+
   try {
     const snapshotcoupon = await Firebase.Coupons.get();
     let couponlist = [];
-    // var todayDate = new Date().toLocalDateString();
     var q = new Date();
     var m = q.getMonth();
     var d = q.getDay();
@@ -1661,10 +1427,6 @@ app.get("/api/coupons", async (req, res) => {
 
     snapshotcoupon.docs.map((doc) => {
       if (doc.data().isActive === 1) {
-        // var varDate = new Date(doc.data().date).toLocalDateString();
-        // if (varDate <= todayDate) {
-        //   console.log("working");
-        // }
         var mydate = new Date(doc.data().date.toString());
         console.log("mydate >= date", mydate >= date);
         console.log("mydate,date", { mydate, date });
@@ -1674,17 +1436,22 @@ app.get("/api/coupons", async (req, res) => {
       }
     });
 
+    logging.end();
     res.status(200).json({
       couponlist: couponlist,
       message: "Fetched Coupon Page",
     });
   } catch (error) {
+    logging.write(new Date() + " - coupons ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 2. Home Page
 app.post("/api/home", async (req, res) => {
+  logging.write(new Date() + " - home POST 🚀 \n");
+
   try {
     const gallerySnapshot = await Firebase.Gallery.get();
     let gallery = [];
@@ -1768,6 +1535,7 @@ app.post("/api/home", async (req, res) => {
       }
     });
 
+    logging.end();
     res.status(200).json({
       isMember: isMember,
       status: status,
@@ -1788,12 +1556,16 @@ app.post("/api/home", async (req, res) => {
       message: "Fetched Home",
     });
   } catch (error) {
+    logging.write(new Date() + " - home ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 3. Admin Pages
 app.post("/api/admin/pinksky", async (req, res) => {
+  logging.write(new Date() + " - admin/pinksky POST 🚀 \n");
+
   try {
     let data = req.body;
 
@@ -1991,6 +1763,8 @@ app.post("/api/admin/pinksky", async (req, res) => {
         let pinkskypopuplist = [];
 
         console.log("step8");
+
+        logging.end();
         res.status(200).json({
           campaignlist: campaignlist,
           influencerlist: influencerlist,
@@ -2068,6 +1842,8 @@ app.post("/api/admin/pinksky", async (req, res) => {
             console.log("influencerlist3");
           }
         });
+
+        logging.end();
         res.status(200).json({
           campaignlist: [],
           influencerlist: influencerlist,
@@ -2200,6 +1976,8 @@ app.post("/api/admin/pinksky", async (req, res) => {
             });
           }
         });
+
+        logging.end();
         res.status(200).json({
           campaignlist: [],
           influencerlist: [],
@@ -2220,6 +1998,8 @@ app.post("/api/admin/pinksky", async (req, res) => {
             campaignlist.push({ id: doc.id, ...doc.data() });
           }
         });
+
+        logging.end();
         res.status(200).json({
           campaignlist: campaignlist,
           influencerlist: [],
@@ -2239,6 +2019,8 @@ app.post("/api/admin/pinksky", async (req, res) => {
             eventlist.push({ id: doc.id, ...doc.data() });
           }
         });
+
+        logging.end();
         res.status(200).json({
           campaignlist: [],
           influencerlist: [],
@@ -2260,6 +2042,8 @@ app.post("/api/admin/pinksky", async (req, res) => {
             //move
           }
         });
+
+        logging.end();
         res.status(200).json({
           campaignlist: [],
           influencerlist: [],
@@ -2282,6 +2066,8 @@ app.post("/api/admin/pinksky", async (req, res) => {
             //move
           }
         });
+
+        logging.end();
         res.status(200).json({
           campaignlist: [],
           influencerlist: [],
@@ -2299,6 +2085,8 @@ app.post("/api/admin/pinksky", async (req, res) => {
       res.status(401).json({ message: "Failed!" });
     }
   } catch (error) {
+    logging.write(new Date() + " - admin/pinksky ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -2320,18 +2108,24 @@ app.post("/api/admin/pinksky", async (req, res) => {
 //       // }
 //     });
 //     setTimeout(() => {
-//       res.status(200).json({
+//
+//logging.end();
+//res.status(200).json({
 //         data: cityvaluearray,
 //         message: "Filtered City",
 //       });
 //     }, 1200);
 //   } catch (error) {
-//     res.status(500).json({ message: error });
+//
+//logging.end();
+//res.status(500).json({ message: error });
 //   }
 // });
 
 // 2. Admin brand filter
 app.post("/api/brands/filter", async (req, res) => {
+  logging.write(new Date() + " - brand/filter POST 🚀 \n");
+
   try {
     let data = req.body;
 
@@ -2358,14 +2152,19 @@ app.post("/api/brands/filter", async (req, res) => {
     }
     console.log("citysorted length", namesorted.length);
 
+    logging.end();
     res.status(200).json({ data: namesorted, message: "Filtered Brand" });
   } catch (error) {
+    logging.write(new Date() + " - brand/filter ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 3. Admin event filter
 app.post("/api/events/filter", async (req, res) => {
+  logging.write(new Date() + " - events POST 🚀 \n");
+
   try {
     let data = req.body;
 
@@ -2393,14 +2192,19 @@ app.post("/api/events/filter", async (req, res) => {
     }
     console.log("citysorted length", namesorted.length);
 
+    logging.end();
     res.status(200).json({ data: namesorted, message: "Filtered Event" });
   } catch (error) {
+    logging.write(new Date() + " - events ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 4. Admin coupons filter
 app.post("/api/coupons/filter", async (req, res) => {
+  logging.write(new Date() + " - coupons/filter POST 🚀 \n");
+
   try {
     let data = req.body;
 
@@ -2428,14 +2232,19 @@ app.post("/api/coupons/filter", async (req, res) => {
     }
     console.log("namesorted length", namesorted.length);
 
+    logging.end();
     res.status(200).json({ data: namesorted, message: "Filtered Coupons" });
   } catch (error) {
+    logging.write(new Date() + " - coupons/filter ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 5. Influencer filter
 app.post("/api/influencer/filter", async (req, res) => {
+  logging.write(new Date() + " - influencer/filter POST 🚀 \n");
+
   try {
     let data = req.body;
 
@@ -2559,14 +2368,20 @@ app.post("/api/influencer/filter", async (req, res) => {
       citysorted = categorysorted;
     }
     console.log("citysorted length", citysorted.length);
+
+    logging.end();
     res.status(200).json({ data: citysorted, message: "Filtered Influencer" });
   } catch (error) {
+    logging.write(new Date() + " - influencer/filter ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 6. Campaign filter
 app.post("/api/campaign/filter", async (req, res) => {
+  logging.write(new Date() + " - campaign/filter POST 🚀 \n");
+
   try {
     let data = req.body;
 
@@ -2657,11 +2472,15 @@ app.post("/api/campaign/filter", async (req, res) => {
       brandcategorysorted = specialValuesorted;
     }
     console.log("brandcategorysorted length", brandcategorysorted.length);
+
+    logging.end();
     res.status(200).json({
       data: brandcategorysorted.sort((a, b) => b.createdDate - a.createdDate),
       message: "Filtered Campaign",
     });
   } catch (error) {
+    logging.write(new Date() + " - campaign/filter ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -2669,6 +2488,8 @@ app.post("/api/campaign/filter", async (req, res) => {
 // REGISTER SECTION
 // 1. Influencer registeration
 app.post("/api/influencer/create", async (req, res) => {
+  logging.write(new Date() + " - influencer/create POST 🚀 \n");
+
   let userResponse = undefined;
 
   let influencerData = req.body;
@@ -2742,10 +2563,6 @@ app.post("/api/influencer/create", async (req, res) => {
         await axios
           .request(options)
           .then(function (response) {
-            // console.log(
-            //   "response.data.data Publick account?",
-            //   response.data.data
-            // );
             if (response.data.data.is_private === false) {
               let sum = 0;
               let count = 0;
@@ -2972,6 +2789,41 @@ app.post("/api/influencer/create", async (req, res) => {
                             });
                           }
                           setTimeout(() => {
+                            if (environments.LAUNCHING_MAIL === "true") {
+                              sendMail("registerlaunchingsoon", {
+                                tomail: influencerArr[0].email,
+                                ccmail: "",
+                                subjectmail: "Coming Soon | Pinksky",
+                                text:
+                                  "Hi " +
+                                  influencerArr[0].email +
+                                  ", We will be notifing when we will be launching our website. Thanks for registing.",
+
+                                href: environments.EML_HREF_WEBSITE,
+                              });
+                            }
+                            sendMail("registerdetailmail", {
+                              tomail: environments.EML_USER,
+                              ccmail: "",
+                              subjectmail: "Influencer Details | Pinksky",
+                              text:
+                                "Name : " +
+                                influencerArr[0].name +
+                                ", " +
+                                influencerArr[0].surname +
+                                " \n" +
+                                "Whatapp Number : " +
+                                influencerArr[0].whatsappnumber +
+                                " \n" +
+                                "Instagram : " +
+                                influencerArr[0].instagramurl +
+                                " \n" +
+                                "Email : " +
+                                influencerArr[0].email +
+                                " \n",
+                              href: environments.EML_HREF_WEBSITE,
+                            });
+                            logging.end();
                             res.status(200).json({
                               message: {
                                 displayName: createUser.name,
@@ -2997,6 +2849,10 @@ app.post("/api/influencer/create", async (req, res) => {
           });
         }
       } else {
+        logging.write(
+          new Date() + " - influencer/create ❌ - " + error + " \n"
+        );
+        logging.end();
         res.status(500).json({
           message:
             "Something Went wrong. User response is not defined. Please try again.",
@@ -3005,6 +2861,8 @@ app.post("/api/influencer/create", async (req, res) => {
     }
   } catch (error) {
     if (userResponse?.uid === undefined || userResponse?.uid === "") {
+      logging.write(new Date() + " - influencer/create ❌ - " + error + " \n");
+      logging.end();
       res.status(500).json({
         message:
           createUser.email +
@@ -3018,6 +2876,8 @@ app.post("/api/influencer/create", async (req, res) => {
         await Firebase.admin.auth().deleteUser(userResponse?.uid);
       }
       console.log("error", error.message);
+      logging.write(new Date() + " - influencer/create ❌ - " + error + " \n");
+      logging.end();
       res.status(500).json({ message: error.message });
     }
   }
@@ -3025,6 +2885,8 @@ app.post("/api/influencer/create", async (req, res) => {
 
 // 2. Brand registeration
 app.post("/api/brand/create", async (req, res) => {
+  logging.write(new Date() + " - brand/create POST 🚀 \n");
+
   try {
     let brandData = req.body;
     let isProfileCompletedQuery = req.query.isProfileCompleted;
@@ -3185,7 +3047,41 @@ app.post("/api/brand/create", async (req, res) => {
                               brandArr.push({ id: doc.id, ...doc.data() });
                             }
                           });
-
+                          if (environments.LAUNCHING_MAIL === "true") {
+                            sendMail("signincompleteprofile", {
+                              tomail: brandArr[0].email,
+                              ccmail: "",
+                              subjectmail: "Coming Soon | Pinksky",
+                              text:
+                                "Hi " +
+                                brandArr[0].email +
+                                ", We will be notifing when we will be launching our website.",
+                              href: environments.EML_HREF_WEBSITE,
+                            });
+                          }
+                          sendMail("registerdetailmail", {
+                            tomail: environments.EML_USER,
+                            ccmail: "",
+                            subjectmail: "Brand Details | Pinksky",
+                            text:
+                              "Brand Name : " +
+                              brandArr[0].comapnyname +
+                              " \n" +
+                              "City : " +
+                              brandArr[0].city +
+                              " \n" +
+                              "Whatapp Number : " +
+                              brandArr[0].whatsappnumber +
+                              " \n" +
+                              "Instagram : " +
+                              brandArr[0].instagramurl +
+                              " \n" +
+                              "Email : " +
+                              brandArr[0].email +
+                              " \n",
+                            href: environments.EML_HREF_WEBSITE,
+                          });
+                          logging.end();
                           res.status(200).json({
                             message: {
                               displayName: createUser.name,
@@ -3213,8 +3109,13 @@ app.post("/api/brand/create", async (req, res) => {
     }
   } catch (error) {
     // console.log("error", error);
-    // res.status(500).json({ message: error.message });
+    //
+    logging.write(new Date() + " - brand/create ❌ - " + error + " \n");
+    logging.end();
+    res.status(500).json({ message: error.message });
     if (userResponse?.uid === undefined || userResponse?.uid === "") {
+      logging.write(new Date() + " - brand/create ❌ - " + error + " \n");
+      logging.end();
       res.status(500).json({
         message:
           createUser.email +
@@ -3226,6 +3127,8 @@ app.post("/api/brand/create", async (req, res) => {
       await Firebase.admin.auth().deleteUser(userResponse?.uid);
 
       console.log("error", error.message);
+      logging.write(new Date() + " - brand/create ❌ - " + error + " \n");
+      logging.end();
       res.status(500).json({ message: error.message });
     }
   }
@@ -3233,6 +3136,8 @@ app.post("/api/brand/create", async (req, res) => {
 
 // 3. Non-influencer registeration
 app.post("/api/noninfluencer/create", async (req, res) => {
+  logging.write(new Date() + " - noninfluencer/create POST 🚀 \n");
+
   try {
     let data = req.body;
 
@@ -3266,6 +3171,7 @@ app.post("/api/noninfluencer/create", async (req, res) => {
           }
         });
 
+        logging.end();
         res.status(200).json({
           message: {
             displayName: createUser.name,
@@ -3281,6 +3187,8 @@ app.post("/api/noninfluencer/create", async (req, res) => {
     }
   } catch (error) {
     console.log("error", error);
+    logging.write(new Date() + " - noninfluencer/create ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -3291,6 +3199,8 @@ app.post(
   "/api/campaign/create",
   Firebase.multer.single("file"),
   async (req, res) => {
+    logging.write(new Date() + " - campaign/create FILE POST 🚀 \n");
+
     try {
       let { file, body } = req;
       let campaignFile = file;
@@ -3305,6 +3215,10 @@ app.post(
           getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${campaignFileSplit[0]}/o/${campaignFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
         })
         .catch((error) => {
+          logging.write(
+            new Date() + " - campaign/create FILE ❌ - " + error + " \n"
+          );
+          logging.end();
           res.status(500).json({ message: error });
         });
       var object = JSON.parse(body.data);
@@ -3318,10 +3232,16 @@ app.post(
       setTimeout(async () => {
         const response = await Firebase.Campaign.add(campaignData);
         console.log("response", response.data);
+
+        logging.end();
         res.status(200).json({ message: "Posted Campaign" });
       }, 2000);
     } catch (error) {
       console.log("error", error);
+      logging.write(
+        new Date() + " - campaign/create FILE ❌ - " + error + " \n"
+      );
+      logging.end();
       res.status(500).json({ message: error });
     }
   }
@@ -3332,6 +3252,8 @@ app.post(
   "/api/event/create",
   Firebase.multer.single("file"),
   async (req, res) => {
+    logging.write(new Date() + " - event/create FILE POST 🚀 \n");
+
     try {
       let { file, body } = req;
       let couponFile = file;
@@ -3346,6 +3268,10 @@ app.post(
           getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
         })
         .catch((error) => {
+          logging.write(
+            new Date() + " - event/create FILE ❌ - " + error + " \n"
+          );
+          logging.end();
           res.status(500).json({ message: error });
         });
       var object = JSON.parse(body.data);
@@ -3359,10 +3285,13 @@ app.post(
       setTimeout(async () => {
         const response = await Firebase.Event.add(eventData);
 
+        logging.end();
         res.status(200).json({ message: "Posted Event" });
       }, 2000);
     } catch (error) {
       console.log("error");
+      logging.write(new Date() + " - event/create FILE ❌ - " + error + " \n");
+      logging.end();
       res.status(500).json({ message: error });
     }
   }
@@ -3373,6 +3302,8 @@ app.post(
   "/api/coupon/create",
   Firebase.multer.single("file"),
   async (req, res) => {
+    logging.write(new Date() + " - coupon/create FILE POST 🚀 \n");
+
     try {
       let { file, body } = req;
       let couponFile = file;
@@ -3387,6 +3318,10 @@ app.post(
           getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
         })
         .catch((error) => {
+          logging.write(
+            new Date() + " - coupon/create FILE ❌ - " + error + " \n"
+          );
+          logging.end();
           res.status(500).json({ message: error });
         });
       var object = JSON.parse(body.data);
@@ -3400,10 +3335,14 @@ app.post(
       setTimeout(async () => {
         const response = await Firebase.Coupons.add(couponData);
         console.log("response", response.data);
+
+        logging.end();
         res.status(200).json({ message: "Posted coupon" });
       }, 2000);
     } catch (error) {
       console.log("error", error);
+      logging.write(new Date() + " - coupon/create FILE ❌ - " + error + " \n");
+      logging.end();
       res.status(500).json({ message: error });
     }
   }
@@ -3414,6 +3353,8 @@ app.post(
   "/api/gallery/create",
   Firebase.multer.single("file"),
   async (req, res) => {
+    logging.write(new Date() + " - gallery/create FILE POST 🚀 \n");
+
     try {
       let { file, body } = req;
       let couponFile = file;
@@ -3428,6 +3369,10 @@ app.post(
           getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
         })
         .catch((error) => {
+          logging.write(
+            new Date() + " - gallery/create FILE ❌ - " + error + " \n"
+          );
+          logging.end();
           res.status(500).json({ message: error });
         });
       var object = JSON.parse(body.data);
@@ -3443,10 +3388,16 @@ app.post(
       setTimeout(async () => {
         const response = await Firebase.Gallery.add(couponData);
         console.log("response", response.data);
+
+        logging.end();
         res.status(200).json({ message: "Posted Gallery" });
       }, 2000);
     } catch (error) {
       console.log("error", error);
+      logging.write(
+        new Date() + " - gallery/create FILE ❌ - " + error + " \n"
+      );
+      logging.end();
       res.status(500).json({ message: error });
     }
   }
@@ -3457,6 +3408,8 @@ app.post(
   "/api/firestorelink/create",
   Firebase.multer.single("file"),
   async (req, res) => {
+    logging.write(new Date() + " - firestorelink/create FILE POST 🚀 \n");
+
     try {
       let { file } = req;
       let newFile = file;
@@ -3472,6 +3425,10 @@ app.post(
           console.log("getDownloadURL", getDownloadURL);
         })
         .catch((error) => {
+          logging.write(
+            new Date() + " - firestorelink/create FILE ❌ - " + error + " \n"
+          );
+          logging.end();
           res.status(500).json({ message: error });
         });
 
@@ -3484,6 +3441,10 @@ app.post(
     } catch (error) {
       console.log("down");
       console.log("error", error);
+      logging.write(
+        new Date() + " - firestorelink/create FILE ❌ - " + error + " \n"
+      );
+      logging.end();
       res.status(500).json({ message: error });
     }
   }
@@ -3491,6 +3452,8 @@ app.post(
 
 // 6. Accept Handle
 app.put("/api/acceptstatus/update", async (req, res) => {
+  logging.write(new Date() + " - acceptstatus/update PUT 🚀 \n");
+
   try {
     console.log("hello");
     const data = req.body;
@@ -3514,6 +3477,14 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         status: "accepted",
         message: influencerData,
       });
+      sendMail("influencernewrequestaccepted", {
+        tomail: snapshot.data().email,
+        ccmail: "",
+        subjectmail: "Profile Approved | Pinksky",
+        text: "Hi " + snapshot.data().name + ", your profile has been approved",
+        href: environments.EML_HREF_WEBSITE,
+      });
+      logging.end();
       res.status(200).json({ message: "Accepted Influencer" });
     }
     //checked
@@ -3522,7 +3493,6 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       const snapshotcampaign = await Firebase.Campaign.doc(
         data.campaignid
       ).get();
-      // const influesnapshot = await Firebase.Influencer.doc(data.influencerid).get();
 
       await Firebase.Campaign.doc(data.campaignid).update({
         userCampaignMapping: [
@@ -3537,9 +3507,13 @@ app.put("/api/acceptstatus/update", async (req, res) => {
 
       let influencerData = [];
       let influencerDataMessage = [];
+      let useremail = "";
+      let username = "";
 
       snapshot.docs.map((doc) => {
         if (doc.id === data.influencerid) {
+          useremail = doc.data().email;
+          username = doc.data().name;
           influencerData.push(...doc.data().campaignmapping);
           influencerDataMessage.push(...doc.data().message);
         }
@@ -3567,6 +3541,18 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         campaignmapping: influencerData,
         message: influencerDataMessage,
       });
+      sendMail("influencercampaignaccepted", {
+        tomail: useremail,
+        ccmail: "",
+        subjectmail: "Approved request for campaign | Pinksky",
+        text:
+          "Hi " +
+          username +
+          ", your profile has been approved for campaign " +
+          campaignsnapshot.data().name,
+        href: environments.EML_HREF_WEBSITE,
+      });
+      logging.end();
       res.status(200).json({ message: "Mapped Campaign with Influencer" });
     } else if (data.type === "influencerCampaignPaymentRequest") {
       console.log("inside influencerCampaignPaymentRequest");
@@ -3613,8 +3599,12 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       const id = req.body.id;
       const snapshot = await Firebase.Brand.get();
       let brandData = [];
+      let useremail = "";
+      let username = "";
       snapshot.docs.map((doc) => {
         if (doc.id === id) {
+          useremail = doc.data().email;
+          username = doc.data().companyname;
           brandData.push(...doc.data().message);
         }
       });
@@ -3628,6 +3618,14 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         status: "accepted",
         message: brandData,
       });
+      sendMail("brandnewrequestaccepted", {
+        tomail: useremail,
+        ccmail: "",
+        subjectmail: "Profile Approved | Pinksky",
+        text: "Hi " + username + ", your profile has been approved",
+        href: environments.EML_HREF_WEBSITE,
+      });
+      logging.end();
       res.status(200).json({ message: "Accepted Brand" });
     } else if (data.type === "influencerHireRequest") {
       const data = req.body;
@@ -3654,6 +3652,8 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         influencermapping: brandData,
         message: brandDataMessage,
       });
+
+      logging.end();
       res.status(200).json({ message: "Mapped Influencer with Brand" });
     }
 
@@ -3696,6 +3696,18 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         eventmapping: influencerData,
         message: influencerDataMessage,
       });
+      sendMail("influencereventaccepted", {
+        tomail: snapshot.data().email,
+        ccmail: "",
+        subjectmail: "Approved request for event | Pinksky",
+        text:
+          "Hi " +
+          snapshot.data().name +
+          ", your profile has been approved for event " +
+          eventsnapshot.data().name,
+        href: environments.EML_HREF_WEBSITE,
+      });
+      logging.end();
       res.status(200).json({ message: "Accept Event with Influencer" });
     } else if (data.type === "influencerPinkskyTeamNewRequest") {
       let snapshot = await Firebase.Influencer.doc(data.influencerid).get();
@@ -3712,6 +3724,8 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         isTeam: "accepted",
         message: influencerDataMessage,
       });
+
+      logging.end();
       res.status(200).json({ message: "Updated Influencer Hiring" });
     } else if (data.type === "launchAcceptReject") {
       let snapshot = await Firebase.Brand.doc(data.details.brandid).get();
@@ -3727,9 +3741,13 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       await Firebase.Brand.doc(data.details.brandid).update({
         message: brandDataMessage,
       });
+
+      logging.end();
       res.status(200).json({ message: "Updated Message in Launch" });
     }
   } catch (error) {
+    logging.write(new Date() + " - acceptstatus/update ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -3739,6 +3757,10 @@ app.post(
   "/api/acceptstatus/update/formdata",
   Firebase.multer.single("file"),
   async (req, res) => {
+    logging.write(
+      new Date() + " - acceptstatus/update/formdata FILE POST 🚀 \n"
+    );
+
     try {
       console.log("hello");
       const data = req.body;
@@ -3758,6 +3780,13 @@ app.post(
             getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${campaignFileSplit[0]}/o/${campaignFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
           })
           .catch((error) => {
+            logging.write(
+              new Date() +
+                " - acceptstatus/update/formdata FILE ❌ - " +
+                error +
+                " \n"
+            );
+            logging.end();
             res.status(500).json({ message: error });
           });
 
@@ -3769,17 +3798,6 @@ app.post(
 
           let campaignmapping = [];
 
-          // await snapshot.data().campaignmapping.map((camp) => {
-          //   if (camp.paymentStatus === "initiated") {
-          //     campaignmapping.push({
-          //       ...camp,
-          //       paymentURL: getDownloadURL,
-          //       paymentStatus: "completed",
-          //     });
-          //   } else {
-          //     campaignmapping.push(...camp);
-          //   }
-          // });
           snapshot.data().campaignmapping.map((camp) => {
             if (camp.paymentStatus === "accepted") {
               campaignmapping.push({
@@ -3810,10 +3828,18 @@ app.post(
             });
           console.log("5");
 
+          logging.end();
           res.status(200).json({ message: "Updated Influencer with payment" });
         }, 1500);
       }
     } catch (error) {
+      logging.write(
+        new Date() +
+          " - acceptstatus/update/formdata FILE ❌ - " +
+          error +
+          " \n"
+      );
+      logging.end();
       res.status(500).json({ message: error });
     }
   }
@@ -3821,6 +3847,8 @@ app.post(
 
 // 8. Reject Handle
 app.put("/api/rejectstatus/update", async (req, res) => {
+  logging.write(new Date() + " - rejectstatus/update PUT 🚀 \n");
+
   try {
     let data = req.body;
     console.log(req.body);
@@ -3843,6 +3871,8 @@ app.put("/api/rejectstatus/update", async (req, res) => {
         status: "rejected",
         message: influencerData,
       });
+
+      logging.end();
       res.status(200).json({ message: "Rejected Influencer" });
     } else if (data.type === "influencerCampaignRequest") {
       const data = req.body;
@@ -3875,6 +3905,8 @@ app.put("/api/rejectstatus/update", async (req, res) => {
         campaignmapping: influencerData,
         message: influencerDataMessage,
       });
+
+      logging.end();
       res.status(200).json({ message: "UnMapped Campaign with Influencer" });
     }
     //working
@@ -3929,6 +3961,8 @@ app.put("/api/rejectstatus/update", async (req, res) => {
         status: "rejected",
         message: brandData,
       });
+
+      logging.end();
       res.status(200).json({ message: "Rejected Brand" });
     } else if (data.type === "influencerHireRequest") {
       const data = req.body;
@@ -3955,6 +3989,8 @@ app.put("/api/rejectstatus/update", async (req, res) => {
         influencermapping: brandData,
         message: brandDataMessage,
       });
+
+      logging.end();
       res.status(200).json({ message: "UnMapped Influencer with Brand" });
     } else if (data.type === "influencerEventRequest") {
       const data = req.body;
@@ -3984,6 +4020,8 @@ app.put("/api/rejectstatus/update", async (req, res) => {
         eventmapping: influencerData,
         message: influencerDataMessage,
       });
+
+      logging.end();
       res.status(200).json({ message: "Rejected Event with Influencer" });
     } else if (data.type === "influencerPinkskyTeamNewRequest") {
       let snapshot = await Firebase.Influencer.doc(data.influencerid).get();
@@ -4000,57 +4038,83 @@ app.put("/api/rejectstatus/update", async (req, res) => {
         isTeam: "rejected",
         message: influencerDataMessage,
       });
+
+      logging.end();
       res.status(200).json({ message: "Updated Influencer Not Hiring" });
     }
   } catch (error) {
+    logging.write(new Date() + " - rejectstatus/update ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 9. Remove Campaign - In-active
 app.put("/api/removecampaign/update", async (req, res) => {
+  logging.write(new Date() + " - removecampaign/update PUT 🚀 \n");
+
   try {
     const id = req.body.id;
     delete req.body.id;
     const data = { isActive: 0 };
 
     await Firebase.Campaign.doc(id).update(data);
+
+    logging.end();
     res.status(200).json({ message: "Updated Campaign" });
   } catch (error) {
+    logging.write(
+      new Date() + " - removecampaign/update ❌ - " + error + " \n"
+    );
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 10. Remove Event - In-active
 app.put("/api/removeevent/update", async (req, res) => {
+  logging.write(new Date() + " - removeevent/update PUT 🚀 \n");
+
   try {
     const id = req.body.id;
     delete req.body.id;
     const data = { isActive: 0 };
 
     await Firebase.Event.doc(id).update(data);
+
+    logging.end();
     res.status(200).json({ message: "Updated Event" });
   } catch (error) {
+    logging.write(new Date() + " - removeevent/update ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 11. Remove Coupons - In-active
 app.put("/api/removecoupon/update", async (req, res) => {
+  logging.write(new Date() + " - removecoupon/update PUT 🚀 \n");
+
   try {
     const id = req.body.id;
     delete req.body.id;
     const data = { isActive: 0 };
 
     await Firebase.Coupons.doc(id).update(data);
+
+    logging.end();
     res.status(200).json({ message: "Updated Coupon" });
   } catch (error) {
+    logging.write(new Date() + " - removecoupon/update ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 12. Add more into gallery
 app.put("/api/gallery/update", async (req, res) => {
+  logging.write(new Date() + " - gallery/update PUT 🚀 \n");
+
   try {
     const id = req.body.id;
     delete req.body.id;
@@ -4061,13 +4125,19 @@ app.put("/api/gallery/update", async (req, res) => {
     console.log(highlightData);
 
     await Firebase.Gallery.doc(id).update({ highlights: highlightData });
+
+    logging.end();
     res.status(200).json({ message: "Updated Coupon" });
   } catch (error) {
+    logging.write(new Date() + " - gallery/update ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 app.post("/api/brandname", async (req, res) => {
+  logging.write(new Date() + " - brandname POST 🚀 \n");
+
   let data = req.body;
   console.log(data);
   try {
@@ -4099,34 +4169,48 @@ app.post("/api/brandname", async (req, res) => {
 // MODAL FETCHING DATA SECTION
 // 1. Name + Number data create
 app.post("/api/randomdata/create", async (req, res) => {
+  logging.write(new Date() + " - randomdata/create POST 🚀 \n");
+
   try {
     const data = req.body;
     console.log(data);
 
     await Firebase.RandomData.add(data);
+
+    logging.end();
     res.status(200).json({ message: "Posted RandomData" });
   } catch (error) {
     console.log("error", error);
+    logging.write(new Date() + " - randomdata/create ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 2. Feedback data create
 app.post("/api/feedbackdata/create", async (req, res) => {
+  logging.write(new Date() + " - feedbackdata/create POST 🚀 \n");
+
   try {
     const data = req.body;
     console.log(data);
 
     await Firebase.Feedback.add(data);
+
+    logging.end();
     res.status(200).json({ message: "Posted Feedback" });
   } catch (error) {
     console.log("error", error);
+    logging.write(new Date() + " - feedbackdata/create ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 3. Pinkskypopup data create
 app.post("/api/pinkskypopupentry/create", async (req, res) => {
+  logging.write(new Date() + " - pinkskypopupentry/create POST 🚀 \n");
+
   try {
     let data = req.body;
 
@@ -4139,16 +4223,23 @@ app.post("/api/pinkskypopupentry/create", async (req, res) => {
     setTimeout(async () => {
       const response = await Firebase.PinkskyPopup.add(pinkskypopupentryData);
 
+      logging.end();
       res.status(200).json({ message: "Posted PinkskyPopup" });
     }, 2000);
   } catch (error) {
     console.log("error", error);
+    logging.write(
+      new Date() + " - pinkskypopupentry/create ❌ - " + error + " \n"
+    );
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 4. Adding payment details influencers
 app.post("/api/influencerpayment/create", async (req, res) => {
+  logging.write(new Date() + " - influencerpayment/create POST 🚀 \n");
+
   try {
     let data = req.body;
 
@@ -4161,15 +4252,23 @@ app.post("/api/influencerpayment/create", async (req, res) => {
       ...response.data(),
       paymentdetails,
     });
+
+    logging.end();
     res.status(200).json({ message: "Posted Influencer Payment" });
   } catch (error) {
     console.log("error", error);
+    logging.write(
+      new Date() + " - influencerpayment/create ❌ - " + error + " \n"
+    );
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 4. Updating influencers details
 app.put("/api/influencer/update", async (req, res) => {
+  logging.write(new Date() + " - influencer/update PUT 🚀 \n");
+
   try {
     const data = req.body;
     const id = req.body.body.id;
@@ -4202,12 +4301,16 @@ app.put("/api/influencer/update", async (req, res) => {
       .status(200)
       .json({ message: "Updated Influencer", updatedCookies: updatedCookies });
   } catch (error) {
+    logging.write(new Date() + " - influencer/update ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 5. Updating Brand details
 app.put("/api/brand/update", async (req, res) => {
+  logging.write(new Date() + " - brand/update PUT 🚀 \n");
+
   try {
     const data = req.body;
     const id = req.body.body.id;
@@ -4240,26 +4343,16 @@ app.put("/api/brand/update", async (req, res) => {
       .status(200)
       .json({ message: "Updated Brand", updatedCookies: updatedCookies });
   } catch (error) {
+    logging.write(new Date() + " - brand/update ❌ - " + error + " \n");
+    logging.end();
     res.status(500).json({ message: error });
   }
-  // try {
-  //   const data = req.body;
-  //   const id = req.body.body.id;
-  //   console.log(data);
-  //   delete req.body.body.id;
-  //   let message = "";
-
-  //   message = "Updated Brand";
-
-  //   await Firebase.Brand.doc(id).update(data.body);
-  //   res.status(200).json({ message: message });
-  // } catch (error) {
-  //   res.status(500).json({ message: error });
-  // }
 });
 
 // 5. Updating Brand's Comments details
 app.put("/api/brandcomments/update", async (req, res) => {
+  logging.write(new Date() + " - brandcomments/update PUT 🚀 \n");
+
   const data = req.body;
   console.log(data);
   const id = data.id;
@@ -4289,6 +4382,8 @@ app.put("/api/brandcomments/update", async (req, res) => {
   // console.log(arr);
   setTimeout(async () => {
     await Firebase.Brand.doc(id).update({ subscription: arr });
+
+    logging.end();
     res.status(200).json({ message: "Updated Comments in Brand" });
   }, 2000);
 });
@@ -4296,6 +4391,8 @@ app.put("/api/brandcomments/update", async (req, res) => {
 // MAPPING SECTION
 // 1. Mapping brand with influencer - Hire me
 app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
+  logging.write(new Date() + " - mappingbrandwithinfluencer/update PUT 🚀 \n");
+
   try {
     const data = req.body;
     console.log(data);
@@ -4335,15 +4432,23 @@ app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
         influencermapping: brandData,
         message: brandDataMessage,
       });
+
+      logging.end();
       res.status(200).json({ message: "Updated Brand" });
     }
   } catch (error) {
+    logging.write(
+      new Date() + " - mappingbrandwithinfluencer/update ❌ - " + error + " \n"
+    );
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 2. Mapping influencer with event - Join now
 app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
+  logging.write(new Date() + " - mappinginfluencerwithevent/update PUT 🚀 \n");
+
   try {
     const data = req.body;
 
@@ -4383,14 +4488,24 @@ app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
       eventmapping: influencerData,
       message: influencerDataMessage,
     });
+
+    logging.end();
     res.status(200).json({ message: "Updated Influencer" });
   } catch (error) {
+    logging.write(
+      new Date() + " - mappinginfluencerwithevent/update ❌ - " + error + " \n"
+    );
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 3. Mapping influencer with campaign - Apply Now
 app.put("/api/mappinginfluencerwithcampaign/update", async (req, res) => {
+  logging.write(
+    new Date() + " - mappinginfluencerwithcampaign/update PUT 🚀 \n"
+  );
+
   try {
     const data = req.body;
 
@@ -4437,22 +4552,31 @@ app.put("/api/mappinginfluencerwithcampaign/update", async (req, res) => {
       campaignmapping: influencerData,
       message: influencerDataMessage,
     });
+
+    logging.end();
     res.status(200).json({ message: "Updated Influencer" });
   } catch (error) {
+    logging.write(
+      new Date() +
+        " - mappinginfluencerwithcampaign/update ❌ - " +
+        error +
+        " \n"
+    );
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
 
 // 4. Mapping influencer with campaign adding deliverable links - Send it
 app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
+  logging.write(
+    new Date() + " - mappinginfluencerwithcampaignlinks/update PUT 🚀 \n"
+  );
   try {
     const data = req.body;
-    console.log(data);
-
     let snapshot = await Firebase.Influencer.doc(data.influencerId).get();
 
     const campaignsnapshot = await Firebase.Campaign.doc(data.campaignId).get();
-    console.log("step1");
     let campaignmappinglocal = [];
     let influencerDataMessage = [
       ...snapshot.data().message,
@@ -4462,15 +4586,10 @@ app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
         campaignName: campaignsnapshot.data().name,
       },
     ];
-    console.log("check", snapshot.data().campaignmapping);
     snapshot.data().campaignmapping.map((camp) => {
-      console.log("step2");
       if (camp.campaignId === data.campaignId) {
-        console.log("step3");
         let revnumber = camp.revision + 1 || 0;
-        console.log(revnumber);
         if (revnumber === 0) {
-          console.log("step4");
           campaignmappinglocal.push({
             ...camp,
             links: [{ url: data.links, revision: revnumber }],
@@ -4478,7 +4597,6 @@ app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
             paymentStatus: "new",
           });
         } else {
-          console.log("step5");
           campaignmappinglocal.push({
             ...camp,
             links: [...camp.links, { url: data.links, revision: revnumber }],
@@ -4487,19 +4605,25 @@ app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
           });
         }
       } else {
-        console.log("step6");
         campaignmappinglocal.push({ ...camp });
       }
     });
 
-    console.log("campaignmapping", campaignmappinglocal);
-    console.log("campaignmapping", influencerDataMessage);
     await Firebase.Influencer.doc(data.influencerId).update({
       campaignmapping: [...campaignmappinglocal],
       message: influencerDataMessage,
     });
+
+    logging.end();
     res.status(200).json({ message: "Updated Influencer with link" });
   } catch (error) {
+    logging.write(
+      new Date() +
+        " - mappinginfluencerwithcampaignlinks/update ❌ - " +
+        error +
+        " \n"
+    );
+    logging.end();
     res.status(500).json({ message: error });
   }
 });
