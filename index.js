@@ -26,8 +26,11 @@ const clientSpreadsheetToDB = sheetdb({
 const clientInfluencer = sheetdb({
   address: environments.SPREADSHEET + "?sheet=Influencer",
 });
-const clientCampaign = sheetdb({
-  address: environments.SPREADSHEET + "?sheet=Campaign",
+// const clientCampaign = sheetdb({
+//   address: environments.SPREADSHEET + "?sheet=Campaign",
+// });
+const clientInternData = sheetdb({
+  address: environments.SPREADSHEET + "?sheet=Intern",
 });
 const clientNonInfluencer = sheetdb({
   address: environments.SPREADSHEET + "?sheet=NonInfluencer",
@@ -161,11 +164,16 @@ app.post("/api/verify/razorpay", async (req, res) => {
       console.log("something ", req.body.event);
       if (req.body.event === "subscription.activated") {
         const updating = await Firebase.Brand.doc(
-          req.body.payload.subscription.entity.notes.pinksky_id
+          req.body.payload.subscription.entity.notes.pinksky_id.replace(
+            "\n",
+            ""
+          )
         ).get();
-
         await Firebase.Brand.doc(
-          req.body.payload.subscription.entity.notes.pinksky_id
+          req.body.payload.subscription.entity.notes.pinksky_id.replace(
+            "\n",
+            ""
+          )
         ).update({
           subscription:
             updating.data().subscription.length > 0
@@ -180,11 +188,17 @@ app.post("/api/verify/razorpay", async (req, res) => {
       if (req.body.event === "payment_link.paid") {
         if (req.body.payload.payment_link.entity.notes.influencer === "true") {
           const snapshot = await Firebase.Influencer.doc(
-            req.body.payload.payment_link.entity.notes.pinksky_id
+            req.body.payload.payment_link.entity.notes.pinksky_id.replace(
+              "\n",
+              ""
+            )
           ).get();
           if (snapshot.data().pinkskymember.isMember !== true) {
             const updated = await Firebase.Influencer.doc(
-              req.body.payload.payment_link.entity.notes.pinksky_id
+              req.body.payload.payment_link.entity.notes.pinksky_id.replace(
+                "\n",
+                ""
+              )
             ).update({
               pinkskymember: {
                 isMember: true,
@@ -202,11 +216,17 @@ app.post("/api/verify/razorpay", async (req, res) => {
           req.body.payload.payment_link.entity.notes.non_Influencer === "true"
         ) {
           const nonsnapshot = await Firebase.NonInfluencer.doc(
-            req.body.payload.payment_link.entity.notes.pinksky_id
+            req.body.payload.payment_link.entity.notes.pinksky_id.replace(
+              "\n",
+              ""
+            )
           ).get();
           if (nonsnapshot.data().pinkskymember.isMember !== true) {
             await Firebase.NonInfluencer.doc(
-              req.body.payload.payment_link.entity.notes.pinksky_id
+              req.body.payload.payment_link.entity.notes.pinksky_id.replace(
+                "\n",
+                ""
+              )
             ).update({
               pinkskymember: {
                 isMember: true,
@@ -224,11 +244,17 @@ app.post("/api/verify/razorpay", async (req, res) => {
           req.body.payload.payment_link.entity.notes.brand === "true"
         ) {
           const brandsnapshot = await Firebase.Brand.doc(
-            req.body.payload.payment_link.entity.notes.pinksky_id
+            req.body.payload.payment_link.entity.notes.pinksky_id.replace(
+              "\n",
+              ""
+            )
           ).get();
           if (brandsnapshot.data().pinkskymember.isMember !== true) {
             await Firebase.Brand.doc(
-              req.body.payload.payment_link.entity.notes.pinksky_id
+              req.body.payload.payment_link.entity.notes.pinksky_id.replace(
+                "\n",
+                ""
+              )
             ).update({
               pinkskymember: {
                 isMember: true,
@@ -534,37 +560,37 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     }
 
     //Campaign
-    const campaignsnapshot = await Firebase.Campaign.get();
-    let campaignData = [];
-    campaignsnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
-        campaignData.push({
-          id: doc.id,
-          brandcategory: doc.data().brandcategory,
-          city: doc.data().city,
-          name: doc.data().name,
-          paidPrivilege: doc.data().viewerDetails.paidPrivilege,
-          pinkskyPrivilege: doc.data().viewerDetails.pinkskyPrivilege,
-        });
-        await Firebase.Campaign.doc(doc.id).update({
-          dbInserted: 1,
-        });
-      } else {
-        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
-      }
-    });
+    // const campaignsnapshot = await Firebase.Campaign.get();
+    // let campaignData = [];
+    // campaignsnapshot.docs.map(async (doc) => {
+    //   if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
+    //     campaignData.push({
+    //       id: doc.id,
+    //       brandcategory: doc.data().brandcategory,
+    //       city: doc.data().city,
+    //       name: doc.data().name,
+    //       paidPrivilege: doc.data().viewerDetails.paidPrivilege,
+    //       pinkskyPrivilege: doc.data().viewerDetails.pinkskyPrivilege,
+    //     });
+    //     await Firebase.Campaign.doc(doc.id).update({
+    //       dbInserted: 1,
+    //     });
+    //   } else {
+    //     console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+    //   }
+    // });
 
-    if (campaignData.length > 0) {
-      clientCampaign.create(campaignData).then(
-        function (data) {
-          console.log(data);
-        },
-        function (err) {
-          isValid = 0;
-          throw err;
-        }
-      );
-    }
+    // if (campaignData.length > 0) {
+    //   clientCampaign.create(campaignData).then(
+    //     function (data) {
+    //       console.log(data);
+    //     },
+    //     function (err) {
+    //       isValid = 0;
+    //       throw err;
+    //     }
+    //   );
+    // }
 
     //NonInfluencer
     const noninfluencersnapshot = await Firebase.NonInfluencer.get();
@@ -605,14 +631,14 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
       if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
         pinkskyPopupData.push({
           id: doc.id,
-          targetage: doc.data().age,
+          // targetage: doc.data().age,
           brandname: doc.data().brandname,
           email: doc.data().email,
-          targetgender: doc.data().gender,
+          // targetgender: doc.data().gender,
           instagramid: doc.data().instagramid,
           name: doc.data().name,
-          whatdoyousell: doc.data().whatdoyousell,
-          yesnoppe: doc.data().yesnoppe,
+          // whatdoyousell: doc.data().whatdoyousell,
+          // yesnoppe: doc.data().yesnoppe,
           whatsappnumber: doc.data().whatsappnumber,
         });
         await Firebase.PinkskyPopup.doc(doc.id).update({
@@ -638,15 +664,28 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     //Random Data
     const randomDatasnapshot = await Firebase.RandomData.get();
     let randomData = [];
+    let internData = [];
+
     randomDatasnapshot.docs.map(async (doc) => {
       if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
-        randomData.push({
-          id: doc.id,
-          category: doc.data().category,
-          name: doc.data().name,
-          number: doc.data().number,
-          userid: doc.data().userid,
-        });
+        if(doc.data().category.toLowerCase().indexOf("intern") !== -1){
+          internData.push({
+            id: doc.id,
+            category: doc.data().category,
+            name: doc.data().name,
+            number: doc.data().number,
+            userid: doc.data().userid,
+          });
+        }else{
+          randomData.push({
+            id: doc.id,
+            category: doc.data().category,
+            name: doc.data().name,
+            number: doc.data().number,
+            userid: doc.data().userid,
+          });
+        }
+      
         await Firebase.RandomData.doc(doc.id).update({
           dbInserted: 1,
         });
@@ -654,6 +693,18 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
         console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
+
+    if (internData.length > 0) {
+      clientInternData.create(internData).then(
+        function (data) {
+          console.log(data);
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
 
     if (randomData.length > 0) {
       clientNamePhonenumber.create(randomData).then(
@@ -3413,6 +3464,7 @@ app.post(
     try {
       let { file } = req;
       let newFile = file;
+      console.log(newFile);
       let newFileSplit = newFile.fileRef.metadata.id.split("/");
       let newFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/${newFileSplit[1]}`;
       console.log("newFileSplit", newFileSplit);
