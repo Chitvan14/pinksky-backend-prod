@@ -1874,6 +1874,8 @@ app.post("/api/admin/pinksky", async (req, res) => {
             });
             console.log("influencerlist7");
             doc.data().eventmapping.map((nesitem) => {
+              console.log("raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name",raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
+              .name)
               localeventmapping.push({
                 ...nesitem,
                 name:
