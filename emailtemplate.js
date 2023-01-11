@@ -8,7 +8,8 @@ module.exports = function (type, data) {
     type === "registerlaunchingsoon" ||
     type === "influencernewrequestaccepted" ||
     type === "influencercampaignaccepted" ||
-    type === "brandnewrequestaccepted"
+    type === "brandnewrequestaccepted" ||
+    type === "influencereventaccepted"
   ) {
     // html = `<span> ${data.text} </span> <a href=${data.href} style="text-decoration:none; color:#151515;"> Go to website →</a>`;
     html = `<html>

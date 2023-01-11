@@ -3750,7 +3750,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         eventmapping: influencerData,
         message: influencerDataMessage,
       });
-      sendMail("influencereventaccepted", {
+      sendMail("influencereventaccepted", { 
         tomail: snapshot.data().email,
         ccmail: "",
         subjectmail: "Approved request for event | Pinksky",
