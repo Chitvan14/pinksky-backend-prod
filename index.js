@@ -58,7 +58,7 @@ app.use(cors());
 //     tomail: environments.EML_USER,
 //     ccmail: "",
 //     subjectmail: "Influencer Details | Pinksky",
-//     text: "Hi \n Chitvan Garg",
+//     text: "Hi"+" <br/>"+" Chitvan Garg",
 //     href: environments.EML_HREF_WEBSITE,
 //   });
 // });
@@ -916,7 +916,7 @@ app.post("/api/signin", async (req, res) => {
             ccmail: "",
             subjectmail: "Complete your profile | Pinksky",
             text:
-              "Hi " + brandData[0].email + ", Please complete your profile.",
+              "Hey " + brandData[0].companyname + ", Please complete your profile.",
             href: environments.EML_HREF_WEBSITE,
           });
         }
@@ -1016,8 +1016,8 @@ app.post("/api/signin", async (req, res) => {
             ccmail: "",
             subjectmail: "Complete your profile | Pinksky",
             text:
-              "Hi " +
-              influencerData[0].email +
+              "Hey " +
+              influencerData[0].name +
               ", Please complete your profile.",
             href: environments.EML_HREF_WEBSITE,
           });
@@ -2844,12 +2844,12 @@ app.post("/api/influencer/create", async (req, res) => {
                           setTimeout(() => {
                             if (environments.LAUNCHING_MAIL === "true") {
                               sendMail("registerlaunchingsoon", {
-                                tomail: influencerArr[0].email,
+                                tomail: influencerArr[0].name,
                                 ccmail: "",
                                 subjectmail: "Coming Soon | Pinksky",
                                 text:
-                                  "Hi " +
-                                  influencerArr[0].email +
+                                  "Hey " +
+                                  influencerArr[0].name +
                                   ", We will be notifing when we will be launching our website. Thanks for registing.",
 
                                 href: environments.EML_HREF_WEBSITE,
@@ -2864,16 +2864,16 @@ app.post("/api/influencer/create", async (req, res) => {
                                 influencerArr[0].name +
                                 ", " +
                                 influencerArr[0].surname +
-                                " \n" +
+                                " <br/>" +
                                 "Whatapp Number : " +
                                 influencerArr[0].whatsappnumber +
-                                " \n" +
+                                " <br/>" +
                                 "Instagram : " +
                                 influencerArr[0].instagramurl +
-                                " \n" +
+                                " <br/>" +
                                 "Email : " +
                                 influencerArr[0].email +
-                                " \n",
+                                " <br/>",
                               href: environments.EML_HREF_WEBSITE,
                             });
                             logging.end();
@@ -3106,8 +3106,8 @@ app.post("/api/brand/create", async (req, res) => {
                               ccmail: "",
                               subjectmail: "Coming Soon | Pinksky",
                               text:
-                                "Hi " +
-                                brandArr[0].email +
+                                "Hey " +
+                                brandArr[0].companyname +
                                 ", We will be notifing when we will be launching our website.",
                               href: environments.EML_HREF_WEBSITE,
                             });
@@ -3119,19 +3119,19 @@ app.post("/api/brand/create", async (req, res) => {
                             text:
                               "Brand Name : " +
                               brandArr[0].comapnyname +
-                              " \n" +
+                              " <br/>" +
                               "City : " +
                               brandArr[0].city +
-                              " \n" +
+                              " <br/>" +
                               "Whatapp Number : " +
                               brandArr[0].whatsappnumber +
-                              " \n" +
+                              " <br/>" +
                               "Instagram : " +
                               brandArr[0].instagramurl +
-                              " \n" +
+                              " <br/>" +
                               "Email : " +
                               brandArr[0].email +
-                              " \n",
+                              " <br/>",
                             href: environments.EML_HREF_WEBSITE,
                           });
                           logging.end();
