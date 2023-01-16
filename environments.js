@@ -11,7 +11,7 @@ module.exports = {
   PORT: process.env.PORT,
   BASE_URL: process.env.BASE_URL,
   LAUNCHING_MAIL:process.env.LAUNCHING_MAIL,
-
+  VERIFY_EMAIL:process.env.VERIFY_EMAIL,
   apiKey: process.env.apiKey,
   authDomain: process.env.authDomain,
   databaseURL: process.env.databaseURL,

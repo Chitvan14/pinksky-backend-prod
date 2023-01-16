@@ -9,7 +9,8 @@ module.exports = function (type, data) {
     type === "influencernewrequestaccepted" ||
     type === "influencercampaignaccepted" ||
     type === "brandnewrequestaccepted" ||
-    type === "influencereventaccepted"
+    type === "influencereventaccepted" ||
+    type === "verifyemail"
   ) {
     // html = `<span> ${data.text} </span> <a href=${data.href} style="text-decoration:none; color:#151515;"> Go to website →</a>`;
     html = `<html>
@@ -20,7 +21,7 @@ module.exports = function (type, data) {
     <body style="background-color:#fff;margin:0">
         <table style="width:100%;border-collapse:collapse">
             <tr>
-                <td style="font-size:0"></td>
+               
                 <td style="padding:0;width:600px;background-color:#fff" width="600">
                     <table style="width:100%;max-width:600px;background-color:#fff;border-collapse:collapse">
                         <tr>
@@ -43,7 +44,7 @@ module.exports = function (type, data) {
                                                         <div style="display:flex;text-align:center;flex-direction:column;max-width:358px;padding-top:12px;vertical-align:top;margin:auto">
                                                             <p style="font-family:Lato;font-weight:400;font-style:normal;font-size:13px;line-height:24px;margin:auto;color:#151515">${data.text}</p>
                                                         </div>
-                                                        <a href="https://pinkskyclub.com/" style="font-family:Lato;font-weight:400;font-size:12px;line-height:20px;text-align:center;letter-spacing:.25px;color:#db2693;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-top:14px;display:block;width:200px;text-decoration:none">pinkskyclub.com</a>
+                                                        <a href=${data.href} style="font-family:Lato;font-weight:400;font-size:12px;line-height:20px;text-align:center;letter-spacing:.25px;color:#db2693;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-top:14px;display:block;width:200px;text-decoration:none">${data.hrefText}</a>
 
                                                     </td>
                                                 </tr>

@@ -53,15 +53,22 @@ app.use(cors());
 
 // WHATSAPP AND EMAIL SECTION
 // 1. Logging
-// app.post("/api/testmail", async (req, res) => {
-//   sendMail("registerdetailmail", {
-//     tomail: environments.EML_USER,
-//     ccmail: "",
-//     subjectmail: "Influencer Details | Pinksky",
-//     text: "Hi"+" <br/>"+" Chitvan Garg",
-//     href: environments.EML_HREF_WEBSITE,
-//   });
-// });
+app.post("/api/testmail", async (req, res) => {
+  // sendMail("registerdetailmail", {
+  //   tomail: environments.EML_USER,
+  //   ccmail: "",
+  //   subjectmail: "Influencer Details | Pinksky",
+  //   text: "Hi"+" <br/>"+" Chitvan Garg",
+  //   href: environments.EML_HREF_WEBSITE,
+  // });
+  await Firebase.admin
+    .auth()
+    .generateEmailVerificationLink("gargchitvan99@gmail.com")
+    .then((response) => {
+      console.log(response);
+    });
+  // .getUser(influencerData.isNonInfluencer.uuid.toString());
+});
 // 2. creating mail to send
 const sendMail = (sendType, data) => {
   console.log("sendMail started 🚀");
@@ -668,7 +675,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
 
     randomDatasnapshot.docs.map(async (doc) => {
       if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
-        if(doc.data().category.toLowerCase().indexOf("intern") !== -1){
+        if (doc.data().category.toLowerCase().indexOf("intern") !== -1) {
           internData.push({
             id: doc.id,
             category: doc.data().category,
@@ -676,7 +683,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
             number: doc.data().number,
             userid: doc.data().userid,
           });
-        }else{
+        } else {
           randomData.push({
             id: doc.id,
             category: doc.data().category,
@@ -685,7 +692,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
             userid: doc.data().userid,
           });
         }
-      
+
         await Firebase.RandomData.doc(doc.id).update({
           dbInserted: 1,
         });
@@ -880,9 +887,12 @@ app.post("/api/signin", async (req, res) => {
       .catch((error) => {
         throw error;
       });
+      let verify = true;
+
     if (userResponse.user.displayName != null) {
       if (userResponse.user.displayName.indexOf("Brand") != -1) {
         //Brand
+
         const snapshot = await Firebase.Brand.get();
         let brandData = [];
         snapshot.docs.map((doc) => {
@@ -890,6 +900,41 @@ app.post("/api/signin", async (req, res) => {
             brandData.push({ id: doc.id, ...doc.data() });
           }
         });
+
+        if (brandData[0].isActive === 0) {
+          verify = true;
+          sendMail("verifyemail", {
+            tomail: brandData[0].email,
+            ccmail: "",
+            subjectmail: "Verify your account | Pinksky",
+            text:
+              "Hey " +
+              brandData[0].companyname +
+              ", Use the link below to verify your email.",
+
+            href:
+              environments.VERIFY_EMAIL +
+              "?registeras=Brand&id=" +
+              brandData[0].id,
+            hrefText: "Verify Email",
+          });
+        } else {
+          verify = false;
+          if (userResponse.user.displayName.toString().slice(0, 1) === "0") {
+            sendMail("signincompleteprofile", {
+              tomail: brandData[0].email,
+              ccmail: "",
+              subjectmail: "Complete your profile | Pinksky",
+              text:
+                "Hey " +
+                brandData[0].companyname +
+                ", Please complete your profile.",
+              href: environments.EML_HREF_WEBSITE,
+              hrefText: "pinkskyclub.com",
+
+            });
+          }
+        }
 
         let isMember = false;
         if (brandData[0].pinkskymember.cooldown === null) {
@@ -910,16 +955,20 @@ app.post("/api/signin", async (req, res) => {
             isMember = true;
           }
         }
-        if (userResponse.user.displayName.toString().slice(0, 1) === "0") {
-          sendMail("signincompleteprofile", {
-            tomail: brandData[0].email,
-            ccmail: "",
-            subjectmail: "Complete your profile | Pinksky",
-            text:
-              "Hey " + brandData[0].companyname + ", Please complete your profile.",
-            href: environments.EML_HREF_WEBSITE,
-          });
-        }
+        console.log("brandData",{
+          message: {
+            displayName: userResponse.user.displayName,
+            id: brandData[0].id,
+            email: brandData[0].email,
+            type: "Brand",
+            status: brandData[0].status,
+            member: isMember,
+            uuid: userResponse.user.uid,
+          },
+          verify: verify,
+        });
+
+
         logging.end();
         res.status(200).json({
           message: {
@@ -931,6 +980,7 @@ app.post("/api/signin", async (req, res) => {
             member: isMember,
             uuid: userResponse.user.uid,
           },
+          verify: verify,
         });
         //}
       } else if (
@@ -943,7 +993,27 @@ app.post("/api/signin", async (req, res) => {
             noninfluencerData.push({ id: doc.id, ...doc.data() });
           }
         });
+        if (noninfluencerData[0].isActive === 0) {
+          verify = true;
+          sendMail("verifyemail", {
+            tomail: noninfluencerData[0].email,
+            ccmail: "",
+            subjectmail: "Verify your account | Pinksky",
+            text:
+              "Hey " +
+              noninfluencerData[0].name +
+              ", Use the link below to verify your email.",
 
+            href:
+              environments.VERIFY_EMAIL +
+              "?registeras=Noninfluencer&id=" +
+              noninfluencerData[0].id,
+            hrefText: "Verify Email",
+          });
+        } else {
+          verify = false;
+        
+        }
         let isMember = false;
         if (noninfluencerData[0].pinkskymember.cooldown === null) {
           isMember = false;
@@ -978,6 +1048,8 @@ app.post("/api/signin", async (req, res) => {
             member: isMember,
             uuid: userResponse.user.uid,
           },
+          verify: verify,
+
         });
       } else {
         console.log("2");
@@ -988,7 +1060,41 @@ app.post("/api/signin", async (req, res) => {
             influencerData.push({ id: doc.id, ...doc.data() });
           }
         });
+        if (influencerData[0].isActive === 0) {
+          verify = true;
+          sendMail("verifyemail", {
+            tomail: influencerData[0].email,
+            ccmail: "",
+            subjectmail: "Verify your account | Pinksky",
+            text:
+              "Hey " +
+              influencerData[0].name +
+              ", Use the link below to verify your email.",
 
+            href:
+              environments.VERIFY_EMAIL +
+              "?registeras=Influencer&id=" +
+              influencerData[0].id,
+            hrefText: "Verify Email",
+          });
+        } else {
+          verify = false;
+          if (userResponse.user.displayName.toString().slice(0, 1) === "0") {
+            sendMail("signincompleteprofile", {
+              tomail: influencerData[0].email,
+              ccmail: "",
+              subjectmail: "Complete your profile | Pinksky",
+              text:
+                "Hey " +
+                influencerData[0].name +
+                ", Please complete your profile.",
+              href: environments.EML_HREF_WEBSITE,
+              hrefText: "pinkskyclub.com",
+
+            });
+          }
+          
+        }
         let isMember = false;
         if (influencerData[0].pinkskymember.cooldown === null) {
           console.log("Here 1");
@@ -1010,18 +1116,7 @@ app.post("/api/signin", async (req, res) => {
             isMember = true;
           }
         }
-        if (userResponse.user.displayName.toString().slice(0, 1) === "0") {
-          sendMail("signincompleteprofile", {
-            tomail: influencerData[0].email,
-            ccmail: "",
-            subjectmail: "Complete your profile | Pinksky",
-            text:
-              "Hey " +
-              influencerData[0].name +
-              ", Please complete your profile.",
-            href: environments.EML_HREF_WEBSITE,
-          });
-        }
+       
         logging.end();
         res.status(200).json({
           message: {
@@ -1032,7 +1127,7 @@ app.post("/api/signin", async (req, res) => {
             status: influencerData[0].status,
             member: isMember,
             uuid: userResponse.user.uid,
-          },
+          }, verify: verify,
         });
         //}
       }
@@ -1874,8 +1969,10 @@ app.post("/api/admin/pinksky", async (req, res) => {
             });
             console.log("influencerlist7");
             doc.data().eventmapping.map((nesitem) => {
-              console.log("raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name",raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
-              .name)
+              console.log(
+                "raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name",
+                raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name
+              );
               localeventmapping.push({
                 ...nesitem,
                 name:
@@ -2543,7 +2640,7 @@ app.post("/api/campaign/filter", async (req, res) => {
 app.post("/api/influencer/create", async (req, res) => {
   logging.write(new Date() + " - influencer/create POST 🚀 \n");
 
-  let userResponse = undefined;
+  let userResponse = { uid: "" };
 
   let influencerData = req.body;
   let isProfileCompletedQuery = req.query.isProfileCompleted;
@@ -2844,17 +2941,32 @@ app.post("/api/influencer/create", async (req, res) => {
                           setTimeout(() => {
                             if (environments.LAUNCHING_MAIL === "true") {
                               sendMail("registerlaunchingsoon", {
-                                tomail: influencerArr[0].name,
+                                tomail: influencerArr[0].email,
                                 ccmail: "",
                                 subjectmail: "Coming Soon | Pinksky",
                                 text:
                                   "Hey " +
                                   influencerArr[0].name +
-                                  ", We will be notifing when we will be launching our website. Thanks for registing.",
+                                  ", We will be notifing when we will be launching our website. Thanks for showing your interest.",
 
                                 href: environments.EML_HREF_WEBSITE,
                               });
                             }
+                            sendMail("verifyemail", {
+                              tomail: influencerArr[0].email,
+                              ccmail: "",
+                              subjectmail: "Verify your account | Pinksky",
+                              text:
+                                "Hey " +
+                                influencerArr[0].name +
+                                ", Use the link below to verify your email.",
+
+                              href:
+                                environments.VERIFY_EMAIL +
+                                "?registeras=Influencer&id=" +
+                                influencerArr[0].id,
+                              hrefText: "Verify Email",
+                            });
                             sendMail("registerdetailmail", {
                               tomail: environments.EML_USER,
                               ccmail: "",
@@ -2913,10 +3025,10 @@ app.post("/api/influencer/create", async (req, res) => {
       }
     }
   } catch (error) {
-    if (userResponse?.uid === undefined || userResponse?.uid === "") {
+    if (userResponse?.uid === "") {
       logging.write(new Date() + " - influencer/create ❌ - " + error + " \n");
       logging.end();
-      res.status(500).json({
+      res.status(402).json({
         message:
           createUser.email +
           " is already an pinksky user. Try sigging up with another user id.",
@@ -2939,23 +3051,23 @@ app.post("/api/influencer/create", async (req, res) => {
 // 2. Brand registeration
 app.post("/api/brand/create", async (req, res) => {
   logging.write(new Date() + " - brand/create POST 🚀 \n");
-
+  let brandData = req.body;
+  let isProfileCompletedQuery = req.query.isProfileCompleted;
+  console.log("brandData", req.body);
+  const createUser = {
+    email: brandData.email,
+    password: brandData.password,
+    name:
+      isProfileCompletedQuery +
+      "_Brand_" +
+      brandData.companyname.replace(/\s/g, ""),
+  };
+  let userResponse = { uid: "" };
   try {
-    let brandData = req.body;
-    let isProfileCompletedQuery = req.query.isProfileCompleted;
-    console.log("brandData", req.body);
-    const createUser = {
-      email: brandData.email,
-      password: brandData.password,
-      name:
-        isProfileCompletedQuery +
-        "_Brand_" +
-        brandData.companyname.replace(/\s/g, ""),
-    };
     console.log("createUser", createUser);
 
     if (createUser.email != undefined && createUser.password != undefined) {
-      const userResponse = await Firebase.admin.auth().createUser({
+      userResponse = await Firebase.admin.auth().createUser({
         email: createUser.email,
         password: createUser.password,
         emailVerified: false,
@@ -3110,15 +3222,31 @@ app.post("/api/brand/create", async (req, res) => {
                                 brandArr[0].companyname +
                                 ", We will be notifing when we will be launching our website.",
                               href: environments.EML_HREF_WEBSITE,
+                              hrefText: "pinkskyclub.com",
                             });
                           }
+                          sendMail("verifyemail", {
+                            tomail: brandArr[0].email,
+                            ccmail: "",
+                            subjectmail: "Verify your account | Pinksky",
+                            text:
+                              "Hey " +
+                              brandArr[0].companyname +
+                              ", Use the link below to verify your email.",
+
+                            href:
+                              environments.VERIFY_EMAIL +
+                              "?registeras=Brand&id=" +
+                              brandArr[0].id,
+                            hrefText: "Verify Email",
+                          });
                           sendMail("registerdetailmail", {
                             tomail: environments.EML_USER,
                             ccmail: "",
                             subjectmail: "Brand Details | Pinksky",
                             text:
                               "Brand Name : " +
-                              brandArr[0].comapnyname +
+                              brandArr[0].companyname +
                               " <br/>" +
                               "City : " +
                               brandArr[0].city +
@@ -3133,6 +3261,7 @@ app.post("/api/brand/create", async (req, res) => {
                               brandArr[0].email +
                               " <br/>",
                             href: environments.EML_HREF_WEBSITE,
+                            hrefText: "pinkskyclub.com",
                           });
                           logging.end();
                           res.status(200).json({
@@ -3161,29 +3290,35 @@ app.post("/api/brand/create", async (req, res) => {
       }
     }
   } catch (error) {
-    // console.log("error", error);
-    //
     logging.write(new Date() + " - brand/create ❌ - " + error + " \n");
     logging.end();
-    res.status(500).json({ message: error.message });
-    if (userResponse?.uid === undefined || userResponse?.uid === "") {
-      logging.write(new Date() + " - brand/create ❌ - " + error + " \n");
-      logging.end();
-      res.status(500).json({
+    // if (error instanceof ReferenceError) {
+
+    //   // Output expected ReferenceErrors.
+
+    //   console.log("braaaannndd error",error);
+    // }else{
+    console.log(userResponse);
+    if (userResponse?.uid === "") {
+      console.log(createUser.email);
+
+      res.status(402).json({
         message:
           createUser.email +
           " is already an pinksky user. Try sigging up with another user id.",
       });
     } else {
-      console.log(userResponse?.uid);
-
       await Firebase.admin.auth().deleteUser(userResponse?.uid);
 
       console.log("error", error.message);
-      logging.write(new Date() + " - brand/create ❌ - " + error + " \n");
-      logging.end();
+
       res.status(500).json({ message: error.message });
     }
+    //}
+    // console.log("error", error);
+    //
+
+    // res.status(500).json({ message: error.message });
   }
 });
 
@@ -3750,7 +3885,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         eventmapping: influencerData,
         message: influencerDataMessage,
       });
-      sendMail("influencereventaccepted", { 
+      sendMail("influencereventaccepted", {
         tomail: snapshot.data().email,
         ccmail: "",
         subjectmail: "Approved request for event | Pinksky",
@@ -4319,7 +4454,7 @@ app.post("/api/influencerpayment/create", async (req, res) => {
   }
 });
 
-// 4. Updating influencers details
+// 5. Updating influencers details
 app.put("/api/influencer/update", async (req, res) => {
   logging.write(new Date() + " - influencer/update PUT 🚀 \n");
 
@@ -4361,7 +4496,7 @@ app.put("/api/influencer/update", async (req, res) => {
   }
 });
 
-// 5. Updating Brand details
+// 6. Updating Brand details
 app.put("/api/brand/update", async (req, res) => {
   logging.write(new Date() + " - brand/update PUT 🚀 \n");
 
@@ -4403,7 +4538,7 @@ app.put("/api/brand/update", async (req, res) => {
   }
 });
 
-// 5. Updating Brand's Comments details
+// 7. Updating Brand's Comments details
 app.put("/api/brandcomments/update", async (req, res) => {
   logging.write(new Date() + " - brandcomments/update PUT 🚀 \n");
 
@@ -4440,6 +4575,55 @@ app.put("/api/brandcomments/update", async (req, res) => {
     logging.end();
     res.status(200).json({ message: "Updated Comments in Brand" });
   }, 2000);
+});
+
+// 8. Verifying account
+app.put("/api/verifyaccount/update", async (req, res) => {
+  logging.write(new Date() + " - verifyaccount/update PUT 🚀 \n");
+
+  try {
+    const data = req.body;
+    if (data.registeras === "Influencer") {
+      const id = data.id;
+      const snapshot = await Firebase.Influencer.doc(id).get();
+
+      await Firebase.Influencer.doc(id).update({
+        ...snapshot.data(),
+        isActive: 1,
+      });
+
+      logging.end();
+      res.status(200).json({ message: "Verified Influencer" });
+    }
+    if (data.registeras === "Brand") {
+      const id = data.id;
+      const snapshot = await Firebase.Brand.doc(id).get();
+
+      await Firebase.Brand.doc(id).update({
+        ...snapshot.data(),
+        isActive: 1,
+      });
+
+      logging.end();
+      res.status(200).json({ message: "Verified Brand" });
+    }
+    if (data.registeras === "Noninfluencer") {
+      const id = data.id;
+      const snapshot = await Firebase.NonInfluencer.doc(id).get();
+
+      await Firebase.NonInfluencer.doc(id).update({
+        ...snapshot.data(),
+        isActive: 1,
+      });
+
+      logging.end();
+      res.status(200).json({ message: "Verified NonInfluencer" });
+    }
+  } catch (error) {
+    logging.write(new Date() + " - verifyaccount/update ❌ - " + error + " \n");
+    logging.end();
+    res.status(500).json({ message: error });
+  }
 });
 
 // MAPPING SECTION
