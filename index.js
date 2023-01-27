@@ -945,7 +945,7 @@ app.post("/api/signin", async (req, res) => {
 
              You have successfully created an account at Pinksky! 
              <br/><br/>
-             Our team will contact you shortly to discuss your requirements. On that note, we would request you to proceed with the completion of your profile.
+             Our team will contact you shortly to discuss your requirements. On that note, <strong>we would request you to proceed with the completion of your profile.</strong>
              <br/><br/>
              Thanks for choosing Pinksky💕`,
               href: environments.EML_HREF_WEBSITE,
@@ -1106,7 +1106,7 @@ app.post("/api/signin", async (req, res) => {
 
               You have successfully created an account at Pinksky! <br/><br/>
               
-              Updates of all the new events will be shown on the website. On that note, we would request you to proceed with the completion of your profile. 
+              Updates of all the new events will be shown on the website. On that note, <strong>we would request you to proceed with the completion of your profile. </strong>
               <br/><br/>
               Thanks for choosing Pinksky💕`,
 
@@ -5014,8 +5014,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
           headers: {
             "content-type": "application/json",
-            "X-RapidAPI-Key":
-              environments.RapidAPIKey_V2,
+            "X-RapidAPI-Key": environments.RapidAPIKey_V2,
             "X-RapidAPI-Host": environments.RapidAPIHost_V2,
           },
           data: `{"username":"${influencerData.instagramurl}"}`,
@@ -5259,8 +5258,7 @@ app.post("/api/v2/brand/create", async (req, res) => {
           url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
           headers: {
             "content-type": "application/json",
-            "X-RapidAPI-Key":
-              environments.RapidAPIKey_V2,
+            "X-RapidAPI-Key": environments.RapidAPIKey_V2,
             "X-RapidAPI-Host": environments.RapidAPIHost_V2,
           },
           data: `{"username":"${brandData.instagramurl}"}`,
@@ -5494,7 +5492,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
 
   try {
     let { data } = req.body;
-    if (data.displayName.slice(0, 1) === "1") {
+    if (data.displayName.slice(0, 1) === "1" && data.isRegistering == "N") {
       if (data.displayName.indexOf("Brand") != -1) {
         //Brand
         const snapshot = await Firebase.Brand.doc(data.id).get();
@@ -5519,8 +5517,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
             url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
             headers: {
               "content-type": "application/json",
-              "X-RapidAPI-Key":
-                environments.RapidAPIKey_V2,
+              "X-RapidAPI-Key": environments.RapidAPIKey_V2,
               "X-RapidAPI-Host": environments.RapidAPIHost_V2,
             },
             data: `{"username":"${snapshot.data().instagramurl}"}`,
@@ -5585,8 +5582,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
             url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
             headers: {
               "content-type": "application/json",
-              "X-RapidAPI-Key":
-                environments.RapidAPIKey_V2,
+              "X-RapidAPI-Key": environments.RapidAPIKey_V2,
               "X-RapidAPI-Host": environments.RapidAPIHost_V2,
             },
             data: `{"username":"${snapshot.data().instagramurl}"}`,
@@ -5745,7 +5741,10 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           });
         }
       }
-    } else if (data.displayName.slice(0, 1) === "0") {
+    } else if (
+      data.displayName.slice(0, 1) === "0" &&
+      data.isRegistering == "Y"
+    ) {
       if (data.displayName.indexOf("Influencer") != -1) {
         const snapshot = await Firebase.Influencer.doc(data.id).get();
 
@@ -5763,7 +5762,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           url: environments.RAPID_USERINFO_URL_V2,
           headers: {
             "content-type": "application/json",
-            "X-RapidAPI-Key":environments.RapidAPIKey_V2,
+            "X-RapidAPI-Key": environments.RapidAPIKey_V2,
             "X-RapidAPI-Host": environments.RapidAPIHost_V2,
           },
           data: `{"username":"${snapshot.data().instagramurl}"}`,
