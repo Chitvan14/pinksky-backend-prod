@@ -104,55 +104,55 @@ const sendMail = (sendType, data) => {
 };
 
 // 3. creating whatspp messages to send
-const sendWhatsappMess = (sendType, data) => {
-  var dataString = {};
-  if (sendType === "sendingCouponDetails") {
-    dataString = JSON.stringify({
-      messaging_product: "whatsapp",
-      to: data.receiverNumber, //reciever number
-      type: "template",
-      template: {
-        name: "sample_shipping_confirmation", //template
-        language: {
-          code: "en_US",
-        },
-        components: [
-          {
-            type: "body",
-            parameters: [
-              {
-                type: "text",
-                text: "something",
-              },
-            ],
-          },
-        ],
-      },
-    });
-  }
-  const size = Object.keys(dataString).length;
-  if (size > 0) {
-    var config = {
-      method: "post",
-      url: environments.WAPP_SENDMESSTEXT_UATURL_PRMNTOKN,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: environments.WAPP_AUTH_PRMNTOKN,
-      },
-      data: dataString,
-    };
+// const sendWhatsappMess = (sendType, data) => {
+//   var dataString = {};
+//   if (sendType === "sendingCouponDetails") {
+//     dataString = JSON.stringify({
+//       messaging_product: "whatsapp",
+//       to: data.receiverNumber, //reciever number
+//       type: "template",
+//       template: {
+//         name: "sample_shipping_confirmation", //template
+//         language: {
+//           code: "en_US",
+//         },
+//         components: [
+//           {
+//             type: "body",
+//             parameters: [
+//               {
+//                 type: "text",
+//                 text: "something",
+//               },
+//             ],
+//           },
+//         ],
+//       },
+//     });
+//   }
+//   const size = Object.keys(dataString).length;
+//   if (size > 0) {
+//     var config = {
+//       method: "post",
+//       url: environments.WAPP_SENDMESSTEXT_UATURL_PRMNTOKN,
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: environments.WAPP_AUTH_PRMNTOKN,
+//       },
+//       data: dataString,
+//     };
 
-    axios(config)
-      .then(function (response) {
-        logging.end();
-        res.status(200).json({ data: response, status: 1 });
-      })
-      .catch(function (error) {
-        logging.end();
-        res.status(200).json({ data: error, status: 0 });
-      });
-  }
-};
+//     axios(config)
+//       .then(function (response) {
+//         logging.end();
+//         res.status(200).json({ data: response, status: 1 });
+//       })
+//       .catch(function (error) {
+//         logging.end();
+//         res.status(200).json({ data: error, status: 0 });
+//       });
+//   }
+// };
 
 // RAZORPAY SECTION
 // 1. Webhook callback
@@ -4941,5 +4941,997 @@ app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
 });
 
 //----------------------------------------------------------------------
+app.post("/api/v2/influencer/create", async (req, res) => {
+  logging.write(new Date() + " - v2/influencer/create POST 🚀 \n");
 
+  let userResponse = { uid: "" };
+
+  let influencerData = req.body;
+  let isProfileCompletedQuery = req.query.isProfileCompleted;
+  console.log("influencerData", req.body);
+  console.log("isProfileCompletedQuery", isProfileCompletedQuery);
+
+  const createUser = {
+    email: influencerData.email,
+    password: influencerData.password,
+    name:
+      isProfileCompletedQuery +
+      "_Influencer_" +
+      influencerData.name.replace(/\s/g, "") +
+      "_" +
+      influencerData.surname.replace(/\s/g, ""),
+  };
+  console.log("createUser", createUser);
+  try {
+    //login here
+    if (createUser.email != undefined && createUser.password != undefined) {
+      if (influencerData.isNonInfluencer.uuid.toString().length > 2) {
+        let getUserByUuid = await Firebase.admin
+          .auth()
+          .getUser(influencerData.isNonInfluencer.uuid.toString());
+
+        await Firebase.admin.auth().updateUser(getUserByUuid?.uid, {
+          password: createUser.password,
+          emailVerified: false,
+          disabled: false,
+          displayName: createUser.name,
+        });
+
+        userResponse = {
+          email: influencerData.email,
+          uid: getUserByUuid?.uid,
+        };
+        console.log("def", userResponse);
+      } else {
+        console.log("abc");
+        userResponse = await Firebase.admin.auth().createUser({
+          email: createUser.email,
+          password: createUser.password,
+          emailVerified: false,
+          disabled: false,
+          displayName: createUser.name,
+        });
+      }
+
+      console.log(
+        "userResponse email",
+        environments.NODE_ENV,
+        userResponse.email,
+        userResponse.uid
+      );
+      if (userResponse.email !== undefined && userResponse.uid !== undefined) {
+        let influencerSchema = null;
+        // const options = {
+        //   method: "GET",
+        //   url: environments.RAPID_USERINFO_URL + influencerData.instagramurl,
+        //   headers: {
+        //     "X-RapidAPI-Key": environments.RapidAPIKey,
+        //     "X-RapidAPI-Host": environments.RapidAPIHost,
+        //   },
+        // };
+        const options = {
+          method: "POST",
+          url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
+          headers: {
+            "content-type": "application/json",
+            "X-RapidAPI-Key":
+              environments.RapidAPIKey_V2,
+            "X-RapidAPI-Host": environments.RapidAPIHost_V2,
+          },
+          data: `{"username":"${influencerData.instagramurl}"}`,
+        };
+        //pointoferror
+        console.log(options);
+        //Here -- axios
+        //let instagramPostDetails = [];
+        let onGoingStatus = false;
+        // let breakMovement = true;
+        await axios
+          .request(options)
+          .then(function (response) {
+            let instadatares = response.data.response.body.data.user;
+            // console.log("instagram respnose",instadatares)
+            if (instadatares.is_private === false) {
+              //let sum = 0;
+              //let count = 0;
+              console.log(
+                "instadatares.edge_owner_to_timeline_media.edges",
+                instadatares.edge_owner_to_timeline_media.edges.length
+              );
+              if (instadatares.edge_owner_to_timeline_media.edges.length > 4) {
+                //do something
+                onGoingStatus = true;
+              } else {
+                const err = new TypeError(
+                  "We cant't calculate your profile. Please login in with public instagram profile with more than 5 posts."
+                );
+                throw err;
+              }
+              //onGoingStatus = 200;
+            } else {
+              const err = new TypeError(
+                "Please Register With Public Instagram Account"
+              );
+              throw err;
+            }
+          })
+          .catch(function (error) {
+            throw error;
+          });
+
+        if (onGoingStatus === true) {
+          if (influencerData.isNonInfluencer.uuid.toString().length > 2) {
+            const snapshotNonInfluencer = await Firebase.NonInfluencer.doc(
+              influencerData.isNonInfluencer.id.toString()
+            ).get();
+            influencerSchema = {
+              ...influencerData,
+              pinkskymember: snapshotNonInfluencer.data().pinkskymember,
+              isProfileCompleted: isProfileCompletedQuery,
+
+              message: [
+                {
+                  statusID: "100",
+                  campaignID: "",
+                  campaignName: "",
+                },
+              ],
+              createdDate: new Date(),
+              updatedDate: new Date(),
+            };
+          } else {
+            influencerSchema = {
+              ...influencerData,
+              isProfileCompleted: isProfileCompletedQuery,
+
+              message: [
+                {
+                  statusID: "100",
+                  campaignID: "",
+                  campaignName: "",
+                },
+              ],
+              createdDate: new Date(),
+              updatedDate: new Date(),
+            };
+          }
+
+          Firebase.Influencer.add(influencerSchema);
+          setTimeout(async () => {
+            let influencerArr = [];
+            const snapshot = await Firebase.Influencer.get();
+            snapshot.docs.map((doc) => {
+              if (doc.data().email === createUser.email) {
+                influencerArr.push({ id: doc.id, ...doc.data() });
+              }
+            });
+            console.log("influencerArr", influencerArr);
+            //setting up coupon from noninfluencer
+            if (
+              influencerData.isNonInfluencer.uuid.toString().length > 2 &&
+              influencerSchema.pinkskymember.isMember === true
+            ) {
+              const snapshotCoupon = await Firebase.Coupons.get();
+              snapshotCoupon.docs.map(async (doc) => {
+                if (
+                  doc
+                    .data()
+                    .userCouponMapping.includes(
+                      influencerData.isNonInfluencer.id.toString()
+                    )
+                ) {
+                  await Firebase.Coupons.doc(doc.id).update({
+                    userCouponMapping: [
+                      ...doc.data().userCouponMapping,
+                      influencerArr[0].id,
+                    ],
+                  });
+                }
+              });
+            }
+            setTimeout(() => {
+              sendMail("verifyemail", {
+                tomail: influencerArr[0].email,
+                ccmail: "",
+                subjectmail: "Verify your account | Pinksky",
+                text:
+                  "Hey " +
+                  influencerArr[0].name +
+                  ", Use the link below to verify your email.",
+
+                href:
+                  environments.VERIFY_EMAIL +
+                  "?registeras=Influencer&id=" +
+                  influencerArr[0].id,
+                hrefText: "Verify Email",
+              });
+              sendMail("registerdetailmail", {
+                tomail: environments.EML_USER,
+                ccmail: "",
+                subjectmail: "Influencer Details | Pinksky",
+                text:
+                  "Name : " +
+                  influencerArr[0].name +
+                  ", " +
+                  influencerArr[0].surname +
+                  " <br/>" +
+                  "Whatapp Number : " +
+                  influencerArr[0].whatsappnumber +
+                  " <br/>" +
+                  "Instagram : " +
+                  influencerArr[0].instagramurl +
+                  " <br/>" +
+                  "Email : " +
+                  influencerArr[0].email +
+                  " <br/>",
+                href: environments.EML_HREF_WEBSITE,
+                hrefText: "pinkskyclub.com",
+              });
+              logging.end();
+              res.status(200).json({
+                message: {
+                  displayName: createUser.name,
+                  id: influencerArr[0].id,
+                  // email: createUser.email,
+                  email: influencerArr[0].email,
+                  type: "Posted Influencer",
+                  uuid: userResponse?.uid,
+                  member: false,
+                  status: "new",
+                },
+              });
+            }, 1000);
+          }, 2000);
+        }
+      } else {
+        logging.write(
+          new Date() + " - influencer/create ❌ - " + error + " \n"
+        );
+        logging.end();
+        res.status(500).json({
+          message:
+            "Something Went wrong. User response is not defined. Please try again.",
+        });
+      }
+    }
+  } catch (error) {
+    if (userResponse?.uid === "") {
+      logging.write(new Date() + " - influencer/create ❌ - " + error + " \n");
+      logging.end();
+      res.status(402).json({
+        message:
+          createUser.email +
+          " is already an pinksky user. Try sigging up with another user id.",
+      });
+    } else {
+      console.log(userResponse?.uid);
+      if (influencerData.isNonInfluencer.uuid.length > 2) {
+        //non influencer is safe
+      } else {
+        await Firebase.admin.auth().deleteUser(userResponse?.uid);
+      }
+      console.log("error", error.message);
+      logging.write(new Date() + " - influencer/create ❌ - " + error + " \n");
+      logging.end();
+      res.status(500).json({ message: error.message });
+    }
+  }
+});
+app.post("/api/v2/brand/create", async (req, res) => {
+  logging.write(new Date() + " - brand/create POST 🚀 \n");
+  let brandData = req.body;
+  let isProfileCompletedQuery = req.query.isProfileCompleted;
+  console.log("brandData", req.body);
+  const createUser = {
+    email: brandData.email,
+    password: brandData.password,
+    name:
+      isProfileCompletedQuery +
+      "_Brand_" +
+      brandData.companyname.replace(/\s/g, ""),
+  };
+  let userResponse = { uid: "" };
+  try {
+    console.log("createUser", createUser);
+
+    if (createUser.email != undefined && createUser.password != undefined) {
+      userResponse = await Firebase.admin.auth().createUser({
+        email: createUser.email,
+        password: createUser.password,
+        emailVerified: false,
+        disabled: false,
+        displayName: createUser.name,
+      });
+
+      console.log("userResponse email", userResponse.email);
+      if (userResponse.email != undefined && userResponse.uid != undefined) {
+        let brandSchema = null;
+        // const options = {
+        //   method: "GET",
+        //   url: environments.RAPID_USERINFO_URL + brandData.instagramurl,
+        //   headers: {
+        //     "X-RapidAPI-Key": environments.RapidAPIKey,
+        //     "X-RapidAPI-Host": environments.RapidAPIHost,
+        //   },
+        // };
+        const options = {
+          method: "POST",
+          url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
+          headers: {
+            "content-type": "application/json",
+            "X-RapidAPI-Key":
+              environments.RapidAPIKey_V2,
+            "X-RapidAPI-Host": environments.RapidAPIHost_V2,
+          },
+          data: `{"username":"${brandData.instagramurl}"}`,
+        };
+        let instagramPostDetails = [];
+        let onGoingStatus = 200;
+        console.log("options ", options);
+        await axios
+          .request(options)
+          .then(function (response) {
+            let instadatares = response.data.response.body.data.user;
+            if (instadatares.is_private === false) {
+              let profileItemData = {
+                id: "1",
+                display_url: instadatares.profile_pic_url_hd,
+              };
+
+              instagramPostDetails.push(profileItemData);
+
+              brandSchema = {
+                ...brandData,
+                instagram: {
+                  id: instadatares.id,
+                  is_business_account: instadatares.is_business_account,
+                  external_url: instadatares.external_url,
+                  followers: instadatares.edge_followed_by.count,
+                  edge_follow: instadatares.edge_follow.count,
+                  is_private: instadatares.is_private,
+                  is_verified: instadatares.is_verified,
+                },
+              };
+              onGoingStatus = 200;
+            } else {
+              onGoingStatus = 401;
+            }
+          })
+          .catch(function (error) {
+            throw error;
+          });
+        if (onGoingStatus === 401) {
+          const err = new TypeError(
+            "Please Register With Public Instagram Account"
+          );
+          throw err;
+        } else {
+          //          let interval = 9000;
+          let lengthOfArray = instagramPostDetails.length - 1;
+          let brandArr = [];
+
+          console.log("lengthOfArray", lengthOfArray);
+          instagramPostDetails.forEach((file, index) => {
+            // setTimeout(() => {
+            //console.log("hi people", interval * index);
+
+            const d = new Date();
+            let month = d.getMonth() + 1;
+            let date = d.getDate();
+            let year = d.getFullYear();
+            let time = d.getTime();
+            const fileName =
+              createUser.name +
+              "_" +
+              month +
+              "_" +
+              date +
+              "_" +
+              year +
+              "_" +
+              time +
+              "_" +
+              index +
+              ".jpeg";
+            let filePath = path.join(__dirname, "/images", fileName);
+            console.log("filePath", filePath);
+            //let filePath = "./images/" + fileName;
+            const options = {
+              url: file.display_url,
+              method: "GET",
+            };
+            console.log("fileName", fileName);
+            let getDownloadURL = "";
+            request(options, async (err, resp, body) => {
+              if (resp.statusCode === 200) {
+                console.log("res.statusCode", resp.statusCode);
+                var bucket = Firebase.admin.storage().bucket();
+
+                await bucket.upload(filePath);
+                let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
+                console.log("------Here------");
+                console.log(fileFirebaseURL);
+
+                axios
+                  .get(fileFirebaseURL)
+                  .then((response) => {
+                    getDownloadURL =
+                      environments.FIRESTORE_URL +
+                      `${fileName}?alt=media&token=${response.data.downloadTokens}`;
+                    instagramPostDetails[index].new_url = getDownloadURL;
+                    console.log("index", index);
+                    fs.unlinkSync(filePath);
+                    if (index === lengthOfArray) {
+                      console.log("inside");
+
+                      brandSchema = {
+                        ...brandSchema,
+                        isProfileCompleted: isProfileCompletedQuery,
+                        imgURL: instagramPostDetails[0].new_url,
+                        message: [
+                          {
+                            statusID: "100",
+                            influencerID: "",
+                            influencerName: "",
+                          },
+                        ],
+
+                        createdDate: new Date(),
+                        updatedDate: new Date(),
+                      };
+                    }
+
+                    Firebase.Brand.add(brandSchema);
+                    setTimeout(async () => {
+                      console.log("inside2");
+
+                      const snapshot = await Firebase.Brand.get();
+                      setTimeout(() => {
+                        snapshot.docs.map((doc) => {
+                          if (doc.data().email === createUser.email) {
+                            brandArr.push({ id: doc.id, ...doc.data() });
+                          }
+                        });
+
+                        sendMail("verifyemail", {
+                          tomail: brandArr[0].email,
+                          ccmail: "",
+                          subjectmail: "Verify your account | Pinksky",
+                          text:
+                            "Hey " +
+                            brandArr[0].companyname +
+                            ", Use the link below to verify your email.",
+
+                          href:
+                            environments.VERIFY_EMAIL +
+                            "?registeras=Brand&id=" +
+                            brandArr[0].id,
+                          hrefText: "Verify Email",
+                        });
+                        sendMail("registerdetailmail", {
+                          tomail: environments.EML_USER,
+                          ccmail: "",
+                          subjectmail: "Brand Details | Pinksky",
+                          text:
+                            "Brand Name : " +
+                            brandArr[0].companyname +
+                            " <br/>" +
+                            "City : " +
+                            brandArr[0].city +
+                            " <br/>" +
+                            "Whatapp Number : " +
+                            brandArr[0].whatsappnumber +
+                            " <br/>" +
+                            "Instagram : " +
+                            brandArr[0].instagramurl +
+                            " <br/>" +
+                            "Email : " +
+                            brandArr[0].email +
+                            " <br/>",
+                          href: environments.EML_HREF_WEBSITE,
+                          hrefText: "pinkskyclub.com",
+                        });
+                        logging.end();
+                        res.status(200).json({
+                          message: {
+                            displayName: createUser.name,
+                            id: brandArr[0].id,
+                            // email: createUser.email,
+                            email: brandArr[0].email,
+                            type: "Posted Brand",
+                            uuid: userResponse?.uid,
+                            member: false,
+                            status: "new",
+                          },
+                        });
+                      }, 1000);
+                    }, 2000);
+                  })
+                  .catch((error) => {
+                    throw error;
+                  });
+              }
+            }).pipe(fs.createWriteStream(filePath));
+            // }, index * interval);
+          });
+        }
+      }
+    }
+  } catch (error) {
+    logging.write(new Date() + " - brand/create ❌ - " + error + " \n");
+    logging.end();
+    // if (error instanceof ReferenceError) {
+
+    //   // Output expected ReferenceErrors.
+
+    //   console.log("braaaannndd error",error);
+    // }else{
+    console.log(userResponse);
+    if (userResponse?.uid === "") {
+      console.log(createUser.email);
+
+      res.status(402).json({
+        message:
+          createUser.email +
+          " is already an pinksky user. Try sigging up with another user id.",
+      });
+    } else {
+      await Firebase.admin.auth().deleteUser(userResponse?.uid);
+
+      console.log("error", error.message);
+
+      res.status(500).json({ message: error.message });
+    }
+    //}
+    // console.log("error", error);
+    //
+
+    // res.status(500).json({ message: error.message });
+  }
+});
+app.post("/api/v2/signin/profileupdating", async (req, res) => {
+  logging.write(new Date() + " - signin/profileupdating POST 🚀 \n");
+
+  try {
+    let { data } = req.body;
+    if (data.displayName.slice(0, 1) === "1") {
+      if (data.displayName.indexOf("Brand") != -1) {
+        //Brand
+        const snapshot = await Firebase.Brand.doc(data.id).get();
+
+        var difference =
+          new Date().getTime() - snapshot.data().updatedDate.toDate().getTime();
+
+        var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
+        console.log("daysDifference", daysDifference);
+        if (daysDifference > 15) {
+          let brandSchema = null;
+          // const options = {
+          //   method: "GET",
+          //   url: environments.RAPID_USERINFO_URL + snapshot.data().instagramurl,
+          //   headers: {
+          //     "X-RapidAPI-Key": environments.RapidAPIKey,
+          //     "X-RapidAPI-Host": environments.RapidAPIHost,
+          //   },
+          // };
+          const options = {
+            method: "POST",
+            url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
+            headers: {
+              "content-type": "application/json",
+              "X-RapidAPI-Key":
+                environments.RapidAPIKey_V2,
+              "X-RapidAPI-Host": environments.RapidAPIHost_V2,
+            },
+            data: `{"username":"${snapshot.data().instagramurl}"}`,
+          };
+          await axios
+            .request(options)
+            .then(function (response) {
+              // console.log("inside2", response.data);
+              let instadatares = response.data.response.body.data.user;
+              brandSchema = {
+                ...snapshot.data(),
+                instagram: {
+                  id: instadatares.id,
+                  is_business_account: instadatares.is_business_account,
+                  external_url: instadatares.external_url,
+                  followers: instadatares.edge_followed_by.count,
+                  edge_follow: instadatares.edge_follow.count,
+                  is_private: instadatares.is_private,
+                  is_verified: instadatares.is_verified,
+                },
+                updatedDate: new Date(),
+              };
+              setTimeout(async () => {
+                await Firebase.Brand.doc(data.id).update(brandSchema);
+
+                logging.end();
+                res.status(200).json({
+                  message: "Updated Profile",
+                });
+              }, 1000);
+            })
+            .catch(function (error) {
+              throw error;
+            });
+        } else {
+          logging.end();
+          res.status(200).json({
+            message: "Nothing to Update in Profile",
+          });
+        }
+      } else {
+        const snapshot = await Firebase.Influencer.doc(data.id).get();
+
+        var difference =
+          new Date().getTime() - snapshot.data().updatedDate.toDate().getTime();
+
+        var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
+        console.log("daysDifference", daysDifference);
+        if (daysDifference > 15) {
+          console.log("inside");
+          let influencerSchema = null;
+          // const options = {
+          //   method: "GET",
+          //   url: environments.RAPID_USERINFO_URL + snapshot.data().instagramurl,
+          //   headers: {
+          //     "X-RapidAPI-Key": environments.RapidAPIKey,
+          //     "X-RapidAPI-Host": environments.RapidAPIHost,
+          //   },
+          // };
+          const options = {
+            method: "POST",
+            url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
+            headers: {
+              "content-type": "application/json",
+              "X-RapidAPI-Key":
+                environments.RapidAPIKey_V2,
+              "X-RapidAPI-Host": environments.RapidAPIHost_V2,
+            },
+            data: `{"username":"${snapshot.data().instagramurl}"}`,
+          };
+          let instagramPostDetails = [];
+          await axios
+            .request(options)
+            .then(function (response) {
+              let sum = 0;
+              let count = 0;
+              let instadatares = response.data.response.body.data.user;
+              instadatares.edge_owner_to_timeline_media.edges.map((item) => {
+                // console.log(item);
+                sum =
+                  sum +
+                  item.node.edge_media_to_comment.count +
+                  item.node.edge_liked_by.count;
+
+                if (count <= 4) {
+                  // console.log("item.node.shortcode", item.node.shortcode);
+                  let itemData = {
+                    id: item.node.id,
+                    shortcode: item.node.shortcode,
+                    display_url: item.node.display_url,
+                    caption: item.node.edge_media_to_caption.edges[0].node.text,
+                    edge_media_to_comment:
+                      item.node.edge_media_to_comment.count,
+                    edge_liked_by: item.node.edge_liked_by.count,
+                  };
+
+                  instagramPostDetails.push(itemData);
+                }
+                count++;
+              });
+              console.log("SUM", sum);
+              let engagementRate = sum / instadatares.edge_followed_by.count;
+              //* 1000;
+              console.log("ENGAGEMENT RATE", engagementRate);
+
+              influencerSchema = {
+                ...snapshot.data(),
+                imgURL1: instagramPostDetails[0].display_url,
+                imgURL2: instagramPostDetails[1].display_url,
+                imgURL3: instagramPostDetails[2].display_url,
+                imgURL4: instagramPostDetails[3].display_url,
+                imgURL5: instagramPostDetails[4].display_url,
+                instagram: {
+                  engagementRate:
+                    engagementRate.toString().replace(".", "").substring(0, 1) +
+                    "." +
+                    engagementRate.toString().replace(".", "").substring(1, 3),
+                  id: instadatares.id,
+                  is_business_account: instadatares.is_business_account,
+                  external_url: instadatares.external_url,
+                  followers: instadatares.edge_followed_by.count,
+                  edge_follow: instadatares.edge_follow.count,
+                  is_private: instadatares.is_private,
+                  is_verified: instadatares.is_verified,
+                },
+                updatedDate: new Date(),
+              };
+            })
+            .catch(function (error) {
+              throw error;
+            });
+
+          let interval = 8500;
+          let lengthOfArray = instagramPostDetails.length - 1;
+          // let influencerArr = [];
+          console.log("lengthOfArray", lengthOfArray);
+          instagramPostDetails.forEach((file, index) => {
+            setTimeout(() => {
+              console.log("hi people", interval * index);
+
+              const d = new Date();
+              let month = d.getMonth() + 1;
+              let date = d.getDate();
+              let year = d.getFullYear();
+              let time = d.getTime();
+              const fileName =
+                data.displayName +
+                "_" +
+                month +
+                "_" +
+                date +
+                "_" +
+                year +
+                "_" +
+                time +
+                "_" +
+                index +
+                ".jpeg";
+              let filePath = path.join(__dirname, "/images", fileName);
+              //let filePath = "./images/" + fileName;
+              const options = {
+                url: file.display_url,
+                method: "GET",
+              };
+              console.log("fileName", fileName);
+              let getDownloadURL = "";
+              request(options, async (err, resp, body) => {
+                if (resp.statusCode === 200) {
+                  console.log("res.statusCode", resp.statusCode);
+                  var bucket = Firebase.admin.storage().bucket();
+
+                  await bucket.upload(filePath);
+                  let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
+                  console.log("------Here------");
+                  console.log(fileFirebaseURL);
+                  axios
+                    .get(fileFirebaseURL)
+                    .then((response) => {
+                      getDownloadURL =
+                        environments.FIRESTORE_URL +
+                        `${fileName}?alt=media&token=${response.data.downloadTokens}`;
+                      instagramPostDetails[index].new_url = getDownloadURL;
+                      console.log("index", index);
+                      fs.unlinkSync(filePath);
+                      if (index === lengthOfArray) {
+                        console.log("inside");
+
+                        influencerSchema = {
+                          ...influencerSchema,
+                          imgURL1: instagramPostDetails[0]?.new_url,
+                          imgURL2: instagramPostDetails[1]?.new_url,
+                          imgURL3: instagramPostDetails[2]?.new_url,
+                          imgURL4: instagramPostDetails[3]?.new_url,
+                          imgURL5: instagramPostDetails[4]?.new_url,
+                        };
+                        console.log("influencerSchema", influencerSchema);
+                        setTimeout(async () => {
+                          console.log("inside2");
+
+                          await Firebase.Influencer.doc(data.id).update(
+                            influencerSchema
+                          );
+
+                          logging.end();
+                          res.status(200).json({
+                            message: "Updated Profile",
+                          });
+                        }, 4000);
+                      }
+                    })
+                    .catch((error) => {
+                      throw error;
+                    });
+                }
+              }).pipe(fs.createWriteStream(filePath));
+            }, index * interval);
+          });
+        } else {
+          logging.end();
+          res.status(200).json({
+            message: "Nothing to Update in Profile",
+          });
+        }
+      }
+    } else if (data.displayName.slice(0, 1) === "0") {
+      if (data.displayName.indexOf("Influencer") != -1) {
+        const snapshot = await Firebase.Influencer.doc(data.id).get();
+
+        let influencerSchema = null;
+        // const options = {
+        //   method: "GET",
+        //   url: environments.RAPID_USERINFO_URL + snapshot.data().instagramurl,
+        //   headers: {
+        //     "X-RapidAPI-Key": environments.RapidAPIKey,
+        //     "X-RapidAPI-Host": environments.RapidAPIHost,
+        //   },
+        // };
+        const options = {
+          method: "POST",
+          url: environments.RAPID_USERINFO_URL_V2,
+          headers: {
+            "content-type": "application/json",
+            "X-RapidAPI-Key":environments.RapidAPIKey_V2,
+            "X-RapidAPI-Host": environments.RapidAPIHost_V2,
+          },
+          data: `{"username":"${snapshot.data().instagramurl}"}`,
+        };
+        //pointoferror
+
+        let instagramPostDetails = [];
+        await axios
+          .request(options)
+          .then(function (response) {
+            let instadatares = response.data.response.body.data.user;
+
+            //console.log("response", response);
+            let sum = 0;
+            let count = 0;
+
+            instadatares.edge_owner_to_timeline_media.edges.map((item) => {
+              // console.log(item);
+              sum =
+                sum +
+                item.node.edge_media_to_comment.count +
+                item.node.edge_liked_by.count;
+
+              if (count <= 4) {
+                // console.log("item.node.shortcode", item.node.shortcode);
+                let itemData = {
+                  id: item.node.id,
+                  shortcode: item.node.shortcode,
+                  display_url: item.node.display_url,
+                  caption: item.node.edge_media_to_caption.edges[0].node.text,
+                  edge_media_to_comment: item.node.edge_media_to_comment.count,
+                  edge_liked_by: item.node.edge_liked_by.count,
+                };
+
+                instagramPostDetails.push(itemData);
+              }
+              count++;
+            });
+            console.log("SUM", sum);
+            let engagementRate = sum / instadatares.edge_followed_by.count;
+            //* 1000;
+            console.log("ENGAGEMENT RATE", engagementRate);
+
+            influencerSchema = {
+              ...snapshot.data(),
+              imgURL1: instagramPostDetails[0].display_url,
+              imgURL2: instagramPostDetails[1].display_url,
+              imgURL3: instagramPostDetails[2].display_url,
+              imgURL4: instagramPostDetails[3].display_url,
+              imgURL5: instagramPostDetails[4].display_url,
+              instagram: {
+                engagementRate:
+                  engagementRate.toString().replace(".", "").substring(0, 1) +
+                  "." +
+                  engagementRate.toString().replace(".", "").substring(1, 3),
+                id: instadatares.id,
+                is_business_account: instadatares.is_business_account,
+                external_url: instadatares.external_url,
+                followers: instadatares.edge_followed_by.count,
+                edge_follow: instadatares.edge_follow.count,
+                is_private: instadatares.is_private,
+                is_verified: instadatares.is_verified,
+              },
+              updatedDate: new Date(),
+            };
+          })
+          .catch(function (error) {
+            throw error;
+          });
+
+        let interval = 8500;
+        let lengthOfArray = instagramPostDetails.length - 1;
+        // let influencerArr = [];
+        console.log("lengthOfArray", lengthOfArray);
+        instagramPostDetails.forEach((file, index) => {
+          setTimeout(() => {
+            console.log("hi people", interval * index);
+
+            const d = new Date();
+            let month = d.getMonth() + 1;
+            let date = d.getDate();
+            let year = d.getFullYear();
+            let time = d.getTime();
+            const fileName =
+              data.displayName +
+              "_" +
+              month +
+              "_" +
+              date +
+              "_" +
+              year +
+              "_" +
+              time +
+              "_" +
+              index +
+              ".jpeg";
+            let filePath = path.join(__dirname, "/images", fileName);
+            //let filePath = "./images/" + fileName;
+            const optionss = {
+              url: file.display_url,
+              method: "GET",
+            };
+            console.log("fileName", fileName);
+            let getDownloadURL = "";
+            request(optionss, async (err, resp, body) => {
+              if (resp.statusCode === 200) {
+                console.log("res.statusCode", resp.statusCode);
+                var bucket = Firebase.admin.storage().bucket();
+
+                await bucket.upload(filePath);
+                let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
+                console.log("------Here------");
+                console.log(fileFirebaseURL);
+                axios
+                  .get(fileFirebaseURL)
+                  .then((response) => {
+                    getDownloadURL =
+                      environments.FIRESTORE_URL +
+                      `${fileName}?alt=media&token=${response.data.downloadTokens}`;
+                    instagramPostDetails[index].new_url = getDownloadURL;
+                    console.log("index", index);
+                    fs.unlinkSync(filePath);
+                    if (index === lengthOfArray) {
+                      console.log("inside");
+
+                      influencerSchema = {
+                        ...influencerSchema,
+                        imgURL1: instagramPostDetails[0]?.new_url,
+                        imgURL2: instagramPostDetails[1]?.new_url,
+                        imgURL3: instagramPostDetails[2]?.new_url,
+                        imgURL4: instagramPostDetails[3]?.new_url,
+                        imgURL5: instagramPostDetails[4]?.new_url,
+                      };
+                      console.log("influencerSchema", influencerSchema);
+                      setTimeout(async () => {
+                        console.log("inside2");
+
+                        await Firebase.Influencer.doc(data.id).update(
+                          influencerSchema
+                        );
+
+                        logging.end();
+                        res.status(200).json({
+                          message: "Updated Profile",
+                        });
+                      }, 4000);
+                    }
+                  })
+                  .catch((error) => {
+                    throw error;
+                  });
+              }
+            }).pipe(fs.createWriteStream(filePath));
+          }, index * interval);
+        });
+      } else {
+        logging.end();
+        res.status(200).json({
+          message: "Nothing to Update in Profile",
+        });
+      }
+    }
+  } catch (error) {
+    logging.write(
+      new Date() + " - signin/profileupdating ❌ - " + error + " \n"
+    );
+    logging.end();
+    res.status(500).json({ message: error });
+  }
+});
 app.listen(PORT, () => console.log("Running @5000"));
