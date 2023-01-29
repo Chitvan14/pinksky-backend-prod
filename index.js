@@ -5499,8 +5499,8 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
   logging.write(new Date() + " - signin/profileupdating POST 🚀 \n");
 
   try {
-    let { data } = req.body;
-    if (data.displayName.slice(0, 1) === "1" && data.isRegistering == "N") {
+    let { data,isRegistering } = req.body;
+    if (data.displayName.slice(0, 1) === "1" && isRegistering == "N") {
       if (data.displayName.indexOf("Brand") != -1) {
         //Brand
         const snapshot = await Firebase.Brand.doc(data.id).get();
@@ -5751,7 +5751,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
       }
     } else if (
       data.displayName.slice(0, 1) === "0" &&
-      data.isRegistering == "Y"
+      isRegistering == "Y"
     ) {
       if (data.displayName.indexOf("Influencer") != -1) {
         const snapshot = await Firebase.Influencer.doc(data.id).get();
