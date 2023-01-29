@@ -65,13 +65,13 @@ app.post("/api/testmail", async (req, res) => {
     .auth()
     .generateEmailVerificationLink("gargchitvan99@gmail.com")
     .then((response) => {
-      console.log(response);
+      //console.log(response);
     });
   // .getUser(influencerData.isNonInfluencer.uuid.toString());
 });
 // 2. creating mail to send
 const sendMail = (sendType, data) => {
-  console.log("sendMail started 🚀");
+  //console.log("sendMail started 🚀");
   var transporter = nodemailer.createTransport({
     service: environments.EML_PROVIDER,
     auth: {
@@ -92,13 +92,13 @@ const sendMail = (sendType, data) => {
   };
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
-      console.log("sendMail Failed ❌ with error - ", error);
+      //console.log("sendMail Failed ❌ with error - ", error);
     } else {
-      console.log("sendMail success ✅ with response - ", {
-        response: info.response,
-        sendType,
-        data,
-      });
+      //console.log("sendMail success ✅ with response - ", {
+      //   response: info.response,
+      //   sendType,
+      //   data,
+      // });
     }
   });
 };
@@ -168,7 +168,7 @@ app.post("/api/verify/razorpay", async (req, res) => {
     const digest = shasum.digest("hex");
 
     if (digest === req.headers["x-razorpay-signature"]) {
-      console.log("something ", req.body.event);
+      //console.log("something ", req.body.event);
       if (req.body.event === "subscription.activated") {
         const updating = await Firebase.Brand.doc(
           req.body.payload.subscription.entity.notes.pinksky_id.replace(
@@ -279,7 +279,7 @@ app.post("/api/verify/razorpay", async (req, res) => {
       }
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     logging.write(new Date() + " - verify/razorpay ❌ - " + error + " \n");
     logging.end();
     res.status(500).json({
@@ -295,7 +295,7 @@ app.post("/api/subscription/razorpay", async (req, res) => {
 
   try {
     let data = req.body;
-    console.log(data);
+    //console.log(data);
     let planid = "";
 
     const snapshot = await Firebase.Brand.doc(data.id).get();
@@ -356,7 +356,6 @@ app.post("/api/subscription/razorpay", async (req, res) => {
           ? environments.PLNCMPPROFESSIONAL12
           : "";
 
-      console.log(planid);
       const options = {
         plan_id: planid,
         customer_notify: 1,
@@ -429,7 +428,7 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
         // callback_url: "https://example-callback-url.com/",
         // callback_method: "get"
       });
-      console.log(paymentLink);
+      //console.log(paymentLink);
 
       logging.end();
       res.status(200).json({
@@ -457,7 +456,7 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
           },
         ],
       });
-      console.log("here 1");
+      //console.log("here 1");
 
       //send mail and message with short id, coupon details and influencer detials to
       // influencer, brand, pinksky 3 mails/messages
@@ -481,14 +480,14 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
 
       logging.end();
       setTimeout(() => {
-        console.log("text", {
-          tomail: influesnapshot.data().email,
-          ccmail: brandsnapshot.data().email,
-          subjectmail: "Coupon Redeem | Pinksky",
-          text: text,
-          href: environments.EML_HREF_WEBSITE,
-          hrefText: "pinkskyclub.com",
-        });
+        //console.log("text", {
+        //   tomail: influesnapshot.data().email,
+        //   ccmail: brandsnapshot.data().email,
+        //   subjectmail: "Coupon Redeem | Pinksky",
+        //   text: text,
+        //   href: environments.EML_HREF_WEBSITE,
+        //   hrefText: "pinkskyclub.com",
+        // });
         res.status(200).json({ message: "Notified" });
       }, 1700);
     }
@@ -528,13 +527,13 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
           dbInserted: 1,
         });
       } else {
-        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
     if (influencerData.length > 0) {
       clientInfluencer.create(influencerData).then(
         function (data) {
-          console.log(data);
+          //console.log(data);
         },
         function (err) {
           isValid = 0;
@@ -563,14 +562,14 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
           dbInserted: 1,
         });
       } else {
-        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
 
     if (brandData.length > 0) {
       clientBrand.create(brandData).then(
         function (data) {
-          console.log(data);
+          //console.log(data);
         },
         function (err) {
           isValid = 0;
@@ -596,14 +595,14 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     //       dbInserted: 1,
     //     });
     //   } else {
-    //     console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+    //     //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
     //   }
     // });
 
     // if (campaignData.length > 0) {
     //   clientCampaign.create(campaignData).then(
     //     function (data) {
-    //       console.log(data);
+    //       //console.log(data);
     //     },
     //     function (err) {
     //       isValid = 0;
@@ -628,14 +627,14 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
           dbInserted: 1,
         });
       } else {
-        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
 
     if (noninfluencerData.length > 0) {
       clientNonInfluencer.create(noninfluencerData).then(
         function (data) {
-          console.log(data);
+          //console.log(data);
         },
         function (err) {
           isValid = 0;
@@ -665,14 +664,14 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
           dbInserted: 1,
         });
       } else {
-        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
 
     if (pinkskyPopupData.length > 0) {
       clientPinkskyPopup.create(pinkskyPopupData).then(
         function (data) {
-          console.log(data);
+          //console.log(data);
         },
         function (err) {
           isValid = 0;
@@ -712,14 +711,14 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
           dbInserted: 1,
         });
       } else {
-        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
 
     if (internData.length > 0) {
       clientInternData.create(internData).then(
         function (data) {
-          console.log(data);
+          //console.log(data);
         },
         function (err) {
           isValid = 0;
@@ -731,7 +730,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     if (randomData.length > 0) {
       clientNamePhonenumber.create(randomData).then(
         function (data) {
-          console.log(data);
+          //console.log(data);
         },
         function (err) {
           isValid = 0;
@@ -755,14 +754,14 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
           dbInserted: 1,
         });
       } else {
-        console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
 
     if (feedbackData.length > 0) {
       clientFeedback.create(feedbackData).then(
         function (data) {
-          console.log(data);
+          //console.log(data);
         },
         function (err) {
           isValid = 0;
@@ -875,7 +874,7 @@ app.post("/api/forgotpassword", async (req, res) => {
       .catch((error) => {
         throw error;
       });
-    console.log("email sent1");
+    //console.log("email sent1");
 
     logging.end();
     res.status(200).json({ message: "Forgot Password" });
@@ -976,18 +975,18 @@ app.post("/api/signin", async (req, res) => {
             isMember = true;
           }
         }
-        console.log("brandData", {
-          message: {
-            displayName: userResponse.user.displayName,
-            id: brandData[0].id,
-            email: brandData[0].email,
-            type: "Brand",
-            status: brandData[0].status,
-            member: isMember,
-            uuid: userResponse.user.uid,
-          },
-          verify: verify,
-        });
+        //console.log("brandData", {
+        //   message: {
+        //     displayName: userResponse.user.displayName,
+        //     id: brandData[0].id,
+        //     email: brandData[0].email,
+        //     type: "Brand",
+        //     status: brandData[0].status,
+        //     member: isMember,
+        //     uuid: userResponse.user.uid,
+        //   },
+        //   verify: verify,
+        // });
 
         logging.end();
         res.status(200).json({
@@ -1070,7 +1069,7 @@ app.post("/api/signin", async (req, res) => {
           verify: verify,
         });
       } else {
-        console.log("2");
+        //console.log("2");
         let influencerData = [];
         const snapshot = await Firebase.Influencer.get();
         snapshot.docs.map((doc) => {
@@ -1121,10 +1120,10 @@ app.post("/api/signin", async (req, res) => {
         //   ", Please complete your profile.",
         let isMember = false;
         if (influencerData[0].pinkskymember.cooldown === null) {
-          console.log("Here 1");
+          //console.log("Here 1");
           isMember = false;
         } else {
-          console.log("Here 2");
+          //console.log("Here 2");
           if (
             new Date(influencerData[0].pinkskymember.cooldown.seconds * 1000) <
             new Date()
@@ -1184,7 +1183,7 @@ app.post("/api/signin/profileupdating", async (req, res) => {
           new Date().getTime() - snapshot.data().updatedDate.toDate().getTime();
 
         var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
-        console.log("daysDifference", daysDifference);
+        //console.log("daysDifference", daysDifference);
         if (daysDifference > 15) {
           let brandSchema = null;
           const options = {
@@ -1199,7 +1198,7 @@ app.post("/api/signin/profileupdating", async (req, res) => {
           await axios
             .request(options)
             .then(function (response) {
-              // console.log("inside2", response.data);
+              // //console.log("inside2", response.data);
 
               brandSchema = {
                 ...snapshot.data(),
@@ -1239,9 +1238,9 @@ app.post("/api/signin/profileupdating", async (req, res) => {
           new Date().getTime() - snapshot.data().updatedDate.toDate().getTime();
 
         var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
-        console.log("daysDifference", daysDifference);
+        //console.log("daysDifference", daysDifference);
         if (daysDifference > 15) {
-          console.log("inside");
+          //console.log("inside");
           let influencerSchema = null;
           const options = {
             method: "GET",
@@ -1260,14 +1259,14 @@ app.post("/api/signin/profileupdating", async (req, res) => {
 
               response.data.data.edge_owner_to_timeline_media.edges.map(
                 (item) => {
-                  // console.log(item);
+                  // //console.log(item);
                   sum =
                     sum +
                     item.node.edge_media_to_comment.count +
                     item.node.edge_liked_by.count;
 
                   if (count <= 4) {
-                    // console.log("item.node.shortcode", item.node.shortcode);
+                    // //console.log("item.node.shortcode", item.node.shortcode);
                     let itemData = {
                       id: item.node.id,
                       shortcode: item.node.shortcode,
@@ -1284,11 +1283,11 @@ app.post("/api/signin/profileupdating", async (req, res) => {
                   count++;
                 }
               );
-              console.log("SUM", sum);
+              //console.log("SUM", sum);
               let engagementRate =
                 sum / response.data.data.edge_followed_by.count;
               //* 1000;
-              console.log("ENGAGEMENT RATE", engagementRate);
+              //console.log("ENGAGEMENT RATE", engagementRate);
 
               influencerSchema = {
                 ...snapshot.data(),
@@ -1320,10 +1319,10 @@ app.post("/api/signin/profileupdating", async (req, res) => {
           let interval = 8500;
           let lengthOfArray = instagramPostDetails.length - 1;
           // let influencerArr = [];
-          console.log("lengthOfArray", lengthOfArray);
+          //console.log("lengthOfArray", lengthOfArray);
           instagramPostDetails.forEach((file, index) => {
             setTimeout(() => {
-              console.log("hi people", interval * index);
+              //console.log("hi people", interval * index);
 
               const d = new Date();
               let month = d.getMonth() + 1;
@@ -1349,17 +1348,17 @@ app.post("/api/signin/profileupdating", async (req, res) => {
                 url: file.display_url,
                 method: "GET",
               };
-              console.log("fileName", fileName);
+              //console.log("fileName", fileName);
               let getDownloadURL = "";
               request(options, async (err, resp, body) => {
                 if (resp.statusCode === 200) {
-                  console.log("res.statusCode", resp.statusCode);
+                  //console.log("res.statusCode", resp.statusCode);
                   var bucket = Firebase.admin.storage().bucket();
 
                   await bucket.upload(filePath);
                   let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
-                  console.log("------Here------");
-                  console.log(fileFirebaseURL);
+                  //console.log("------Here------");
+                  //console.log(fileFirebaseURL);
                   axios
                     .get(fileFirebaseURL)
                     .then((response) => {
@@ -1367,10 +1366,10 @@ app.post("/api/signin/profileupdating", async (req, res) => {
                         environments.FIRESTORE_URL +
                         `${fileName}?alt=media&token=${response.data.downloadTokens}`;
                       instagramPostDetails[index].new_url = getDownloadURL;
-                      console.log("index", index);
+                      //console.log("index", index);
                       fs.unlinkSync(filePath);
                       if (index === lengthOfArray) {
-                        console.log("inside");
+                        //console.log("inside");
 
                         influencerSchema = {
                           ...influencerSchema,
@@ -1380,9 +1379,9 @@ app.post("/api/signin/profileupdating", async (req, res) => {
                           imgURL4: instagramPostDetails[3]?.new_url,
                           imgURL5: instagramPostDetails[4]?.new_url,
                         };
-                        console.log("influencerSchema", influencerSchema);
+                        //console.log("influencerSchema", influencerSchema);
                         setTimeout(async () => {
-                          console.log("inside2");
+                          //console.log("inside2");
 
                           await Firebase.Influencer.doc(data.id).update(
                             influencerSchema
@@ -1430,32 +1429,32 @@ app.post("/api/influencer", async (req, res) => {
   logging.write(new Date() + " - influencer POST 🚀 \n");
 
   try {
-    console.log(req.body);
+    //console.log(req.body);
     const snapshot = await Firebase.Influencer.doc(req.body.id).get();
 
     let list = [];
     //add event and campaign different and show on profile
     snapshot.data().message.map(async (doc) => {
       if (doc.eventId) {
-        console.log(doc.statusID);
+        //console.log(doc.statusID);
         const eventsnapshot = await Firebase.Event.doc(doc.eventId).get();
         list.push({ ...doc, eventDetails: { ...eventsnapshot.data() } });
       }
       if (doc.campaignID) {
-        console.log(doc.statusID);
+        //console.log(doc.statusID);
         const campaignsnapshot = await Firebase.Campaign.doc(
           doc.campaignID
         ).get();
         list.push({ ...doc, campaignDetails: { ...campaignsnapshot.data() } });
       }
     });
-    console.log("list", list);
+    //console.log("list", list);
     setTimeout(() => {
       let influencerprofiledata = {
         ...snapshot.data(),
         message: list,
       };
-      console.log("influencerprofiledata", influencerprofiledata);
+      //console.log("influencerprofiledata", influencerprofiledata);
 
       res
         .status(200)
@@ -1473,7 +1472,7 @@ app.post("/api/noninfluencer", async (req, res) => {
   logging.write(new Date() + " - noninfluencer POST 🚀 \n");
 
   try {
-    console.log(req.body);
+    //console.log(req.body);
     const snapshot = await Firebase.NonInfluencer.doc(req.body.id).get();
 
     setTimeout(() => {
@@ -1481,7 +1480,7 @@ app.post("/api/noninfluencer", async (req, res) => {
         ...snapshot.data(),
         // message: list,
       };
-      console.log("noninfluencerprofiledata", noninfluencerprofiledata);
+      //console.log("noninfluencerprofiledata", noninfluencerprofiledata);
 
       logging.end();
       res.status(200).json({
@@ -1501,10 +1500,10 @@ app.post("/api/brand", async (req, res) => {
   logging.write(new Date() + " - brand POST 🚀 \n");
 
   try {
-    console.log(req.body);
+    //console.log(req.body);
     const snapshot = await Firebase.Brand.doc(req.body.id).get();
 
-    console.log("yahaan hoon");
+    //console.log("yahaan hoon");
     let brandprofiledata = {
       ...snapshot.data(),
     };
@@ -1524,7 +1523,7 @@ app.post("/api/brand/advance", async (req, res) => {
   logging.write(new Date() + " - brand/advance POST 🚀 \n");
 
   try {
-    console.log("2 ");
+    //console.log("2 ");
 
     //coupons
     const couponsnapshot = await Firebase.Coupons.get();
@@ -1537,7 +1536,7 @@ app.post("/api/brand/advance", async (req, res) => {
         });
       }
     });
-    console.log("3 ");
+    //console.log("3 ");
 
     const campaignsnapshot = await Firebase.Campaign.get();
     let campaignArr = [];
@@ -1549,7 +1548,7 @@ app.post("/api/brand/advance", async (req, res) => {
         });
       }
     });
-    console.log("4 ");
+    //console.log("4 ");
 
     const eventsnapshot = await Firebase.Event.get();
     let eventArr = [];
@@ -1562,7 +1561,7 @@ app.post("/api/brand/advance", async (req, res) => {
       }
     });
 
-    console.log("5 ");
+    //console.log("5 ");
 
     logging.end();
     res.status(200).json({
@@ -1574,7 +1573,7 @@ app.post("/api/brand/advance", async (req, res) => {
       message: "Fetched Advanced Brand",
     });
   } catch (error) {
-    console.log("1 ");
+    //console.log("1 ");
     logging.write(new Date() + " - brand/advance ❌ - " + error + " \n");
     logging.end();
     res.status(500).json({ message: error });
@@ -1599,8 +1598,8 @@ app.get("/api/coupons", async (req, res) => {
     snapshotcoupon.docs.map((doc) => {
       if (doc.data().isActive === 1) {
         var mydate = new Date(doc.data().date.toString());
-        console.log("mydate >= date", mydate >= date);
-        console.log("mydate,date", { mydate, date });
+        //console.log("mydate >= date", mydate >= date);
+        //console.log("mydate,date", { mydate, date });
         if (mydate >= date) {
           couponlist.push({ id: doc.id, ...doc.data() });
         }
@@ -1741,17 +1740,17 @@ app.post("/api/admin/pinksky", async (req, res) => {
     let data = req.body;
 
     const getAdmin = await Firebase.Influencer.doc(data.adminid).get();
-    console.log("entered", getAdmin.data().admin);
+    //console.log("entered", getAdmin.data().admin);
 
     if (getAdmin.data().admin) {
       if (data.changesTrigger === "" || data.changesTrigger === undefined) {
         //globalAdmin = false;
-        console.log("step00");
+        //console.log("step00");
         const snapshotGallerydata = await Firebase.Gallery.get();
         let gallerylist = [];
-        console.log("step0");
+        //console.log("step0");
         snapshotGallerydata.docs.map((doc) => {
-          console.log("step0");
+          //console.log("step0");
           if (doc.data()?.isActive === 1) {
             gallerylist.push({ id: doc.id, ...doc.data() });
           } else {
@@ -1761,7 +1760,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
 
         let ramdomdatalist = [];
 
-        console.log("step1");
+        //console.log("step1");
         const snapshotCoupon = await Firebase.Coupons.get();
         let couponlist = [];
         snapshotCoupon.docs.map((doc) => {
@@ -1771,7 +1770,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
             //move
           }
         });
-        console.log("step2");
+        //console.log("step2");
         const snapshotCamp = await Firebase.Campaign.get();
         let campaignlist = [];
         let rawcampaignlist = [];
@@ -1781,7 +1780,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           }
           rawcampaignlist.push({ id: doc.id, ...doc.data() });
         });
-        console.log("step3");
+        //console.log("step3");
         //event
         const snapshotevent = await Firebase.Event.get();
         let eventlist = [];
@@ -1792,12 +1791,12 @@ app.post("/api/admin/pinksky", async (req, res) => {
           }
           raweventlist.push({ id: doc.id, ...doc.data() });
         });
-        console.log("step4");
+        //console.log("step4");
         //influencer
         const snapshotInfl = await Firebase.Influencer.get();
         let influencerlist = [];
 
-        console.log("step5");
+        //console.log("step5");
         snapshotInfl.docs.map((doc) => {
           let localcampaignmapping = [];
           let localeventmapping = [];
@@ -1807,17 +1806,17 @@ app.post("/api/admin/pinksky", async (req, res) => {
               ...doc.data(),
             });
           } else if (doc.data().status === "accepted") {
-            console.log("influencerlist6", doc.id);
-            console.log("influencerlist6?", doc.data()?.campaignmapping);
+            //console.log("influencerlist6", doc.id);
+            //console.log("influencerlist6?", doc.data()?.campaignmapping);
             if (
               doc.data()?.campaignmapping === undefined ||
               doc.data()?.campaignmapping.length === 0
             ) {
               localcampaignmapping = [];
             } else {
-              console.log("influencerlist66");
+              //console.log("influencerlist66");
               doc.data().campaignmapping.map((nesitem) => {
-                console.log("influencerlist666");
+                //console.log("influencerlist666");
                 localcampaignmapping.push({
                   ...nesitem,
                   name:
@@ -1832,16 +1831,16 @@ app.post("/api/admin/pinksky", async (req, res) => {
               });
             }
 
-            console.log("influencerlist7");
+            //console.log("influencerlist7");
             if (
               doc.data()?.eventmapping === undefined ||
               doc.data()?.eventmapping.length === 0
             ) {
               localeventmapping = [];
             } else {
-              console.log("influencerlist77");
+              //console.log("influencerlist77");
               doc.data().eventmapping.map((nesitem) => {
-                console.log("influencerlist777");
+                //console.log("influencerlist777");
                 raweventlist.filter((fun) => fun.id === nesitem.eventId)
                   .length > 0 &&
                   localeventmapping.push({
@@ -1853,21 +1852,21 @@ app.post("/api/admin/pinksky", async (req, res) => {
                   });
               });
             }
-            console.log("influencerlist1");
+            //console.log("influencerlist1");
             influencerlist.push({
               id: doc.id,
               ...doc.data(),
               campaignmapping: localcampaignmapping,
               eventmapping: localeventmapping,
             });
-            console.log("influencerlist2");
+            //console.log("influencerlist2");
           } else {
-            console.log("influencerlist3");
+            //console.log("influencerlist3");
           }
         });
-        console.log("influencerlist4");
+        //console.log("influencerlist4");
 
-        console.log("step6");
+        //console.log("step6");
         //brand
         const snapshotbrand = await Firebase.Brand.get();
         let brandlist = [];
@@ -1875,7 +1874,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
         snapshotbrand.docs.map((doc) => {
           let localinfluemapping = [];
           let locallaunchmapping = [];
-          console.log("step6kyahai--");
+          //console.log("step6kyahai--");
           if (doc.data()?.status === "new") {
             brandlist.push({ id: doc.id, ...doc.data() });
           } else if (doc.data()?.status === "accepted") {
@@ -1886,9 +1885,9 @@ app.post("/api/admin/pinksky", async (req, res) => {
                 //continue
               }
             });
-            console.log("step6?");
+            //console.log("step6?");
             doc.data().influencermapping.map((nesitem) => {
-              console.log("Datataatat", nesitem);
+              //console.log("Datataatat", nesitem);
               localinfluemapping.push({
                 ...nesitem,
                 name:
@@ -1921,7 +1920,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
                   )[0]?.category || "",
               });
             });
-            console.log("step6??");
+            //console.log("step6??");
             brandlist.push({
               id: doc.id,
               ...doc.data(),
@@ -1933,7 +1932,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
 
         let pinkskypopuplist = [];
 
-        console.log("step8");
+        //console.log("step8");
 
         logging.end();
         res.status(200).json({
@@ -1948,13 +1947,13 @@ app.post("/api/admin/pinksky", async (req, res) => {
           message: "Fetched Admin",
         });
       } else if (data.changesTrigger === "influencer") {
-        console.log("step2");
+        //console.log("step2");
         const snapshotCamp = await Firebase.Campaign.get();
         let rawcampaignlist = [];
         snapshotCamp.docs.map((doc) => {
           rawcampaignlist.push({ id: doc.id, ...doc.data() });
         });
-        console.log("step3");
+        //console.log("step3");
         //event
         const snapshotevent = await Firebase.Event.get();
         // let eventlist = [];
@@ -1962,12 +1961,12 @@ app.post("/api/admin/pinksky", async (req, res) => {
         snapshotevent.docs.map((doc) => {
           raweventlist.push({ id: doc.id, ...doc.data() });
         });
-        console.log("step4");
+        //console.log("step4");
         //influencer
         const snapshotInfl = await Firebase.Influencer.get();
         let influencerlist = [];
 
-        console.log("step5");
+        //console.log("step5");
         snapshotInfl.docs.map((doc) => {
           let localcampaignmapping = [];
           let localeventmapping = [];
@@ -1977,9 +1976,9 @@ app.post("/api/admin/pinksky", async (req, res) => {
               ...doc.data(),
             });
           } else if (doc.data().status === "accepted") {
-            console.log("influencerlist6");
+            //console.log("influencerlist6");
             doc.data().campaignmapping.map((nesitem) => {
-              console.log("influencerlist66");
+              //console.log("influencerlist66");
               localcampaignmapping.push({
                 ...nesitem,
                 name:
@@ -1992,12 +1991,12 @@ app.post("/api/admin/pinksky", async (req, res) => {
                   )[0].category || [],
               });
             });
-            console.log("influencerlist7");
+            //console.log("influencerlist7");
             doc.data().eventmapping.map((nesitem) => {
-              console.log(
-                "raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name",
-                raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name
-              );
+              //console.log(
+              //   "raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name",
+              //   raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name
+              // );
               localeventmapping.push({
                 ...nesitem,
                 name:
@@ -2005,16 +2004,16 @@ app.post("/api/admin/pinksky", async (req, res) => {
                     .name || "",
               });
             });
-            console.log("influencerlist1");
+            //console.log("influencerlist1");
             influencerlist.push({
               id: doc.id,
               ...doc.data(),
               campaignmapping: localcampaignmapping,
               eventmapping: localeventmapping,
             });
-            console.log("influencerlist2");
+            //console.log("influencerlist2");
           } else {
-            console.log("influencerlist3");
+            //console.log("influencerlist3");
           }
         });
 
@@ -2030,26 +2029,26 @@ app.post("/api/admin/pinksky", async (req, res) => {
           message: "Fetched Admin",
         });
       } else if (data.changesTrigger === "brand") {
-        console.log("step2");
+        //console.log("step2");
         const snapshotCamp = await Firebase.Campaign.get();
 
         let rawcampaignlist = [];
         snapshotCamp.docs.map((doc) => {
           rawcampaignlist.push({ id: doc.id, ...doc.data() });
         });
-        console.log("step3");
+        //console.log("step3");
         //event
         const snapshotevent = await Firebase.Event.get();
         let raweventlist = [];
         snapshotevent.docs.map((doc) => {
           raweventlist.push({ id: doc.id, ...doc.data() });
         });
-        console.log("step4");
+        //console.log("step4");
         //influencer
         const snapshotInfl = await Firebase.Influencer.get();
         let influencerlist = [];
 
-        console.log("step5");
+        //console.log("step5");
         snapshotInfl.docs.map((doc) => {
           let localcampaignmapping = [];
           let localeventmapping = [];
@@ -2059,9 +2058,9 @@ app.post("/api/admin/pinksky", async (req, res) => {
               ...doc.data(),
             });
           } else if (doc.data().status === "accepted") {
-            console.log("influencerlist6");
+            //console.log("influencerlist6");
             doc.data().campaignmapping.map((nesitem) => {
-              console.log("influencerlist66");
+              //console.log("influencerlist66");
               localcampaignmapping.push({
                 ...nesitem,
                 name:
@@ -2074,7 +2073,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
                   )[0].category || [],
               });
             });
-            console.log("influencerlist7");
+            //console.log("influencerlist7");
             doc.data().eventmapping.map((nesitem) => {
               localeventmapping.push({
                 ...nesitem,
@@ -2083,16 +2082,16 @@ app.post("/api/admin/pinksky", async (req, res) => {
                     .name || "",
               });
             });
-            console.log("influencerlist1");
+            //console.log("influencerlist1");
             influencerlist.push({
               id: doc.id,
               ...doc.data(),
               campaignmapping: localcampaignmapping,
               eventmapping: localeventmapping,
             });
-            console.log("influencerlist2");
+            //console.log("influencerlist2");
           } else {
-            console.log("influencerlist3");
+            //console.log("influencerlist3");
           }
         });
 
@@ -2164,7 +2163,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           message: "Fetched Admin",
         });
       } else if (data.changesTrigger === "campaign") {
-        console.log("step2");
+        //console.log("step2");
         const snapshotCamp = await Firebase.Campaign.get();
         let campaignlist = [];
 
@@ -2207,7 +2206,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           message: "Fetched Admin",
         });
       } else if (data.changesTrigger === "member") {
-        console.log("step1");
+        //console.log("step1");
         const snapshotCoupon = await Firebase.Coupons.get();
         let couponlist = [];
         snapshotCoupon.docs.map((doc) => {
@@ -2232,9 +2231,9 @@ app.post("/api/admin/pinksky", async (req, res) => {
       } else if (data.changesTrigger === "gallery") {
         const snapshotGallerydata = await Firebase.Gallery.get();
         let gallerylist = [];
-        console.log("step0");
+        //console.log("step0");
         snapshotGallerydata.docs.map((doc) => {
-          console.log("step0");
+          //console.log("step0");
           if (doc.data()?.isActive === 1) {
             gallerylist.push({ id: doc.id, ...doc.data() });
           } else {
@@ -2271,7 +2270,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
 // app.post("/api/city/filter", async (req, res) => {
 //   try {
 //     const data = req.body;
-//     console.log(data.city);
+//     //console.log(data.city);
 
 //     let cityvaluearray = [];
 //     cityArrWithAllCity.map((m) => {
@@ -2325,7 +2324,7 @@ app.post("/api/brands/filter", async (req, res) => {
     } else {
       namesorted = list;
     }
-    console.log("citysorted length", namesorted.length);
+    //console.log("citysorted length", namesorted.length);
 
     logging.end();
     res.status(200).json({ data: namesorted, message: "Filtered Brand" });
@@ -2346,13 +2345,13 @@ app.post("/api/events/filter", async (req, res) => {
     const snapshot = await Firebase.Event.get();
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
-    console.log("step 1");
+    //console.log("step 1");
     if (
       data.inputValue.toLowerCase() === environments.ADMIN_EVENT_FILTER_TEXT
     ) {
       namesorted = list;
     } else if (data.inputValue !== "") {
-      console.log("step 2");
+      //console.log("step 2");
       namesorted = list.filter((item) => {
         if (
           item.name
@@ -2365,7 +2364,7 @@ app.post("/api/events/filter", async (req, res) => {
     } else {
       namesorted = list;
     }
-    console.log("citysorted length", namesorted.length);
+    //console.log("citysorted length", namesorted.length);
 
     logging.end();
     res.status(200).json({ data: namesorted, message: "Filtered Event" });
@@ -2386,13 +2385,13 @@ app.post("/api/coupons/filter", async (req, res) => {
     const snapshot = await Firebase.Coupons.get();
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
-    console.log("step 1");
+    //console.log("step 1");
     if (
       data.inputValue.toLowerCase() === environments.ADMIN_COUPON_FILTER_TEXT
     ) {
       namesorted = list;
     } else if (data.inputValue !== "") {
-      console.log("step 2");
+      //console.log("step 2");
       namesorted = list.filter((item) => {
         if (
           item.description
@@ -2405,7 +2404,7 @@ app.post("/api/coupons/filter", async (req, res) => {
     } else {
       namesorted = list;
     }
-    console.log("namesorted length", namesorted.length);
+    //console.log("namesorted length", namesorted.length);
 
     logging.end();
     res.status(200).json({ data: namesorted, message: "Filtered Coupons" });
@@ -2427,7 +2426,7 @@ app.post("/api/influencer/filter", async (req, res) => {
     let list = [];
 
     snapshot.docs.map((doc) => {
-      console.log(doc.id);
+      //console.log(doc.id);
       if (doc.data().status === "accepted") {
         list.push({ id: doc.id, ...doc.data() });
       } else {
@@ -2542,7 +2541,7 @@ app.post("/api/influencer/filter", async (req, res) => {
     } else {
       citysorted = categorysorted;
     }
-    console.log("citysorted length", citysorted.length);
+    //console.log("citysorted length", citysorted.length);
 
     logging.end();
     res.status(200).json({ data: citysorted, message: "Filtered Influencer" });
@@ -2568,7 +2567,7 @@ app.post("/api/campaign/filter", async (req, res) => {
     let citysorted;
     let specialValuesorted;
     let brandcategorysorted;
-    console.log("list length", list.length);
+    //console.log("list length", list.length);
     if (data.inputValue.toLowerCase() === "allcampaigndata") {
       namesorted = list.filter((item) => item.isActive === 1);
     } else if (data.inputValue !== "") {
@@ -2617,7 +2616,7 @@ app.post("/api/campaign/filter", async (req, res) => {
     } else {
       citysorted = categorysorted;
     }
-    console.log("citysorted length", citysorted.length);
+    //console.log("citysorted length", citysorted.length);
     if (data.radioSpecialValue !== "All") {
       specialValuesorted = citysorted.filter((item) => {
         if (data.radioSpecialValue === "Pinksky Privilege") {
@@ -2635,7 +2634,7 @@ app.post("/api/campaign/filter", async (req, res) => {
     data.radioBrandValue
       .filter((item) => item.status === true)
       .map((categ) => brandselectedCategory.push(categ.label));
-    console.log("check 1", brandselectedCategory);
+    //console.log("check 1", brandselectedCategory);
     if (brandselectedCategory[0] !== "All") {
       specialValuesorted.map((element) => {
         if (brandselectedCategory.includes(element.brandcategory.category)) {
@@ -2646,7 +2645,7 @@ app.post("/api/campaign/filter", async (req, res) => {
     } else {
       brandcategorysorted = specialValuesorted;
     }
-    console.log("brandcategorysorted length", brandcategorysorted.length);
+    //console.log("brandcategorysorted length", brandcategorysorted.length);
 
     logging.end();
     res.status(200).json({
@@ -2669,8 +2668,8 @@ app.post("/api/influencer/create", async (req, res) => {
 
   let influencerData = req.body;
   let isProfileCompletedQuery = req.query.isProfileCompleted;
-  console.log("influencerData", req.body);
-  console.log("isProfileCompletedQuery", isProfileCompletedQuery);
+  //console.log("influencerData", req.body);
+  //console.log("isProfileCompletedQuery", isProfileCompletedQuery);
 
   const createUser = {
     email: influencerData.email,
@@ -2682,7 +2681,7 @@ app.post("/api/influencer/create", async (req, res) => {
       "_" +
       influencerData.surname.replace(/\s/g, ""),
   };
-  console.log("createUser", createUser);
+  //console.log("createUser", createUser);
   try {
     //login here
     if (createUser.email != undefined && createUser.password != undefined) {
@@ -2702,9 +2701,9 @@ app.post("/api/influencer/create", async (req, res) => {
           email: influencerData.email,
           uid: getUserByUuid?.uid,
         };
-        console.log("def", userResponse);
+        //console.log("def", userResponse);
       } else {
-        console.log("abc");
+        //console.log("abc");
         userResponse = await Firebase.admin.auth().createUser({
           email: createUser.email,
           password: createUser.password,
@@ -2714,12 +2713,12 @@ app.post("/api/influencer/create", async (req, res) => {
         });
       }
 
-      console.log(
-        "userResponse email",
-        environments.NODE_ENV,
-        userResponse.email,
-        userResponse.uid
-      );
+      //console.log(
+      //   "userResponse email",
+      //   environments.NODE_ENV,
+      //   userResponse.email,
+      //   userResponse.uid
+      // );
       if (userResponse.email !== undefined && userResponse.uid !== undefined) {
         let influencerSchema = null;
         const options = {
@@ -2741,27 +2740,27 @@ app.post("/api/influencer/create", async (req, res) => {
             if (response.data.data.is_private === false) {
               let sum = 0;
               let count = 0;
-              console.log(
-                "response.data.data.edge_owner_to_timeline_media.edges",
-                response.data.data.edge_owner_to_timeline_media.edges.length
-              );
+              //console.log(
+              //   "response.data.data.edge_owner_to_timeline_media.edges",
+              //   response.data.data.edge_owner_to_timeline_media.edges.length
+              // );
               if (
                 response.data.data.edge_owner_to_timeline_media.edges.length > 4
               ) {
                 response.data.data.edge_owner_to_timeline_media.edges.map(
                   (item) => {
-                    // console.log(item);
-                    console.log(count);
+                    // //console.log(item);
+                    //console.log(count);
                     sum =
                       sum +
                       item?.node.edge_media_to_comment.count +
                       item?.node.edge_liked_by.count;
 
                     if (count <= 4) {
-                      console.log(
-                        "item.node.shortcode - ",
-                        item?.node.shortcode
-                      );
+                      //console.log(
+                      //   "item.node.shortcode - ",
+                      //   item?.node.shortcode
+                      // );
                       let itemData = {
                         id: item?.node.id,
                         shortcode: item?.node.shortcode,
@@ -2789,10 +2788,10 @@ app.post("/api/influencer/create", async (req, res) => {
                 sum / response.data.data.edge_followed_by.count;
               // * 1000;
 
-              console.log(
-                "engagementRate",
-                engagementRate.toString().replace(".", "")
-              );
+              //console.log(
+              //   "engagementRate",
+              //   engagementRate.toString().replace(".", "")
+              // );
               influencerSchema = {
                 ...influencerData,
                 instagram: {
@@ -2827,10 +2826,10 @@ app.post("/api/influencer/create", async (req, res) => {
           let interval = 8500;
           let lengthOfArray = instagramPostDetails.length - 1;
           let influencerArr = [];
-          console.log("lengthOfArray", lengthOfArray);
+          //console.log("lengthOfArray", lengthOfArray);
           instagramPostDetails.forEach((file, index) => {
             setTimeout(() => {
-              console.log("hi people", interval * index);
+              //console.log("hi people", interval * index);
 
               const d = new Date();
               let month = d.getMonth() + 1;
@@ -2856,17 +2855,17 @@ app.post("/api/influencer/create", async (req, res) => {
                 url: file.display_url,
                 method: "GET",
               };
-              console.log("fileName", fileName);
+              //console.log("fileName", fileName);
               let getDownloadURL = "";
               request(options, async (err, resp, body) => {
                 if (resp.statusCode === 200) {
-                  console.log("res.statusCode", resp.statusCode);
+                  //console.log("res.statusCode", resp.statusCode);
                   var bucket = Firebase.admin.storage().bucket();
 
                   await bucket.upload(filePath);
                   let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
-                  console.log("------Here------");
-                  console.log(fileFirebaseURL);
+                  //console.log("------Here------");
+                  //console.log(fileFirebaseURL);
                   axios
                     .get(fileFirebaseURL)
                     .then(async (response) => {
@@ -2874,10 +2873,10 @@ app.post("/api/influencer/create", async (req, res) => {
                         environments.FIRESTORE_URL +
                         `${fileName}?alt=media&token=${response.data.downloadTokens}`;
                       instagramPostDetails[index].new_url = getDownloadURL;
-                      console.log("index", index);
+                      //console.log("index", index);
                       fs.unlinkSync(filePath);
                       if (index === lengthOfArray) {
-                        console.log("inside");
+                        //console.log("inside");
                         if (
                           influencerData.isNonInfluencer.uuid.toString()
                             .length > 2
@@ -2927,11 +2926,11 @@ app.post("/api/influencer/create", async (req, res) => {
                           };
                         }
 
-                        console.log("influencerSchema", influencerSchema);
+                        //console.log("influencerSchema", influencerSchema);
                         Firebase.Influencer.add(influencerSchema);
-                        console.log("hello");
+                        //console.log("hello");
                         setTimeout(async () => {
-                          console.log("inside2");
+                          //console.log("inside2");
 
                           const snapshot = await Firebase.Influencer.get();
                           snapshot.docs.map((doc) => {
@@ -3046,13 +3045,13 @@ app.post("/api/influencer/create", async (req, res) => {
           " is already an pinksky user. Try sigging up with another user id.",
       });
     } else {
-      console.log(userResponse?.uid);
+      //console.log(userResponse?.uid);
       if (influencerData.isNonInfluencer.uuid.length > 2) {
         //non influencer is safe
       } else {
         await Firebase.admin.auth().deleteUser(userResponse?.uid);
       }
-      console.log("error", error.message);
+      //console.log("error", error.message);
       logging.write(new Date() + " - influencer/create ❌ - " + error + " \n");
       logging.end();
       res.status(500).json({ message: error.message });
@@ -3065,7 +3064,7 @@ app.post("/api/brand/create", async (req, res) => {
   logging.write(new Date() + " - brand/create POST 🚀 \n");
   let brandData = req.body;
   let isProfileCompletedQuery = req.query.isProfileCompleted;
-  console.log("brandData", req.body);
+  //console.log("brandData", req.body);
   const createUser = {
     email: brandData.email,
     password: brandData.password,
@@ -3076,7 +3075,7 @@ app.post("/api/brand/create", async (req, res) => {
   };
   let userResponse = { uid: "" };
   try {
-    console.log("createUser", createUser);
+    //console.log("createUser", createUser);
 
     if (createUser.email != undefined && createUser.password != undefined) {
       userResponse = await Firebase.admin.auth().createUser({
@@ -3087,7 +3086,7 @@ app.post("/api/brand/create", async (req, res) => {
         displayName: createUser.name,
       });
 
-      console.log("userResponse email", userResponse.email);
+      //console.log("userResponse email", userResponse.email);
       if (userResponse.email != undefined && userResponse.uid != undefined) {
         let brandSchema = null;
         const options = {
@@ -3100,7 +3099,7 @@ app.post("/api/brand/create", async (req, res) => {
         };
         let instagramPostDetails = [];
         let onGoingStatus = 200;
-        console.log("options ", options);
+        //console.log("options ", options);
         await axios
           .request(options)
           .then(function (response) {
@@ -3142,10 +3141,10 @@ app.post("/api/brand/create", async (req, res) => {
           let lengthOfArray = instagramPostDetails.length - 1;
           let brandArr = [];
 
-          console.log("lengthOfArray", lengthOfArray);
+          //console.log("lengthOfArray", lengthOfArray);
           instagramPostDetails.forEach((file, index) => {
             setTimeout(() => {
-              console.log("hi people", interval * index);
+              //console.log("hi people", interval * index);
 
               const d = new Date();
               let month = d.getMonth() + 1;
@@ -3166,23 +3165,23 @@ app.post("/api/brand/create", async (req, res) => {
                 index +
                 ".jpeg";
               let filePath = path.join(__dirname, "/images", fileName);
-              console.log("filePath", filePath);
+              //console.log("filePath", filePath);
               //let filePath = "./images/" + fileName;
               const options = {
                 url: file.display_url,
                 method: "GET",
               };
-              console.log("fileName", fileName);
+              //console.log("fileName", fileName);
               let getDownloadURL = "";
               request(options, async (err, resp, body) => {
                 if (resp.statusCode === 200) {
-                  console.log("res.statusCode", resp.statusCode);
+                  //console.log("res.statusCode", resp.statusCode);
                   var bucket = Firebase.admin.storage().bucket();
 
                   await bucket.upload(filePath);
                   let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
-                  console.log("------Here------");
-                  console.log(fileFirebaseURL);
+                  //console.log("------Here------");
+                  //console.log(fileFirebaseURL);
 
                   axios
                     .get(fileFirebaseURL)
@@ -3191,10 +3190,10 @@ app.post("/api/brand/create", async (req, res) => {
                         environments.FIRESTORE_URL +
                         `${fileName}?alt=media&token=${response.data.downloadTokens}`;
                       instagramPostDetails[index].new_url = getDownloadURL;
-                      console.log("index", index);
+                      //console.log("index", index);
                       fs.unlinkSync(filePath);
                       if (index === lengthOfArray) {
-                        console.log("inside");
+                        //console.log("inside");
 
                         brandSchema = {
                           ...brandSchema,
@@ -3215,7 +3214,7 @@ app.post("/api/brand/create", async (req, res) => {
 
                       Firebase.Brand.add(brandSchema);
                       setTimeout(async () => {
-                        console.log("inside2");
+                        //console.log("inside2");
 
                         const snapshot = await Firebase.Brand.get();
                         setTimeout(() => {
@@ -3296,11 +3295,11 @@ app.post("/api/brand/create", async (req, res) => {
 
     //   // Output expected ReferenceErrors.
 
-    //   console.log("braaaannndd error",error);
+    //   //console.log("braaaannndd error",error);
     // }else{
-    console.log(userResponse);
+    //console.log(userResponse);
     if (userResponse?.uid === "") {
-      console.log(createUser.email);
+      //console.log(createUser.email);
 
       res.status(402).json({
         message:
@@ -3310,12 +3309,12 @@ app.post("/api/brand/create", async (req, res) => {
     } else {
       await Firebase.admin.auth().deleteUser(userResponse?.uid);
 
-      console.log("error", error.message);
+      //console.log("error", error.message);
 
       res.status(500).json({ message: error.message });
     }
     //}
-    // console.log("error", error);
+    // //console.log("error", error);
     //
 
     // res.status(500).json({ message: error.message });
@@ -3374,7 +3373,7 @@ app.post("/api/noninfluencer/create", async (req, res) => {
       }, 2000);
     }
   } catch (error) {
-    console.log("error", error);
+    //console.log("error", error);
     logging.write(new Date() + " - noninfluencer/create ❌ - " + error + " \n");
     logging.end();
     res.status(500).json({ message: error });
@@ -3394,8 +3393,8 @@ app.post(
       let campaignFile = file;
       let campaignFileSplit = campaignFile.fileRef.metadata.id.split("/");
       let campaignFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${campaignFileSplit[0]}/o/${campaignFileSplit[1]}`;
-      console.log("campaignFileSplit", campaignFileSplit);
-      console.log("campaignFileFirebaseURL", campaignFileFirebaseURL);
+      //console.log("campaignFileSplit", campaignFileSplit);
+      //console.log("campaignFileFirebaseURL", campaignFileFirebaseURL);
       let getDownloadURL = "";
       await axios
         .get(campaignFileFirebaseURL)
@@ -3419,13 +3418,13 @@ app.post(
 
       setTimeout(async () => {
         const response = await Firebase.Campaign.add(campaignData);
-        console.log("response", response.data);
+        //console.log("response", response.data);
 
         logging.end();
         res.status(200).json({ message: "Posted Campaign" });
       }, 2000);
     } catch (error) {
-      console.log("error", error);
+      //console.log("error", error);
       logging.write(
         new Date() + " - campaign/create FILE ❌ - " + error + " \n"
       );
@@ -3447,8 +3446,8 @@ app.post(
       let couponFile = file;
       let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
       let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}`;
-      console.log("couponFileSplit", couponFileSplit);
-      console.log("couponFileFirebaseURL", couponFileFirebaseURL);
+      //console.log("couponFileSplit", couponFileSplit);
+      //console.log("couponFileFirebaseURL", couponFileFirebaseURL);
       let getDownloadURL = "";
       await axios
         .get(couponFileFirebaseURL)
@@ -3477,7 +3476,7 @@ app.post(
         res.status(200).json({ message: "Posted Event" });
       }, 2000);
     } catch (error) {
-      console.log("error");
+      //console.log("error");
       logging.write(new Date() + " - event/create FILE ❌ - " + error + " \n");
       logging.end();
       res.status(500).json({ message: error });
@@ -3497,8 +3496,8 @@ app.post(
       let couponFile = file;
       let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
       let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}`;
-      console.log("couponFileSplit", couponFileSplit);
-      console.log("couponFileFirebaseURL", couponFileFirebaseURL);
+      //console.log("couponFileSplit", couponFileSplit);
+      //console.log("couponFileFirebaseURL", couponFileFirebaseURL);
       let getDownloadURL = "";
       await axios
         .get(couponFileFirebaseURL)
@@ -3522,13 +3521,13 @@ app.post(
 
       setTimeout(async () => {
         const response = await Firebase.Coupons.add(couponData);
-        console.log("response", response.data);
+        //console.log("response", response.data);
 
         logging.end();
         res.status(200).json({ message: "Posted coupon" });
       }, 2000);
     } catch (error) {
-      console.log("error", error);
+      //console.log("error", error);
       logging.write(new Date() + " - coupon/create FILE ❌ - " + error + " \n");
       logging.end();
       res.status(500).json({ message: error });
@@ -3548,8 +3547,8 @@ app.post(
       let couponFile = file;
       let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
       let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/gallery%2F${couponFileSplit[2]}`;
-      console.log("couponFileSplit", couponFileSplit);
-      console.log("couponFileFirebaseURL", couponFileFirebaseURL);
+      //console.log("couponFileSplit", couponFileSplit);
+      //console.log("couponFileFirebaseURL", couponFileFirebaseURL);
       let getDownloadURL = "";
       await axios
         .get(couponFileFirebaseURL)
@@ -3575,13 +3574,13 @@ app.post(
 
       setTimeout(async () => {
         const response = await Firebase.Gallery.add(couponData);
-        console.log("response gallery create", response);
+        //console.log("response gallery create", response);
 
         logging.end();
         res.status(200).json({ message: "Posted Gallery" });
       }, 2000);
     } catch (error) {
-      console.log("error", error);
+      //console.log("error", error);
       logging.write(
         new Date() + " - gallery/create FILE ❌ - " + error + " \n"
       );
@@ -3601,17 +3600,17 @@ app.post(
     try {
       let { file } = req;
       let newFile = file;
-      console.log(newFile);
+      //console.log(newFile);
       let newFileSplit = newFile.fileRef.metadata.id.split("/");
       let newFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/gallery%2F${newFileSplit[2]}`;
-      console.log("newFileSplit", newFileSplit);
-      console.log("newFileFirebaseURL", newFileFirebaseURL);
+      //console.log("newFileSplit", newFileSplit);
+      //console.log("newFileFirebaseURL", newFileFirebaseURL);
       let getDownloadURL = "";
       await axios
         .get(newFileFirebaseURL)
         .then((response) => {
           getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/gallery%2F${newFileSplit[2]}?alt=media&token=${response.data.downloadTokens}`;
-          console.log("getDownloadURL", getDownloadURL);
+          //console.log("getDownloadURL", getDownloadURL);
         })
         .catch((error) => {
           logging.write(
@@ -3622,14 +3621,14 @@ app.post(
         });
 
       setTimeout(() => {
-        console.log("up");
+        //console.log("up");
         res
           .status(200)
           .json({ data: getDownloadURL, message: "Posted coupon" });
       }, 1500);
     } catch (error) {
-      console.log("down");
-      console.log("error", error);
+      //console.log("down");
+      //console.log("error", error);
       logging.write(
         new Date() + " - firestorelink/create FILE ❌ - " + error + " \n"
       );
@@ -3644,14 +3643,14 @@ app.put("/api/acceptstatus/update", async (req, res) => {
   logging.write(new Date() + " - acceptstatus/update PUT 🚀 \n");
 
   try {
-    console.log("hello");
+    //console.log("hello");
     const data = req.body;
-    console.log("Here");
+    //console.log("Here");
 
     //checked
     if (data.type === "influencerNewRequest") {
       const id = data.id;
-      console.log(id);
+      //console.log(id);
       const snapshot = await Firebase.Influencer.doc(id).get();
       let influencerData = [
         ...snapshot.data().message,
@@ -3724,7 +3723,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
 
       influencerData[objIndex].status = "accepted";
       influencerData[objIndex].closingPrice = data.closingPrice;
-      console.log("influencerData ", influencerData);
+      //console.log("influencerData ", influencerData);
       const campaignsnapshot = await Firebase.Campaign.doc(
         data.campaignid
       ).get();
@@ -3761,7 +3760,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       logging.end();
       res.status(200).json({ message: "Mapped Campaign with Influencer" });
     } else if (data.type === "influencerCampaignPaymentRequest") {
-      console.log("inside influencerCampaignPaymentRequest");
+      //console.log("inside influencerCampaignPaymentRequest");
       const data = req.body;
 
       const snapshot = await Firebase.Influencer.doc(data.influencerid).get();
@@ -3769,18 +3768,18 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       let influencerData = [...snapshot.data().campaignmapping];
       let influencerDataMessage = [...snapshot.data().message];
 
-      console.log("inside influencerCampaignPaymentRequest 2");
+      //console.log("inside influencerCampaignPaymentRequest 2");
       let objIndex = snapshot
         .data()
         .campaignmapping.findIndex((obj) => obj.campaignId === data.campaignid);
 
       influencerData[objIndex].paymentStatus = "accepted";
 
-      console.log("inside influencerCampaignPaymentRequest 3");
+      //console.log("inside influencerCampaignPaymentRequest 3");
       const campaignsnapshot = await Firebase.Campaign.doc(
         data.campaignid
       ).get();
-      console.log("inside influencerCampaignPaymentRequest 4");
+      //console.log("inside influencerCampaignPaymentRequest 4");
       var dateObj = new Date();
       var month = dateObj.getUTCMonth() + 1; //months from 1-12
       var year = dateObj.getUTCFullYear();
@@ -3793,7 +3792,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         settlementMonth: year + "/" + month,
         viewerDetails: campaignsnapshot.data().viewerDetails,
       });
-      console.log("inside influencerCampaignPaymentRequest 5", influencerData);
+      //console.log("inside influencerCampaignPaymentRequest 5", influencerData);
       await Firebase.Influencer.doc(data.influencerid).update({
         campaignmapping: influencerData,
         message: influencerDataMessage,
@@ -3846,11 +3845,11 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       res.status(200).json({ message: "Accepted Brand" });
     } else if (data.type === "influencerHireRequest") {
       const data = req.body;
-      console.log(data);
+      //console.log(data);
       const snapshot = await Firebase.Brand.doc(data.brandid).get();
       let brandData = [...snapshot.data().influencermapping];
       let brandDataMessage = [...snapshot.data().message];
-      console.log("step1");
+      //console.log("step1");
       let objIndex = brandData.findIndex(
         (obj) => obj.influencerId === data.influencerid
       );
@@ -3858,13 +3857,13 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       const influencersnapshot = await Firebase.Influencer.doc(
         data.influencerid
       ).get();
-      console.log("step2", influencersnapshot.data().name);
+      //console.log("step2", influencersnapshot.data().name);
       brandDataMessage.push({
         statusID: "201",
         influencerID: data.influencerid,
         influencerName: influencersnapshot.data().name,
       });
-      console.log("step3");
+      //console.log("step3");
       await Firebase.Brand.doc(data.brandid).update({
         influencermapping: brandData,
         message: brandDataMessage,
@@ -3893,7 +3892,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       influencerData.push(...snapshot.data().eventmapping);
       influencerDataMessage.push(...snapshot.data().message);
 
-      console.log("influencerData before", influencerData);
+      //console.log("influencerData before", influencerData);
       let objIndex = influencerData.findIndex(
         (obj) => obj.eventId === data.eventid
       );
@@ -3905,10 +3904,10 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         eventId: data.eventid,
         eventName: eventsnapshot.data().name,
       });
-      console.log("data", {
-        eventmapping: influencerData,
-        message: influencerDataMessage,
-      });
+      //console.log("data", {
+      //   eventmapping: influencerData,
+      //   message: influencerDataMessage,
+      // });
       await Firebase.Influencer.doc(data.influencerid).update({
         eventmapping: influencerData,
         message: influencerDataMessage,
@@ -3961,7 +3960,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       );
 
       brandDataMessage[objIndex].isShowAdmin = false;
-      console.log(brandDataMessage);
+      //console.log(brandDataMessage);
       await Firebase.Brand.doc(data.details.brandid).update({
         message: brandDataMessage,
       });
@@ -3986,10 +3985,10 @@ app.post(
     );
 
     try {
-      console.log("hello");
+      //console.log("hello");
       const data = req.body;
       var object = JSON.parse(data.data);
-      console.log("Here");
+      //console.log("Here");
 
       //checked
       if (object.type === "influencerCampaignPaymentRequest") {
@@ -4015,7 +4014,7 @@ app.post(
           });
 
         setTimeout(async () => {
-          console.log("1");
+          //console.log("1");
           let snapshot = await Firebase.Influencer.doc(
             object.influencerid
           ).get();
@@ -4033,7 +4032,7 @@ app.post(
               campaignmapping.push({ ...camp });
             }
           });
-          console.log("3");
+          //console.log("3");
           let influencerDataMessage = [];
 
           snapshot.data().message.map((item) => {
@@ -4050,7 +4049,7 @@ app.post(
               campaignmapping: campaignmapping,
               message: influencerDataMessage,
             });
-          console.log("5");
+          //console.log("5");
 
           logging.end();
           res.status(200).json({ message: "Updated Influencer with payment" });
@@ -4075,7 +4074,7 @@ app.put("/api/rejectstatus/update", async (req, res) => {
 
   try {
     let data = req.body;
-    console.log(req.body);
+    //console.log(req.body);
 
     if (data.type === "influencerNewRequest") {
       const id = req.body.id;
@@ -4110,7 +4109,7 @@ app.put("/api/rejectstatus/update", async (req, res) => {
           influencerDataMessage.push(...doc.data().message);
         }
       });
-      console.log("influencerData before", influencerData);
+      //console.log("influencerData before", influencerData);
       let objIndex = influencerData.findIndex(
         (obj) => obj.campaignId === data.campaignid
       );
@@ -4194,7 +4193,7 @@ app.put("/api/rejectstatus/update", async (req, res) => {
       const snapshot = await Firebase.Brand.doc(data.brandid).get();
       let brandData = [...snapshot.data().influencermapping];
       let brandDataMessage = [...snapshot.data().message];
-      console.log("step1");
+      //console.log("step1");
       let objIndex = brandData.findIndex(
         (obj) => obj.influencerId === data.influencerid
       );
@@ -4202,13 +4201,13 @@ app.put("/api/rejectstatus/update", async (req, res) => {
       const influencersnapshot = await Firebase.Influencer.doc(
         data.influencerid
       ).get();
-      console.log("step2", influencersnapshot.data().name);
+      //console.log("step2", influencersnapshot.data().name);
       brandDataMessage.push({
         statusID: "202",
         influencerID: data.influencerid,
         influencerName: influencersnapshot.data().name,
       });
-      console.log("step3");
+      //console.log("step3");
       await Firebase.Brand.doc(data.brandid).update({
         influencermapping: brandData,
         message: brandDataMessage,
@@ -4224,7 +4223,7 @@ app.put("/api/rejectstatus/update", async (req, res) => {
       influencerData.push(...snapshot.data().eventmapping);
       influencerDataMessage.push(...snapshot.data().message);
 
-      console.log("influencerData before", influencerData);
+      //console.log("influencerData before", influencerData);
       let objIndex = influencerData.findIndex(
         (obj) => obj.eventId === data.eventid
       );
@@ -4236,10 +4235,10 @@ app.put("/api/rejectstatus/update", async (req, res) => {
         eventId: data.eventid,
         eventName: eventsnapshot.data().name,
       });
-      console.log("data", {
-        eventmapping: influencerData,
-        message: influencerDataMessage,
-      });
+      //console.log("data", {
+      //   eventmapping: influencerData,
+      //   message: influencerDataMessage,
+      // });
       await Firebase.Influencer.doc(data.influencerid).update({
         eventmapping: influencerData,
         message: influencerDataMessage,
@@ -4347,19 +4346,18 @@ app.put("/api/gallery/update", async (req, res) => {
     let snapshot = await Firebase.Gallery.doc(id).get();
     //18
     //10
-    if(snapshot.data().highlights.length + data.highlights.length <= 20){
+    if (snapshot.data().highlights.length + data.highlights.length <= 20) {
       let highlightData = [...snapshot.data().highlights, ...data.highlights];
-      console.log(highlightData);
-  
+      //console.log(highlightData);
+
       await Firebase.Gallery.doc(id).update({ highlights: highlightData });
-  
+
       logging.end();
       res.status(200).json({ message: "Updated Coupon" });
-    }else{
+    } else {
       const error = new TypeError("limitreached");
       throw error;
     }
- 
   } catch (error) {
     logging.write(new Date() + " - gallery/update ❌ - " + error + " \n");
     logging.end();
@@ -4371,7 +4369,7 @@ app.post("/api/brandname", async (req, res) => {
   logging.write(new Date() + " - brandname POST 🚀 \n");
 
   let data = req.body;
-  console.log(data);
+  //console.log(data);
   try {
     let snapshot = await Firebase.Brand.get();
     let companynames = [];
@@ -4390,7 +4388,7 @@ app.post("/api/brandname", async (req, res) => {
         });
       }
     });
-    console.log(companynames);
+    //console.log(companynames);
 
     res.json({ message: companynames });
   } catch (error) {
@@ -4405,14 +4403,14 @@ app.post("/api/randomdata/create", async (req, res) => {
 
   try {
     const data = req.body;
-    console.log(data);
+    //console.log(data);
 
     await Firebase.RandomData.add(data);
 
     logging.end();
     res.status(200).json({ message: "Posted RandomData" });
   } catch (error) {
-    console.log("error", error);
+    //console.log("error", error);
     logging.write(new Date() + " - randomdata/create ❌ - " + error + " \n");
     logging.end();
     res.status(500).json({ message: error });
@@ -4425,14 +4423,14 @@ app.post("/api/feedbackdata/create", async (req, res) => {
 
   try {
     const data = req.body;
-    console.log(data);
+    //console.log(data);
 
     await Firebase.Feedback.add(data);
 
     logging.end();
     res.status(200).json({ message: "Posted Feedback" });
   } catch (error) {
-    console.log("error", error);
+    //console.log("error", error);
     logging.write(new Date() + " - feedbackdata/create ❌ - " + error + " \n");
     logging.end();
     res.status(500).json({ message: error });
@@ -4459,7 +4457,7 @@ app.post("/api/pinkskypopupentry/create", async (req, res) => {
       res.status(200).json({ message: "Posted PinkskyPopup" });
     }, 2000);
   } catch (error) {
-    console.log("error", error);
+    //console.log("error", error);
     logging.write(
       new Date() + " - pinkskypopupentry/create ❌ - " + error + " \n"
     );
@@ -4488,7 +4486,7 @@ app.post("/api/influencerpayment/create", async (req, res) => {
     logging.end();
     res.status(200).json({ message: "Posted Influencer Payment" });
   } catch (error) {
-    console.log("error", error);
+    //console.log("error", error);
     logging.write(
       new Date() + " - influencerpayment/create ❌ - " + error + " \n"
     );
@@ -4513,7 +4511,7 @@ app.put("/api/influencer/update", async (req, res) => {
       updatedDisplayName =
         displayName.slice(0, 1) === "0" &&
         "1" + displayName.slice(1, displayName.length);
-      console.log("updatedDisplayName", updatedDisplayName);
+      //console.log("updatedDisplayName", updatedDisplayName);
       await Firebase.admin.auth().updateUser(data?.cookies.uuid, {
         displayName: updatedDisplayName,
       });
@@ -4527,7 +4525,7 @@ app.put("/api/influencer/update", async (req, res) => {
       });
     }
     updatedCookies = { ...data?.cookies, displayName: updatedDisplayName };
-    console.log("here?");
+    //console.log("here?");
     await Firebase.Influencer.doc(id).update(data.body);
     res
       .status(200)
@@ -4555,7 +4553,7 @@ app.put("/api/brand/update", async (req, res) => {
       updatedDisplayName =
         displayName.slice(0, 1) === "0" &&
         "1" + displayName.slice(1, displayName.length);
-      console.log("updatedDisplayName", updatedDisplayName);
+      //console.log("updatedDisplayName", updatedDisplayName);
       await Firebase.admin.auth().updateUser(data?.cookies.uuid, {
         displayName: updatedDisplayName,
       });
@@ -4569,7 +4567,7 @@ app.put("/api/brand/update", async (req, res) => {
       });
     }
     updatedCookies = { ...data?.cookies, displayName: updatedDisplayName };
-    console.log("here?");
+    //console.log("here?");
     await Firebase.Brand.doc(id).update(data.body);
     res
       .status(200)
@@ -4586,12 +4584,12 @@ app.put("/api/brandcomments/update", async (req, res) => {
   logging.write(new Date() + " - brandcomments/update PUT 🚀 \n");
 
   const data = req.body;
-  console.log(data);
+  //console.log(data);
   const id = data.id;
   delete req.body.id;
   const snaps = await Firebase.Brand.doc(id).get();
   let arr = [];
-  // console.log(snaps.data());
+  // //console.log(snaps.data());
   snaps.data().subscription.map((item) => {
     item.payload.subscription.entity.id === data.subid
       ? arr.push({
@@ -4611,7 +4609,7 @@ app.put("/api/brandcomments/update", async (req, res) => {
         })
       : arr.push({ ...item });
   });
-  // console.log(arr);
+  // //console.log(arr);
   setTimeout(async () => {
     await Firebase.Brand.doc(id).update({ subscription: arr });
 
@@ -4715,7 +4713,7 @@ app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
 
   try {
     const data = req.body;
-    console.log(data);
+    //console.log(data);
 
     const snapshot = await Firebase.Brand.get();
     let brandData = [];
@@ -4731,7 +4729,7 @@ app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
         checkStatus = doc.data().status;
       }
     });
-    console.log("checkStatus", checkStatus);
+    //console.log("checkStatus", checkStatus);
     if (checkStatus === "new") {
       res.status(400).json({
         message: "Your status is pending for making changes on Pinksky.",
@@ -4775,9 +4773,9 @@ app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
     const snapshot = await Firebase.Influencer.doc(data.influencerId).get();
     let influencerData = [...snapshot.data().eventmapping];
     let influencerDataMessage = [...snapshot.data().message];
-    console.log(data);
+    //console.log(data);
 
-    console.log("step1");
+    //console.log("step1");
     if (influencerData.find((item) => item.eventId === data.eventId)) {
       let objIndex = influencerData.findIndex(
         (obj) => obj.eventId === data.eventId
@@ -4790,7 +4788,7 @@ app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
         status: "new",
       });
     }
-    console.log("step2");
+    //console.log("step2");
 
     const eventsnapshot = await Firebase.Event.doc(data.eventId).get();
 
@@ -4800,10 +4798,10 @@ app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
       eventName: eventsnapshot.data().name,
     });
 
-    console.log("influencerData after ", {
-      eventmapping: influencerData,
-      message: influencerDataMessage,
-    });
+    //console.log("influencerData after ", {
+    //   eventmapping: influencerData,
+    //   message: influencerDataMessage,
+    // });
     await Firebase.Influencer.doc(data.influencerId).update({
       eventmapping: influencerData,
       message: influencerDataMessage,
@@ -4841,7 +4839,7 @@ app.put("/api/mappinginfluencerwithcampaign/update", async (req, res) => {
         influencerDataMessage.push(...doc.data().message);
       }
     });
-    console.log("influencerData before ", influencerData);
+    //console.log("influencerData before ", influencerData);
     const campaignsnapshot = await Firebase.Campaign.doc(data.campaignId).get();
 
     if (influencerData.find((item) => item.campaignId === data.campaignId)) {
@@ -4867,7 +4865,7 @@ app.put("/api/mappinginfluencerwithcampaign/update", async (req, res) => {
       campaignName: campaignsnapshot.data().name,
     });
 
-    console.log("influencerData after ", influencerData);
+    //console.log("influencerData after ", influencerData);
     await Firebase.Influencer.doc(data.influencerId).update({
       campaignmapping: influencerData,
       message: influencerDataMessage,
@@ -4956,8 +4954,8 @@ app.post("/api/v2/influencer/create", async (req, res) => {
 
   let influencerData = req.body;
   let isProfileCompletedQuery = req.query.isProfileCompleted;
-  console.log("influencerData", req.body);
-  console.log("isProfileCompletedQuery", isProfileCompletedQuery);
+  //console.log("influencerData", req.body);
+  //console.log("isProfileCompletedQuery", isProfileCompletedQuery);
 
   const createUser = {
     email: influencerData.email,
@@ -4969,7 +4967,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
       "_" +
       influencerData.surname.replace(/\s/g, ""),
   };
-  console.log("createUser", createUser);
+  //console.log("createUser", createUser);
   try {
     //login here
     if (createUser.email != undefined && createUser.password != undefined) {
@@ -4989,9 +4987,9 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           email: influencerData.email,
           uid: getUserByUuid?.uid,
         };
-        console.log("def", userResponse);
+        //console.log("def", userResponse);
       } else {
-        console.log("abc");
+        //console.log("abc");
         userResponse = await Firebase.admin.auth().createUser({
           email: createUser.email,
           password: createUser.password,
@@ -5001,12 +4999,12 @@ app.post("/api/v2/influencer/create", async (req, res) => {
         });
       }
 
-      console.log(
-        "userResponse email",
-        environments.NODE_ENV,
-        userResponse.email,
-        userResponse.uid
-      );
+      //console.log(
+      //   "userResponse email",
+      //   environments.NODE_ENV,
+      //   userResponse.email,
+      //   userResponse.uid
+      // );
       if (userResponse.email !== undefined && userResponse.uid !== undefined) {
         let influencerSchema = null;
         // const options = {
@@ -5028,7 +5026,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           data: `{"username":"${influencerData.instagramurl}"}`,
         };
         //pointoferror
-        console.log(options);
+        //console.log(options);
         //Here -- axios
         //let instagramPostDetails = [];
         let onGoingStatus = false;
@@ -5037,14 +5035,14 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           .request(options)
           .then(function (response) {
             let instadatares = response.data.response.body.data.user;
-            // console.log("instagram respnose",instadatares)
+            // //console.log("instagram respnose",instadatares)
             if (instadatares.is_private === false) {
               //let sum = 0;
               //let count = 0;
-              console.log(
-                "instadatares.edge_owner_to_timeline_media.edges",
-                instadatares.edge_owner_to_timeline_media.edges.length
-              );
+              //console.log(
+              //   "instadatares.edge_owner_to_timeline_media.edges",
+              //   instadatares.edge_owner_to_timeline_media.edges.length
+              // );
               if (instadatares.edge_owner_to_timeline_media.edges.length > 4) {
                 //do something
                 onGoingStatus = true;
@@ -5074,7 +5072,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
             influencerSchema = {
               ...influencerData,
               pinkskymember: snapshotNonInfluencer.data().pinkskymember,
-              isProfileCompleted: isProfileCompletedQuery,
+              isProfileCompleted: Math.floor(isProfileCompletedQuery),
 
               message: [
                 {
@@ -5089,7 +5087,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           } else {
             influencerSchema = {
               ...influencerData,
-              isProfileCompleted: isProfileCompletedQuery,
+              isProfileCompleted: Math.floor(isProfileCompletedQuery),
 
               message: [
                 {
@@ -5112,7 +5110,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
                 influencerArr.push({ id: doc.id, ...doc.data() });
               }
             });
-            console.log("influencerArr", influencerArr);
+            //console.log("influencerArr", influencerArr);
             //setting up coupon from noninfluencer
             if (
               influencerData.isNonInfluencer.uuid.toString().length > 2 &&
@@ -5211,13 +5209,13 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           " is already an pinksky user. Try sigging up with another user id.",
       });
     } else {
-      console.log(userResponse?.uid);
+      //console.log(userResponse?.uid);
       if (influencerData.isNonInfluencer.uuid.length > 2) {
         //non influencer is safe
       } else {
         await Firebase.admin.auth().deleteUser(userResponse?.uid);
       }
-      console.log("error", error.message);
+      //console.log("error", error.message);
       logging.write(new Date() + " - influencer/create ❌ - " + error + " \n");
       logging.end();
       res.status(500).json({ message: error.message });
@@ -5228,7 +5226,7 @@ app.post("/api/v2/brand/create", async (req, res) => {
   logging.write(new Date() + " - brand/create POST 🚀 \n");
   let brandData = req.body;
   let isProfileCompletedQuery = req.query.isProfileCompleted;
-  console.log("brandData", req.body);
+  //console.log("brandData", req.body);
   const createUser = {
     email: brandData.email,
     password: brandData.password,
@@ -5239,7 +5237,7 @@ app.post("/api/v2/brand/create", async (req, res) => {
   };
   let userResponse = { uid: "" };
   try {
-    console.log("createUser", createUser);
+    //console.log("createUser", createUser);
 
     if (createUser.email != undefined && createUser.password != undefined) {
       userResponse = await Firebase.admin.auth().createUser({
@@ -5250,7 +5248,7 @@ app.post("/api/v2/brand/create", async (req, res) => {
         displayName: createUser.name,
       });
 
-      console.log("userResponse email", userResponse.email);
+      //console.log("userResponse email", userResponse.email);
       if (userResponse.email != undefined && userResponse.uid != undefined) {
         let brandSchema = null;
         // const options = {
@@ -5273,7 +5271,7 @@ app.post("/api/v2/brand/create", async (req, res) => {
         };
         let instagramPostDetails = [];
         let onGoingStatus = 200;
-        console.log("options ", options);
+        //console.log("options ", options);
         await axios
           .request(options)
           .then(function (response) {
@@ -5316,10 +5314,10 @@ app.post("/api/v2/brand/create", async (req, res) => {
           let lengthOfArray = instagramPostDetails.length - 1;
           let brandArr = [];
 
-          console.log("lengthOfArray", lengthOfArray);
+          //console.log("lengthOfArray", lengthOfArray);
           instagramPostDetails.forEach((file, index) => {
             // setTimeout(() => {
-            //console.log("hi people", interval * index);
+            ////console.log("hi people", interval * index);
 
             const d = new Date();
             let month = d.getMonth() + 1;
@@ -5340,23 +5338,23 @@ app.post("/api/v2/brand/create", async (req, res) => {
               index +
               ".jpeg";
             let filePath = path.join(__dirname, "/images", fileName);
-            console.log("filePath", filePath);
+            //console.log("filePath", filePath);
             //let filePath = "./images/" + fileName;
             const options = {
               url: file.display_url,
               method: "GET",
             };
-            console.log("fileName", fileName);
+            //console.log("fileName", fileName);
             let getDownloadURL = "";
             request(options, async (err, resp, body) => {
               if (resp.statusCode === 200) {
-                console.log("res.statusCode", resp.statusCode);
+                //console.log("res.statusCode", resp.statusCode);
                 var bucket = Firebase.admin.storage().bucket();
 
                 await bucket.upload(filePath);
                 let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
-                console.log("------Here------");
-                console.log(fileFirebaseURL);
+                //console.log("------Here------");
+                //console.log(fileFirebaseURL);
 
                 axios
                   .get(fileFirebaseURL)
@@ -5365,14 +5363,14 @@ app.post("/api/v2/brand/create", async (req, res) => {
                       environments.FIRESTORE_URL +
                       `${fileName}?alt=media&token=${response.data.downloadTokens}`;
                     instagramPostDetails[index].new_url = getDownloadURL;
-                    console.log("index", index);
+                    //console.log("index", index);
                     fs.unlinkSync(filePath);
                     if (index === lengthOfArray) {
-                      console.log("inside");
+                      //console.log("inside");
 
                       brandSchema = {
                         ...brandSchema,
-                        isProfileCompleted: isProfileCompletedQuery,
+                        isProfileCompleted: Math.floor(isProfileCompletedQuery),
                         imgURL: instagramPostDetails[0].new_url,
                         message: [
                           {
@@ -5389,7 +5387,7 @@ app.post("/api/v2/brand/create", async (req, res) => {
 
                     Firebase.Brand.add(brandSchema);
                     setTimeout(async () => {
-                      console.log("inside2");
+                      //console.log("inside2");
 
                       const snapshot = await Firebase.Brand.get();
                       setTimeout(() => {
@@ -5470,11 +5468,11 @@ app.post("/api/v2/brand/create", async (req, res) => {
 
     //   // Output expected ReferenceErrors.
 
-    //   console.log("braaaannndd error",error);
+    //   //console.log("braaaannndd error",error);
     // }else{
-    console.log(userResponse);
+    //console.log(userResponse);
     if (userResponse?.uid === "") {
-      console.log(createUser.email);
+      //console.log(createUser.email);
 
       res.status(402).json({
         message:
@@ -5484,12 +5482,12 @@ app.post("/api/v2/brand/create", async (req, res) => {
     } else {
       await Firebase.admin.auth().deleteUser(userResponse?.uid);
 
-      console.log("error", error.message);
+      //console.log("error", error.message);
 
       res.status(500).json({ message: error.message });
     }
     //}
-    // console.log("error", error);
+    // //console.log("error", error);
     //
 
     // res.status(500).json({ message: error.message });
@@ -5499,7 +5497,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
   logging.write(new Date() + " - signin/profileupdating POST 🚀 \n");
 
   try {
-    let { data,isRegistering } = req.body;
+    let { data, isRegistering } = req.body;
     if (data.displayName.slice(0, 1) === "1" && isRegistering == "N") {
       if (data.displayName.indexOf("Brand") != -1) {
         //Brand
@@ -5509,7 +5507,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           new Date().getTime() - snapshot.data().updatedDate.toDate().getTime();
 
         var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
-        console.log("daysDifference", daysDifference);
+        //console.log("daysDifference", daysDifference);
         if (daysDifference > 15) {
           let brandSchema = null;
           // const options = {
@@ -5533,7 +5531,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           await axios
             .request(options)
             .then(function (response) {
-              // console.log("inside2", response.data);
+              // //console.log("inside2", response.data);
               let instadatares = response.data.response.body.data.user;
               brandSchema = {
                 ...snapshot.data(),
@@ -5573,9 +5571,9 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           new Date().getTime() - snapshot.data().updatedDate.toDate().getTime();
 
         var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
-        console.log("daysDifference", daysDifference);
+        //console.log("daysDifference", daysDifference);
         if (daysDifference > 15) {
-          console.log("inside");
+          //console.log("inside");
           let influencerSchema = null;
           // const options = {
           //   method: "GET",
@@ -5603,14 +5601,14 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
               let count = 0;
               let instadatares = response.data.response.body.data.user;
               instadatares.edge_owner_to_timeline_media.edges.map((item) => {
-                // console.log(item);
+                // //console.log(item);
                 sum =
                   sum +
                   item.node.edge_media_to_comment.count +
                   item.node.edge_liked_by.count;
 
                 if (count <= 4) {
-                  // console.log("item.node.shortcode", item.node.shortcode);
+                  // //console.log("item.node.shortcode", item.node.shortcode);
                   let itemData = {
                     id: item.node.id,
                     shortcode: item.node.shortcode,
@@ -5625,10 +5623,10 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                 }
                 count++;
               });
-              console.log("SUM", sum);
+              //console.log("SUM", sum);
               let engagementRate = sum / instadatares.edge_followed_by.count;
               //* 1000;
-              console.log("ENGAGEMENT RATE", engagementRate);
+              //console.log("ENGAGEMENT RATE", engagementRate);
 
               influencerSchema = {
                 ...snapshot.data(),
@@ -5660,10 +5658,10 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           let interval = 8500;
           let lengthOfArray = instagramPostDetails.length - 1;
           // let influencerArr = [];
-          console.log("lengthOfArray", lengthOfArray);
+          //console.log("lengthOfArray", lengthOfArray);
           instagramPostDetails.forEach((file, index) => {
             setTimeout(() => {
-              console.log("hi people", interval * index);
+              //console.log("hi people", interval * index);
 
               const d = new Date();
               let month = d.getMonth() + 1;
@@ -5689,17 +5687,17 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                 url: file.display_url,
                 method: "GET",
               };
-              console.log("fileName", fileName);
+              //console.log("fileName", fileName);
               let getDownloadURL = "";
               request(options, async (err, resp, body) => {
                 if (resp.statusCode === 200) {
-                  console.log("res.statusCode", resp.statusCode);
+                  //console.log("res.statusCode", resp.statusCode);
                   var bucket = Firebase.admin.storage().bucket();
 
                   await bucket.upload(filePath);
                   let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
-                  console.log("------Here------");
-                  console.log(fileFirebaseURL);
+                  //console.log("------Here------");
+                  //console.log(fileFirebaseURL);
                   axios
                     .get(fileFirebaseURL)
                     .then((response) => {
@@ -5707,10 +5705,10 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                         environments.FIRESTORE_URL +
                         `${fileName}?alt=media&token=${response.data.downloadTokens}`;
                       instagramPostDetails[index].new_url = getDownloadURL;
-                      console.log("index", index);
+                      //console.log("index", index);
                       fs.unlinkSync(filePath);
                       if (index === lengthOfArray) {
-                        console.log("inside");
+                        //console.log("inside");
 
                         influencerSchema = {
                           ...influencerSchema,
@@ -5720,9 +5718,9 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                           imgURL4: instagramPostDetails[3]?.new_url,
                           imgURL5: instagramPostDetails[4]?.new_url,
                         };
-                        console.log("influencerSchema", influencerSchema);
+                        //console.log("influencerSchema", influencerSchema);
                         setTimeout(async () => {
-                          console.log("inside2");
+                          //console.log("inside2");
 
                           await Firebase.Influencer.doc(data.id).update(
                             influencerSchema
@@ -5749,10 +5747,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           });
         }
       }
-    } else if (
-      data.displayName.slice(0, 1) === "0" &&
-      isRegistering == "Y"
-    ) {
+    } else if (data.displayName.slice(0, 1) === "0" && isRegistering == "Y") {
       if (data.displayName.indexOf("Influencer") != -1) {
         const snapshot = await Firebase.Influencer.doc(data.id).get();
 
@@ -5783,19 +5778,19 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           .then(function (response) {
             let instadatares = response.data.response.body.data.user;
 
-            //console.log("response", response);
+            ////console.log("response", response);
             let sum = 0;
             let count = 0;
 
             instadatares.edge_owner_to_timeline_media.edges.map((item) => {
-              // console.log(item);
+              // //console.log(item);
               sum =
                 sum +
                 item.node.edge_media_to_comment.count +
                 item.node.edge_liked_by.count;
 
               if (count <= 4) {
-                // console.log("item.node.shortcode", item.node.shortcode);
+                // //console.log("item.node.shortcode", item.node.shortcode);
                 let itemData = {
                   id: item.node.id,
                   shortcode: item.node.shortcode,
@@ -5809,10 +5804,10 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
               }
               count++;
             });
-            console.log("SUM", sum);
+            //console.log("SUM", sum);
             let engagementRate = sum / instadatares.edge_followed_by.count;
             //* 1000;
-            console.log("ENGAGEMENT RATE", engagementRate);
+            //console.log("ENGAGEMENT RATE", engagementRate);
 
             influencerSchema = {
               ...snapshot.data(),
@@ -5844,10 +5839,10 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
         let interval = 8500;
         let lengthOfArray = instagramPostDetails.length - 1;
         // let influencerArr = [];
-        console.log("lengthOfArray", lengthOfArray);
+        //console.log("lengthOfArray", lengthOfArray);
         instagramPostDetails.forEach((file, index) => {
           setTimeout(() => {
-            console.log("hi people", interval * index);
+            //console.log("hi people", interval * index);
 
             const d = new Date();
             let month = d.getMonth() + 1;
@@ -5873,17 +5868,17 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
               url: file.display_url,
               method: "GET",
             };
-            console.log("fileName", fileName);
+            //console.log("fileName", fileName);
             let getDownloadURL = "";
             request(optionss, async (err, resp, body) => {
               if (resp.statusCode === 200) {
-                console.log("res.statusCode", resp.statusCode);
+                //console.log("res.statusCode", resp.statusCode);
                 var bucket = Firebase.admin.storage().bucket();
 
                 await bucket.upload(filePath);
                 let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
-                console.log("------Here------");
-                console.log(fileFirebaseURL);
+                //console.log("------Here------");
+                //console.log(fileFirebaseURL);
                 axios
                   .get(fileFirebaseURL)
                   .then((response) => {
@@ -5891,10 +5886,10 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                       environments.FIRESTORE_URL +
                       `${fileName}?alt=media&token=${response.data.downloadTokens}`;
                     instagramPostDetails[index].new_url = getDownloadURL;
-                    console.log("index", index);
+                    //console.log("index", index);
                     fs.unlinkSync(filePath);
                     if (index === lengthOfArray) {
-                      console.log("inside");
+                      //console.log("inside");
 
                       influencerSchema = {
                         ...influencerSchema,
@@ -5904,9 +5899,9 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                         imgURL4: instagramPostDetails[3]?.new_url,
                         imgURL5: instagramPostDetails[4]?.new_url,
                       };
-                      console.log("influencerSchema", influencerSchema);
+                      //console.log("influencerSchema", influencerSchema);
                       setTimeout(async () => {
-                        console.log("inside2");
+                        //console.log("inside2");
 
                         await Firebase.Influencer.doc(data.id).update(
                           influencerSchema
@@ -5979,13 +5974,13 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
 //       },
 //       data: `{"ids":[${object.highlightid}]}`,
 //     };
-//     console.log("STEP 6", options);
+//     //console.log("STEP 6", options);
 
 //     axios
 //       .request(options)
 //       .then(function (response) {
 //         const instadatares = response.data.response.body.reels_media[0];
-//         console.log("STEP 7");
+//         //console.log("STEP 7");
 
 //         resolve(instadatares);
 //       })
@@ -6006,26 +6001,26 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
 //     request(optionss,async (err, resp, body) => {
 //       if (resp.statusCode === 200) {
 //         var bucket = Firebase.admin.storage().bucket();
-//         console.log("STEP 8", filePath);
+//         //console.log("STEP 8", filePath);
 //         await bucket.upload(filePath, { destination: "gallery" });
 //         setTimeout(() => {
 //           getGalleryLinkFromFirebase(fileFirebaseURL, filePath, fileName)
 //           .then((url) => {
-//             console.log("STEP 12",{ url, file });
+//             //console.log("STEP 12",{ url, file });
 //             resolve({ url, file });
 //           })
 //           .catch((error) => {
 //             reject(error);
 //           });
 //         }, 20000);
-            
+
 //         //  bucket
 //         //   .upload(filePath, { destination: "gallery" })
 //         //   .then((res) => {
-//         //     console.log("STEP 9");
+//         //     //console.log("STEP 9");
 //         //     getGalleryLinkFromFirebase(fileFirebaseURL, filePath, fileName)
 //         //       .then((url) => {
-//         //         console.log("STEP 12",{ url, file });
+//         //         //console.log("STEP 12",{ url, file });
 //         //         resolve({ url, file });
 //         //       })
 //         //       .catch((error) => {
@@ -6042,7 +6037,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
 
 // function getGalleryLinkFromFirebase(fileFirebaseURL, filePath, fileName) {
 //   return new Promise((resolve, reject) => {
-//     console.log("STEP 10", fileFirebaseURL);
+//     //console.log("STEP 10", fileFirebaseURL);
 
 //     axios
 //       .get(fileFirebaseURL)
@@ -6052,7 +6047,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
 //           `${fileName}?alt=media&token=${nresponse.data.downloadTokens}`;
 
 //         fs.unlinkSync(filePath);
-//         console.log("STEP 11", url);
+//         //console.log("STEP 11", url);
 //         resolve(url);
 //       })
 //       .catch((error) => {
@@ -6072,7 +6067,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
 //     try {
 //       getDownloadLinkFromFirebasePromise(file)
 //         .then((getDownloadURL) => {
-//           console.log("STEP 1", getDownloadURL);
+//           //console.log("STEP 1", getDownloadURL);
 //           if (getDownloadURL === "") {
 //             const error = new TypeError("Cover photo upload unsuccessful");
 //             throw error;
@@ -6087,17 +6082,17 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
 //           }
 //         })
 //         .then(() => {
-//           console.log("STEP 2");
+//           //console.log("STEP 2");
 //           return getHighlightInstaData(object);
 //         })
 //         .then((instadatares) => {
-//           console.log("STEP 3");
+//           //console.log("STEP 3");
 
 //           return instadatares;
 //         })
 //         .then((instadatares) => {
 //           let lengthOfArray = instadatares.items.length - 1;
-//           console.log("STEP 4", lengthOfArray);
+//           //console.log("STEP 4", lengthOfArray);
 //           instadatares.items.forEach(async (file, index) => {
 //             let interval = 20000;
 //             // if (file.media_type === 1) {
@@ -6106,7 +6101,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
 //             //   interval = 5000;
 //             // }
 //             setTimeout(async () => {
-//               console.log("starting with interval > ", interval);
+//               //console.log("starting with interval > ", interval);
 //               const d = new Date();
 //               let month = d.getMonth() + 1;
 //               let date = d.getDate();
@@ -6167,7 +6162,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
 //                 optionss,file,
 //                 fileFirebaseURL,fileName
 //               ).then(async (data) => {
-//                 console.log("STEP 5", data.url);
+//                 //console.log("STEP 5", data.url);
 //                 if (index === lengthOfArray) {
 //                   //update gallery
 //                   galleryData = {

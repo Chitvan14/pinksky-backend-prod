@@ -29,7 +29,7 @@ module.exports = function (type, data) {
                                 <table style="width:100%;max-width:600px;border-collapse:collapse">
                                     <tr>
                                         <td style="padding:0">
-                                            <div style="background-image:url(https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/brand-logo%2Ffavicon-removebg-preview.png?alt=media&token=0a6def94-f8e5-43b1-970d-6b20287c7218);background-repeat:no-repeat;background-position:bottom;height:200px;margin-bottom:30px;padding-top:32px;padding-left:32px">
+                                            <div style="background-image:url(https://firebasestorage.googleapis.com/v0/b/pinksky-website.appspot.com/o/Brands%2Fpinksky.png?alt=media&token=f1c44d80-06bb-414a-b08f-e9df94b90388);background-repeat:no-repeat;background-position:bottom;height:200px;margin-bottom:30px;padding-top:32px;padding-left:32px">
                                             </div>
                                         </td>
                                     </tr>
