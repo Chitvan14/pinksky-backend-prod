@@ -4,7 +4,7 @@ const credientials = require("./pinksky-8804c-firebase-adminsdk-vy5o9-4b658e5d2c
 const Multer = require("multer");
 const FirebaseStorage = require("multer-firebase-storage");
 // require("dotenv").config();
-const environments =  require('./environments.js');
+const environments = require("./environments.js");
 
 const firebaseConfig = {
   apiKey: environments.apiKey,
@@ -44,6 +44,20 @@ const multer = Multer({
   }),
 });
 
+const gallerymulter = Multer({
+  storage: FirebaseStorage({
+    bucketName: "pinksky-8804c.appspot.com",
+    directoryPath: "gallery",
+    credentials: {
+      clientEmail: credientials.client_email,
+      privateKey: credientials.private_key,
+      projectId: credientials.project_id,
+    },
+  }),
+});
+
+
+
 module.exports.Firebase = {
   Influencer,
   RandomData,
@@ -57,5 +71,7 @@ module.exports.Firebase = {
   admin,
   firebase,
   multer,
-  Feedback
+  gallerymulter,
+ 
+  Feedback,
 };

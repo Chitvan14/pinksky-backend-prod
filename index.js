@@ -3539,7 +3539,7 @@ app.post(
 // 4. Gallery create
 app.post(
   "/api/gallery/create",
-  Firebase.multer.single("file"),
+  Firebase.gallerymulter.single("file"),
   async (req, res) => {
     logging.write(new Date() + " - gallery/create FILE POST 🚀 \n");
 
@@ -3547,14 +3547,14 @@ app.post(
       let { file, body } = req;
       let couponFile = file;
       let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
-      let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}`;
+      let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/gallery%2F${couponFileSplit[2]}`;
       console.log("couponFileSplit", couponFileSplit);
       console.log("couponFileFirebaseURL", couponFileFirebaseURL);
       let getDownloadURL = "";
       await axios
         .get(couponFileFirebaseURL)
         .then((response) => {
-          getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/${couponFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
+          getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/gallery%2F${couponFileSplit[2]}?alt=media&token=${response.data.downloadTokens}`;
         })
         .catch((error) => {
           logging.write(
@@ -3575,7 +3575,7 @@ app.post(
 
       setTimeout(async () => {
         const response = await Firebase.Gallery.add(couponData);
-        console.log("response", response.data);
+        console.log("response gallery create", response);
 
         logging.end();
         res.status(200).json({ message: "Posted Gallery" });
@@ -3594,7 +3594,7 @@ app.post(
 // 5. Get gallery links
 app.post(
   "/api/firestorelink/create",
-  Firebase.multer.single("file"),
+  Firebase.gallerymulter.single("file"),
   async (req, res) => {
     logging.write(new Date() + " - firestorelink/create FILE POST 🚀 \n");
 
@@ -3603,14 +3603,14 @@ app.post(
       let newFile = file;
       console.log(newFile);
       let newFileSplit = newFile.fileRef.metadata.id.split("/");
-      let newFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/${newFileSplit[1]}`;
+      let newFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/gallery%2F${newFileSplit[2]}`;
       console.log("newFileSplit", newFileSplit);
       console.log("newFileFirebaseURL", newFileFirebaseURL);
       let getDownloadURL = "";
       await axios
         .get(newFileFirebaseURL)
         .then((response) => {
-          getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/${newFileSplit[1]}?alt=media&token=${response.data.downloadTokens}`;
+          getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${newFileSplit[0]}/o/gallery%2F${newFileSplit[2]}?alt=media&token=${response.data.downloadTokens}`;
           console.log("getDownloadURL", getDownloadURL);
         })
         .catch((error) => {
@@ -4345,13 +4345,21 @@ app.put("/api/gallery/update", async (req, res) => {
     const data = req.body;
 
     let snapshot = await Firebase.Gallery.doc(id).get();
-    let highlightData = [...snapshot.data().highlights, ...data.highlights];
-    console.log(highlightData);
-
-    await Firebase.Gallery.doc(id).update({ highlights: highlightData });
-
-    logging.end();
-    res.status(200).json({ message: "Updated Coupon" });
+    //18
+    //10
+    if(snapshot.data().highlights.length + data.highlights.length <= 20){
+      let highlightData = [...snapshot.data().highlights, ...data.highlights];
+      console.log(highlightData);
+  
+      await Firebase.Gallery.doc(id).update({ highlights: highlightData });
+  
+      logging.end();
+      res.status(200).json({ message: "Updated Coupon" });
+    }else{
+      const error = new TypeError("limitreached");
+      throw error;
+    }
+ 
   } catch (error) {
     logging.write(new Date() + " - gallery/update ❌ - " + error + " \n");
     logging.end();
@@ -5933,4 +5941,429 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
+
+// function getDownloadLinkFromFirebase(){
+//   const promise = new Promise((resolve, reject) => {
+
+//   });
+//   return promise;
+// }
+// function getDownloadLinkFromFirebasePromise(file) {
+//   return new Promise((resolve, reject) => {
+//     let couponFile = file;
+//     let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
+//     let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/gallery%2F${couponFileSplit[2]}`;
+
+//     let getDownloadURL = "";
+//     axios
+//       .get(couponFileFirebaseURL)
+//       .then(async (responseforcover) => {
+//         getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/gallery%2F${couponFileSplit[2]}?alt=media&token=${responseforcover.data.downloadTokens}`;
+
+//         resolve(getDownloadURL);
+//       })
+//       .catch((error) => {
+//         reject(error);
+//       });
+//   });
+// }
+// function getHighlightInstaData(object) {
+//   return new Promise((resolve, reject) => {
+//     const options = {
+//       method: "POST",
+//       url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/highlight/get_stories",
+//       headers: {
+//         "content-type": "application/json",
+//         "X-RapidAPI-Key": environments.RapidAPIKey_V2,
+//         "X-RapidAPI-Host": environments.RapidAPIHost_V2,
+//       },
+//       data: `{"ids":[${object.highlightid}]}`,
+//     };
+//     console.log("STEP 6", options);
+
+//     axios
+//       .request(options)
+//       .then(function (response) {
+//         const instadatares = response.data.response.body.reels_media[0];
+//         console.log("STEP 7");
+
+//         resolve(instadatares);
+//       })
+//       .catch((error) => {
+//         reject(error);
+//       });
+//   });
+// }
+
+// function uploadToLocalToFirebase(
+//   filePath,
+//   optionss,
+//   file,
+//   fileFirebaseURL,
+//   fileName
+// ) {
+//   return new Promise((resolve, reject) => {
+//     request(optionss,async (err, resp, body) => {
+//       if (resp.statusCode === 200) {
+//         var bucket = Firebase.admin.storage().bucket();
+//         console.log("STEP 8", filePath);
+//         await bucket.upload(filePath, { destination: "gallery" });
+//         setTimeout(() => {
+//           getGalleryLinkFromFirebase(fileFirebaseURL, filePath, fileName)
+//           .then((url) => {
+//             console.log("STEP 12",{ url, file });
+//             resolve({ url, file });
+//           })
+//           .catch((error) => {
+//             reject(error);
+//           });
+//         }, 20000);
+            
+//         //  bucket
+//         //   .upload(filePath, { destination: "gallery" })
+//         //   .then((res) => {
+//         //     console.log("STEP 9");
+//         //     getGalleryLinkFromFirebase(fileFirebaseURL, filePath, fileName)
+//         //       .then((url) => {
+//         //         console.log("STEP 12",{ url, file });
+//         //         resolve({ url, file });
+//         //       })
+//         //       .catch((error) => {
+//         //         reject(error);
+//         //       });
+//         //   })
+//         //   .catch((error) => {
+//         //     reject(error);
+//         //   });
+//       }
+//     }).pipe(fs.createWriteStream(filePath));
+//   });
+// }
+
+// function getGalleryLinkFromFirebase(fileFirebaseURL, filePath, fileName) {
+//   return new Promise((resolve, reject) => {
+//     console.log("STEP 10", fileFirebaseURL);
+
+//     axios
+//       .get(fileFirebaseURL)
+//       .then(async (nresponse) => {
+//         let url =
+//           environments.FIRESTORE_URL +
+//           `${fileName}?alt=media&token=${nresponse.data.downloadTokens}`;
+
+//         fs.unlinkSync(filePath);
+//         console.log("STEP 11", url);
+//         resolve(url);
+//       })
+//       .catch((error) => {
+//         reject(error);
+//       });
+//   });
+// }
+// app.post(
+//   "/api/v2/gallery/create",
+//   Firebase.gallerymulter.single("file"),
+//   async (req, res) => {
+//     logging.write(new Date() + " - gallery/create FILE POST 🚀 \n");
+//     let { file, body } = req;
+//     var object = JSON.parse(body.data);
+//     let galleryData = null;
+//     let highlightArr = [];
+//     try {
+//       getDownloadLinkFromFirebasePromise(file)
+//         .then((getDownloadURL) => {
+//           console.log("STEP 1", getDownloadURL);
+//           if (getDownloadURL === "") {
+//             const error = new TypeError("Cover photo upload unsuccessful");
+//             throw error;
+//           } else {
+//             galleryData = {
+//               ...object,
+//               url: getDownloadURL,
+//               createdDate: new Date(),
+//               updatedDate: new Date(),
+//             };
+//             return;
+//           }
+//         })
+//         .then(() => {
+//           console.log("STEP 2");
+//           return getHighlightInstaData(object);
+//         })
+//         .then((instadatares) => {
+//           console.log("STEP 3");
+
+//           return instadatares;
+//         })
+//         .then((instadatares) => {
+//           let lengthOfArray = instadatares.items.length - 1;
+//           console.log("STEP 4", lengthOfArray);
+//           instadatares.items.forEach(async (file, index) => {
+//             let interval = 20000;
+//             // if (file.media_type === 1) {
+//             //   interval = 10000;
+//             // } else {
+//             //   interval = 5000;
+//             // }
+//             setTimeout(async () => {
+//               console.log("starting with interval > ", interval);
+//               const d = new Date();
+//               let month = d.getMonth() + 1;
+//               let date = d.getDate();
+//               let year = d.getFullYear();
+//               let time = d.getTime();
+//               //let getDownloadURL = "";
+//               let fileName = null;
+//               let filePath = null;
+//               let optionss = null;
+
+//               if (file.media_type === 1) {
+//                 fileName =
+//                   "gallery_" +
+//                   object.name.replace(/\s/g, "") +
+//                   "_" +
+//                   month +
+//                   "_" +
+//                   date +
+//                   "_" +
+//                   year +
+//                   "_" +
+//                   time +
+//                   "_" +
+//                   index +
+//                   ".jpeg";
+//                 filePath = path.join(__dirname, "/images", fileName);
+
+//                 optionss = {
+//                   url: file.image_versions2.candidates[5].url,
+//                   method: "GET",
+//                 };
+//               } else if (file.media_type === 2) {
+//                 fileName =
+//                   "gallery_" +
+//                   object.name.replace(/\s/g, "") +
+//                   "_" +
+//                   month +
+//                   "_" +
+//                   date +
+//                   "_" +
+//                   year +
+//                   "_" +
+//                   time +
+//                   "_" +
+//                   index +
+//                   ".mp4";
+//                 filePath = path.join(__dirname, "/images", fileName);
+
+//                 optionss = {
+//                   url: file.video_versions[1].url,
+//                   method: "GET",
+//                 };
+//               }
+//               let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
+
+//               await uploadToLocalToFirebase(
+//                 filePath,
+//                 optionss,file,
+//                 fileFirebaseURL,fileName
+//               ).then(async (data) => {
+//                 console.log("STEP 5", data.url);
+//                 if (index === lengthOfArray) {
+//                   //update gallery
+//                   galleryData = {
+//                     ...galleryData,
+//                     highlights: highlightArr,
+//                     media_ids: instadatares.media_ids,
+//                   };
+
+//                   await Firebase.Gallery.add(galleryData);
+
+//                   logging.end();
+//                   res.status(200).json({ message: "Posted Gallery" });
+//                 } else {
+//                   if (data.file.media_type === 1) {
+//                     highlightArr.push({
+//                       insta_src_id: data.file.pk,
+//                       highlightType: "image/jpg",
+//                       src: data.url,
+//                       videoDuration: "0",
+//                       isActive: 1,
+//                     });
+//                   } else if (data.file.media_type === 2) {
+//                     highlightArr.push({
+//                       insta_src_id: data.file.pk,
+//                       highlightType: "image/mp4",
+//                       src: data.url,
+//                       videoDuration: data.file.video_duration * 1000,
+//                       isActive: 1,
+//                     });
+//                   }
+//                 }
+//               });
+//             }, index * interval);
+//           });
+//         })
+//         .catch((error) => {
+//           throw error;
+//         });
+//     } catch (error) {
+//       logging.write(
+//         new Date() + " - gallery/create FILE ❌ - " + error + " \n"
+//       );
+//       logging.end();
+//       res.status(500).json({ message: error });
+//     }
+//   }
+// );
+// app.post("/api/v2/gallery/firestorelink/create", async (req, res) => {
+//   logging.write(
+//     new Date() + " - v2/gallery/firestorelink/create FILE POST 🚀 \n"
+//   );
+
+//   try {
+//     const options = {
+//       method: "POST",
+//       url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/highlight/get_stories",
+//       headers: {
+//         "content-type": "application/json",
+//         "X-RapidAPI-Key": environments.RapidAPIKey_V2,
+//         "X-RapidAPI-Host": environments.RapidAPIHost_V2,
+//       },
+//       data: '{"ids":[18325340335028970]}',
+//     };
+
+//     let highlightArr = [];
+
+//     await axios
+//       .request(options)
+//       .then(function (response) {
+//         let instadatares = response.data.response.body.reels_media[0];
+//         //check if instadatares length greater than 0
+//         let interval = 8500;
+//         let lengthOfArray = instadatares.items.length - 1;
+//         instadatares.items.forEach((file, index) => {
+//           setTimeout(() => {
+//             const d = new Date();
+//             let month = d.getMonth() + 1;
+//             let date = d.getDate();
+//             let year = d.getFullYear();
+//             let time = d.getTime();
+//             let getDownloadURL = "";
+//             const fileName = null;
+//             let filePath = null;
+//             const optionss = null;
+//             if (file.media_type === 1) {
+//               fileName =
+//                 "gallery_" +
+//                 data.name.replace(/\s/g, "") +
+//                 "_" +
+//                 month +
+//                 "_" +
+//                 date +
+//                 "_" +
+//                 year +
+//                 "_" +
+//                 time +
+//                 "_" +
+//                 index +
+//                 ".jpeg";
+//               filePath = path.join(__dirname, "/images", fileName);
+
+//               optionss = {
+//                 url: file.image_versions2.candidates[5].url,
+//                 method: "GET",
+//               };
+//             } else if (file.media_type === 2) {
+//               fileName =
+//                 "gallery_" +
+//                 data.name.replace(/\s/g, "") +
+//                 "_" +
+//                 month +
+//                 "_" +
+//                 date +
+//                 "_" +
+//                 year +
+//                 "_" +
+//                 time +
+//                 "_" +
+//                 index +
+//                 ".mp4";
+//               filePath = path.join(__dirname, "/images", fileName);
+
+//               optionss = {
+//                 url: file.video_versions[1].url,
+//                 method: "GET",
+//               };
+//             }
+
+//             request(optionss, async (err, resp, body) => {
+//               if (resp.statusCode === 200) {
+//                 var bucket = Firebase.admin.storage().bucket();
+
+//                 await bucket.upload(filePath);
+//                 let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
+
+//                 axios
+//                   .get(fileFirebaseURL)
+//                   .then(async (nresponse) => {
+//                     getDownloadURL =
+//                       environments.FIRESTORE_URL +
+//                       `${fileName}?alt=media&token=${nresponse.data.downloadTokens}`;
+
+//                     //till here link is genrated
+//                     //now need to make highlight for firestore
+//                     fs.unlinkSync(filePath);
+//                     if (index === lengthOfArray) {
+//                       //update gallery
+//                       await Firebase.Gallery.doc(data.id).update({
+//                         highlights: highlightArr,
+//                         media_ids: instadatares.media_ids,
+//                       });
+
+//                       logging.end();
+//                       res.status(200).json({
+//                         message: "Updated Gallery",
+//                       });
+//                     } else {
+//                       if (file.media_type === 1) {
+//                         highlightArr.push({
+//                           insta_src_id: file.pk,
+//                           highlightType: "image/jpg",
+//                           src: getDownloadURL,
+//                           videoDuration: "0",
+//                           isActive: 1,
+//                         });
+//                       } else if (file.media_type === 2) {
+//                         highlightArr.push({
+//                           insta_src_id: file.pk,
+//                           highlightType: "image/mp4",
+//                           src: getDownloadURL,
+//                           videoDuration: file.video_duration * 1000,
+//                           isActive: 1,
+//                         });
+//                       }
+//                     }
+//                   })
+//                   .catch((error) => {
+//                     throw error;
+//                   });
+//               }
+//             }).pipe(fs.createWriteStream(filePath));
+//           }, index * interval);
+//         });
+//       })
+//       .catch(function (error) {
+//         throw error;
+//       });
+//   } catch (error) {
+//     logging.write(
+//       new Date() +
+//         " - v2/gallery/firestorelink/create FILE ❌ - " +
+//         error +
+//         " \n"
+//     );
+//     logging.end();
+//     res.status(500).json({ message: error });
+//   }
+// });
 app.listen(PORT, () => console.log("Running @5000"));
