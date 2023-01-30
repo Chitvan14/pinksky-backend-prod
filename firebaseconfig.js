@@ -5,9 +5,9 @@ const credientialsprod = require("./serviceaccount_prod.json");
 const Multer = require("multer");
 const FirebaseStorage = require("multer-firebase-storage");
 const environments = require("./environments.js");
-let credientials = (environments.NODE_ENV = "production"
+let credientials = environments.NODE_ENV === "production"
   ? credientialsprod
-  : credientialsdev);
+  : credientialsdev;
 const firebaseConfig = {
   apiKey: environments.apiKey,
   authDomain: environments.authDomain,
