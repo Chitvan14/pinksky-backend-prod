@@ -2,4 +2,5 @@ node_modules
 environment.js
 local.env
 dotenv
-pinksky-8804c-firebase-adminsdk-vy5o9-4b658e5d2c.json
+serviceaccount_dev.json
+serviceaccount_prod.json

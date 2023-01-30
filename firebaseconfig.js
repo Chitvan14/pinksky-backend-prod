@@ -1,11 +1,13 @@
 const firebase = require("firebase");
 const admin = require("firebase-admin");
-const credientials = require("./pinksky-8804c-firebase-adminsdk-vy5o9-4b658e5d2c.json");
+const credientialsdev = require("./serviceaccount_dev.json");
+const credientialsprod = require("./serviceaccount_prod.json");
 const Multer = require("multer");
 const FirebaseStorage = require("multer-firebase-storage");
-// require("dotenv").config();
 const environments = require("./environments.js");
-
+let credientials = (environments.NODE_ENV = "production"
+  ? credientialsprod
+  : credientialsdev);
 const firebaseConfig = {
   apiKey: environments.apiKey,
   authDomain: environments.authDomain,
@@ -18,7 +20,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 admin.initializeApp({
   credential: admin.credential.cert(credientials),
-  storageBucket: "pinksky-8804c.appspot.com",
+  storageBucket: environments.storageBucket,
 });
 
 const db = firebase.firestore();
@@ -35,7 +37,7 @@ const Feedback = db.collection("Feedback");
 
 const multer = Multer({
   storage: FirebaseStorage({
-    bucketName: "pinksky-8804c.appspot.com",
+    bucketName: environments.storageBucket,
     credentials: {
       clientEmail: credientials.client_email,
       privateKey: credientials.private_key,
@@ -46,7 +48,7 @@ const multer = Multer({
 
 const gallerymulter = Multer({
   storage: FirebaseStorage({
-    bucketName: "pinksky-8804c.appspot.com",
+    bucketName: environments.storageBucket,
     directoryPath: "gallery",
     credentials: {
       clientEmail: credientials.client_email,
@@ -55,8 +57,6 @@ const gallerymulter = Multer({
     },
   }),
 });
-
-
 
 module.exports.Firebase = {
   Influencer,
@@ -72,6 +72,5 @@ module.exports.Firebase = {
   firebase,
   multer,
   gallerymulter,
- 
   Feedback,
 };
