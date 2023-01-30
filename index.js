@@ -53,22 +53,20 @@ app.use(cors());
 
 // WHATSAPP AND EMAIL SECTION
 // 1. Logging
-app.post("/api/testmail", async (req, res) => {
-  // sendMail("registerdetailmail", {
-  //   tomail: environments.EML_USER,
-  //   ccmail: "",
-  //   subjectmail: "Influencer Details | Pinksky",
-  //   text: "Hi"+" <br/>"+" Chitvan Garg",
-  //   href: environments.EML_HREF_WEBSITE,
-  // });
-  await Firebase.admin
-    .auth()
-    .generateEmailVerificationLink("gargchitvan99@gmail.com")
-    .then((response) => {
-      //console.log(response);
-    });
-  // .getUser(influencerData.isNonInfluencer.uuid.toString());
-});
+// app.post("/api/testmail", async (req, res) => {
+//   // sendMail("registerdetailmail", {
+//   //   tomail: environments.EML_USER,
+//   //   ccmail: "",
+//   //   subjectmail: "Influencer Details | Pinksky",
+//   //   text: "Hi"+" <br/>"+" Chitvan Garg",
+//   //   href: environments.EML_HREF_WEBSITE,
+//   // });
+//   await Firebase.admin
+//     .auth()
+//     .generateEmailVerificationLink("gargchitvan99@gmail.com")
+//     .then((response) => {
+//     });
+// });
 // 2. creating mail to send
 const sendMail = (sendType, data) => {
   //console.log("sendMail started 🚀");
@@ -83,8 +81,10 @@ const sendMail = (sendType, data) => {
   html = emailtemplate(sendType, data);
   var mailOptions = {
     from: environments.EML_USER,
-    // to: data.tomail,
-    to: environments.EML_USER,
+    to:
+      environments.NODE_ENV === "production"
+        ? data.tomail
+        : environments.EML_USER,
     subject: data.subjectmail,
     html: html,
     cc: data.ccmail,
