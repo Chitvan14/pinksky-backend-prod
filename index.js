@@ -1800,7 +1800,10 @@ app.post("/api/admin/pinksky", async (req, res) => {
         snapshotInfl.docs.map((doc) => {
           let localcampaignmapping = [];
           let localeventmapping = [];
-          if (doc.data().status === "new") {
+          if (
+            doc.data().status === "new" &&
+            doc.data().isProfileCompleted === 1
+          ) {
             influencerlist.push({
               id: doc.id,
               ...doc.data(),
@@ -1970,7 +1973,10 @@ app.post("/api/admin/pinksky", async (req, res) => {
         snapshotInfl.docs.map((doc) => {
           let localcampaignmapping = [];
           let localeventmapping = [];
-          if (doc.data().status === "new") {
+          if (
+            doc.data().status === "new" &&
+            doc.data().isProfileCompleted === 1
+          ) {
             influencerlist.push({
               id: doc.id,
               ...doc.data(),
@@ -2052,7 +2058,10 @@ app.post("/api/admin/pinksky", async (req, res) => {
         snapshotInfl.docs.map((doc) => {
           let localcampaignmapping = [];
           let localeventmapping = [];
-          if (doc.data().status === "new") {
+          if (
+            doc.data().status === "new" &&
+            doc.data().isProfileCompleted === 1
+          ) {
             influencerlist.push({
               id: doc.id,
               ...doc.data(),
