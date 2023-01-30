@@ -1,6 +1,3 @@
 node_modules
 environment.js
 local.env
-dotenv
-serviceaccount_dev.json
-serviceaccount_prod.json
