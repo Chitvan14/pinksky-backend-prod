@@ -92,7 +92,7 @@ const sendMail = (sendType, data) => {
   };
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
-      //console.log("sendMail Failed ❌ with error - ", error);
+      console.log("sendMail Failed ❌ with error - ", error);
     } else {
       //console.log("sendMail success ✅ with response - ", {
       //   response: info.response,
@@ -1933,40 +1933,43 @@ app.post("/api/admin/pinksky", async (req, res) => {
               }
             });
             //console.log("step6?");
-            doc.data().influencermapping.map((nesitem) => {
-              //console.log("Datataatat", nesitem);
-              localinfluemapping.push({
-                ...nesitem,
-                name:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0]?.name || "",
-                surname:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0]?.surname || "",
-                phonenumber:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0]?.phonenumber || "",
-                whatsappnumber:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0]?.whatsappnumber || "",
-                instagramurl:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0]?.instagramurl || "",
-                email:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0]?.email || "",
-                category:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0]?.category || "",
+            if (doc.data().influencermapping.length > 0) {
+              doc.data().influencermapping.map((nesitem) => {
+                //console.log("Datataatat", nesitem);
+                localinfluemapping.push({
+                  ...nesitem,
+                  name:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0]?.name || "",
+                  surname:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0]?.surname || "",
+                  phonenumber:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0]?.phonenumber || "",
+                  whatsappnumber:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0]?.whatsappnumber || "",
+                  instagramurl:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0]?.instagramurl || "",
+                  email:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0]?.email || "",
+                  category:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0]?.category || "",
+                });
               });
-            });
+            }
+
             //console.log("step6??");
             brandlist.push({
               id: doc.id,
@@ -2027,33 +2030,38 @@ app.post("/api/admin/pinksky", async (req, res) => {
             });
           } else if (doc.data().status === "accepted") {
             //console.log("influencerlist6");
-            doc.data().campaignmapping.map((nesitem) => {
-              //console.log("influencerlist66");
-              localcampaignmapping.push({
-                ...nesitem,
-                name:
-                  rawcampaignlist.filter(
-                    (fun) => fun.id === nesitem.campaignId
-                  )[0].name || "",
-                category:
-                  rawcampaignlist.filter(
-                    (fun) => fun.id === nesitem.campaignId
-                  )[0].category || [],
+            if (doc.data().campaignmapping.length > 0) {
+              doc.data().campaignmapping.map((nesitem) => {
+                //console.log("influencerlist66");
+                localcampaignmapping.push({
+                  ...nesitem,
+                  name:
+                    rawcampaignlist.filter(
+                      (fun) => fun.id === nesitem.campaignId
+                    )[0].name || "",
+                  category:
+                    rawcampaignlist.filter(
+                      (fun) => fun.id === nesitem.campaignId
+                    )[0].category || [],
+                });
               });
-            });
-            //console.log("influencerlist7");
-            doc.data().eventmapping.map((nesitem) => {
-              //console.log(
-              //   "raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name",
-              //   raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name
-              // );
-              localeventmapping.push({
-                ...nesitem,
-                name:
-                  raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
-                    .name || "",
+            }
+
+            if (doc.data().eventmapping.length > 0) {
+              doc.data().eventmapping.map((nesitem) => {
+                //console.log(
+                //   "raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name",
+                //   raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name
+                // );
+                localeventmapping.push({
+                  ...nesitem,
+                  name:
+                    raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
+                      .name || "",
+                });
               });
-            });
+            }
+
             //console.log("influencerlist1");
             influencerlist.push({
               id: doc.id,
@@ -2112,29 +2120,37 @@ app.post("/api/admin/pinksky", async (req, res) => {
             });
           } else if (doc.data().status === "accepted") {
             //console.log("influencerlist6");
-            doc.data().campaignmapping.map((nesitem) => {
-              //console.log("influencerlist66");
-              localcampaignmapping.push({
-                ...nesitem,
-                name:
-                  rawcampaignlist.filter(
-                    (fun) => fun.id === nesitem.campaignId
-                  )[0].name || "",
-                category:
-                  rawcampaignlist.filter(
-                    (fun) => fun.id === nesitem.campaignId
-                  )[0].category || [],
+
+            if (doc.data().campaignmapping.length > 0) {
+              doc.data().campaignmapping.map((nesitem) => {
+                //console.log("influencerlist66");
+
+                localcampaignmapping.push({
+                  ...nesitem,
+                  name:
+                    rawcampaignlist.filter(
+                      (fun) => fun.id === nesitem.campaignId
+                    )[0].name || "",
+                  category:
+                    rawcampaignlist.filter(
+                      (fun) => fun.id === nesitem.campaignId
+                    )[0].category || [],
+                });
               });
-            });
+            }
+            if (doc.data().eventmapping.length > 0) {
+              doc.data().eventmapping.map((nesitem) => {
+                localeventmapping.push({
+                  ...nesitem,
+                  name:
+                    raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
+                      .name || "",
+                });
+              });
+            }
+
             //console.log("influencerlist7");
-            doc.data().eventmapping.map((nesitem) => {
-              localeventmapping.push({
-                ...nesitem,
-                name:
-                  raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
-                    .name || "",
-              });
-            });
+
             //console.log("influencerlist1");
             influencerlist.push({
               id: doc.id,
@@ -2162,39 +2178,42 @@ app.post("/api/admin/pinksky", async (req, res) => {
                 locallaunchmapping.push(item);
               }
             });
-            doc.data().influencermapping.map((nesitem) => {
-              localinfluemapping.push({
-                ...nesitem,
-                name:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0].name || "",
-                surname:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0].surname || "",
-                phonenumber:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0].phonenumber || "",
-                whatsappnumber:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0].whatsappnumber || "",
-                instagramurl:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0].instagramurl || "",
-                email:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0].email || "",
-                category:
-                  influencerlist.filter(
-                    (fun) => fun.id === nesitem.influencerId
-                  )[0].category || "",
+            if (doc.data().influencermapping.length > 0) {
+              doc.data().influencermapping.map((nesitem) => {
+                localinfluemapping.push({
+                  ...nesitem,
+                  name:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0].name || "",
+                  surname:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0].surname || "",
+                  phonenumber:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0].phonenumber || "",
+                  whatsappnumber:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0].whatsappnumber || "",
+                  instagramurl:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0].instagramurl || "",
+                  email:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0].email || "",
+                  category:
+                    influencerlist.filter(
+                      (fun) => fun.id === nesitem.influencerId
+                    )[0].category || "",
+                });
               });
-            });
+            }
+
             brandlist.push({
               id: doc.id,
               ...doc.data(),
