@@ -3458,20 +3458,58 @@ app.post("/api/noninfluencer/create", async (req, res) => {
             noninfluencerArr.push({ id: doc.id, ...doc.data() });
           }
         });
+        setTimeout(() => {
+          sendMail("verifyemail", {
+            tomail: noninfluencerArr[0].email,
+            ccmail: "",
+            subjectmail: "Verify your account | Pinksky",
+            text:
+              "Hey " +
+              noninfluencerArr[0].name +
+              ", Use the link below to verify your email.",
 
-        logging.end();
-        res.status(200).json({
-          message: {
-            displayName: createUser.name,
-            id: noninfluencerArr[0].id,
-            email: noninfluencerArr[0].email,
-            type: "Posted Non Influencer",
-            uuid: userResponse?.uid,
-            member: false,
-            status: "",
-          },
-        });
-      }, 2000);
+            href:
+              environments.VERIFY_EMAIL +
+              "?registeras=Noninfluencer&id=" +
+              noninfluencerArr[0].id,
+            hrefText: "Verify Email",
+          });
+          sendMail("registerdetailmail", {
+            tomail: environments.EML_USER,
+            ccmail: "",
+            subjectmail: "Non-Influencer Details | Pinksky",
+            text:
+              "Name : " +
+              noninfluencerArr[0].name +
+              ", " +
+              noninfluencerArr[0].surname +
+              " <br/>" +
+              "Whatapp Number : " +
+              noninfluencerArr[0].whatsappnumber +
+              " <br/>" +
+              "Instagram : " +
+              noninfluencerArr[0].instagramid +
+              " <br/>" +
+              "Email : " +
+              noninfluencerArr[0].email +
+              " <br/>",
+            href: environments.EML_HREF_WEBSITE,
+            hrefText: "pinkskyclub.com",
+          });
+          logging.end();
+          res.status(200).json({
+            message: {
+              displayName: createUser.name,
+              id: noninfluencerArr[0].id,
+              email: noninfluencerArr[0].email,
+              type: "Posted Non Influencer",
+              uuid: userResponse?.uid,
+              member: false,
+              status: "",
+            },
+          });
+        }, 1500);
+      }, 1500);
     }
   } catch (error) {
     //console.log("error", error);
