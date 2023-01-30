@@ -158,6 +158,7 @@ const sendMail = (sendType, data) => {
 // 1. Webhook callback
 app.post("/api/verify/razorpay", async (req, res) => {
   logging.write(new Date() + " - verify/razorpay POST 🚀 \n");
+  console.log(new Date() + " - verify/razorpay POST 🚀 \n");
   try {
     const secret = environments.WEBHOOK_SECRET;
 
@@ -281,6 +282,8 @@ app.post("/api/verify/razorpay", async (req, res) => {
   } catch (error) {
     //console.log(error);
     logging.write(new Date() + " - verify/razorpay ❌ - " + error + " \n");
+    console.log(new Date() + " - verify/razorpay ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({
       message:
@@ -292,6 +295,7 @@ app.post("/api/verify/razorpay", async (req, res) => {
 // 2. Pinksky subscription
 app.post("/api/subscription/razorpay", async (req, res) => {
   logging.write(new Date() + " - subscription/razorpay POST 🚀 \n");
+  console.log(new Date() + " - subscription/razorpay POST 🚀 \n");
 
   try {
     let data = req.body;
@@ -380,6 +384,8 @@ app.post("/api/subscription/razorpay", async (req, res) => {
     logging.write(
       new Date() + " - subscription/razorpay ❌ - " + error + " \n"
     );
+    console.log(new Date() + " - subscription/razorpay ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json(error);
   }
@@ -388,6 +394,7 @@ app.post("/api/subscription/razorpay", async (req, res) => {
 // 3. Pinsky coupons
 app.post("/api/getcouponmessage/razorpay", async (req, res) => {
   logging.write(new Date() + " - getcouponmessage/razorpay POST 🚀 \n");
+  console.log(new Date() + " - getcouponmessage/razorpay POST 🚀 \n");
 
   try {
     let response = req.body;
@@ -495,6 +502,10 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
     logging.write(
       new Date() + " - getcouponmessage/razorpay ❌ - " + error + " \n"
     );
+    console.log(
+      new Date() + " - getcouponmessage/razorpay ❌ - " + error + " \n"
+    );
+
     logging.end();
     res.status(500).json(error);
   }
@@ -504,6 +515,7 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
 // 1. Sending data from firebase to spreadsheet
 app.post("/api/firebasetospreadsheet", async (req, res) => {
   logging.write(new Date() + " - firebasetospreadsheet POST 🚀 \n");
+  console.log(new Date() + " - firebasetospreadsheet POST 🚀 \n");
 
   try {
     let isValid = 1;
@@ -777,6 +789,8 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     }
   } catch (err) {
     logging.write(new Date() + " - firebasetospreadsheet ❌ - " + err + " \n");
+    console.log(new Date() + " - firebasetospreadsheet ❌ - " + err + " \n");
+
     logging.end();
     res.status(500).json(err);
   }
@@ -785,6 +799,8 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
 // 2. Sending data from spreadsheet to firebase
 app.get("/api/spreadsheettofirebase", async (req, res) => {
   logging.write(new Date() + " - spreadsheettofirebase GET 🚀 \n");
+  console.log(new Date() + " - spreadsheettofirebase GET 🚀 \n");
+
   try {
     clientSpreadsheetToDB.read().then(
       function (data) {
@@ -857,6 +873,8 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
     logging.write(
       new Date() + " - spreadsheettofirebase ❌ - " + error + " \n"
     );
+    console.log(new Date() + " - spreadsheettofirebase ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json(error);
   }
@@ -866,6 +884,7 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
 // 1. Forgot Password
 app.post("/api/forgotpassword", async (req, res) => {
   logging.write(new Date() + " - forgotpassword POST 🚀 \n");
+  console.log(new Date() + " - forgotpassword POST 🚀 \n");
 
   try {
     await Firebase.firebase
@@ -880,6 +899,8 @@ app.post("/api/forgotpassword", async (req, res) => {
     res.status(200).json({ message: "Forgot Password" });
   } catch (error) {
     logging.write(new Date() + " - forgotpassword ❌ - " + error + " \n");
+    console.log(new Date() + " - forgotpassword ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -895,6 +916,7 @@ app.post("/api/signin", async (req, res) => {
     logging.write(
       new Date() + " - signin POST 🚀 - " + createUser.email + " \n"
     );
+    console.log(new Date() + " - signin POST 🚀 - " + createUser.email + " \n");
 
     const userResponse = await Firebase.firebase
       .auth()
@@ -1163,6 +1185,7 @@ app.post("/api/signin", async (req, res) => {
     }
   } catch (error) {
     logging.write(new Date() + " - signin ❌ - " + error + " \n");
+    console.log(new Date() + " - signin ❌ - " + error + " \n");
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -1171,6 +1194,7 @@ app.post("/api/signin", async (req, res) => {
 // 3. Updating on signin into pinksky
 app.post("/api/signin/profileupdating", async (req, res) => {
   logging.write(new Date() + " - signin/profileupdating POST 🚀 \n");
+  console.log(new Date() + " - signin/profileupdating POST 🚀 \n");
 
   try {
     let { data } = req.body;
@@ -1418,6 +1442,8 @@ app.post("/api/signin/profileupdating", async (req, res) => {
     logging.write(
       new Date() + " - signin/profileupdating ❌ - " + error + " \n"
     );
+    console.log(new Date() + " - signin/profileupdating ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -1427,6 +1453,7 @@ app.post("/api/signin/profileupdating", async (req, res) => {
 // 1. Influencer
 app.post("/api/influencer", async (req, res) => {
   logging.write(new Date() + " - influencer POST 🚀 \n");
+  console.log(new Date() + " - influencer POST 🚀 \n");
 
   try {
     //console.log(req.body);
@@ -1462,6 +1489,8 @@ app.post("/api/influencer", async (req, res) => {
     }, 1500);
   } catch (error) {
     logging.write(new Date() + " - influencer ❌ - " + error + " \n");
+    console.log(new Date() + " - influencer ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -1470,6 +1499,7 @@ app.post("/api/influencer", async (req, res) => {
 // 2. Non-influencer
 app.post("/api/noninfluencer", async (req, res) => {
   logging.write(new Date() + " - noninfluencer POST 🚀 \n");
+  console.log(new Date() + " - noninfluencer POST 🚀 \n");
 
   try {
     //console.log(req.body);
@@ -1490,6 +1520,8 @@ app.post("/api/noninfluencer", async (req, res) => {
     }, 2000);
   } catch (error) {
     logging.write(new Date() + " - noninfluencer ❌ - " + error + " \n");
+    console.log(new Date() + " - noninfluencer ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -1498,7 +1530,7 @@ app.post("/api/noninfluencer", async (req, res) => {
 // 3. Brand
 app.post("/api/brand", async (req, res) => {
   logging.write(new Date() + " - brand POST 🚀 \n");
-
+  console.log(new Date() + " - brand POST 🚀 \n");
   try {
     //console.log(req.body);
     const snapshot = await Firebase.Brand.doc(req.body.id).get();
@@ -1513,6 +1545,8 @@ app.post("/api/brand", async (req, res) => {
       .json({ data: [brandprofiledata], message: "Fetched Brand" });
   } catch (error) {
     logging.write(new Date() + " - brand ❌ - " + error + " \n");
+    console.log(new Date() + " - brand ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -1521,6 +1555,7 @@ app.post("/api/brand", async (req, res) => {
 // 3. Advance Brand - Event, Campaign, Coupon Mappings
 app.post("/api/brand/advance", async (req, res) => {
   logging.write(new Date() + " - brand/advance POST 🚀 \n");
+  console.log(new Date() + " - brand/advance POST 🚀 \n");
 
   try {
     //console.log("2 ");
@@ -1575,6 +1610,8 @@ app.post("/api/brand/advance", async (req, res) => {
   } catch (error) {
     //console.log("1 ");
     logging.write(new Date() + " - brand/advance ❌ - " + error + " \n");
+    console.log(new Date() + " - brand/advance ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -1584,6 +1621,7 @@ app.post("/api/brand/advance", async (req, res) => {
 // 1. Coupons Page
 app.get("/api/coupons", async (req, res) => {
   logging.write(new Date() + " - coupons GET 🚀 \n");
+  console.log(new Date() + " - coupons GET 🚀 \n");
 
   try {
     const snapshotcoupon = await Firebase.Coupons.get();
@@ -1613,6 +1651,8 @@ app.get("/api/coupons", async (req, res) => {
     });
   } catch (error) {
     logging.write(new Date() + " - coupons ❌ - " + error + " \n");
+    console.log(new Date() + " - coupons ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -1621,6 +1661,7 @@ app.get("/api/coupons", async (req, res) => {
 // 2. Home Page
 app.post("/api/home", async (req, res) => {
   logging.write(new Date() + " - home POST 🚀 \n");
+  console.log(new Date() + " - home POST 🚀 \n");
 
   try {
     const gallerySnapshot = await Firebase.Gallery.get();
@@ -1727,6 +1768,8 @@ app.post("/api/home", async (req, res) => {
     });
   } catch (error) {
     logging.write(new Date() + " - home ❌ - " + error + " \n");
+    console.log(new Date() + " - home ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -1735,6 +1778,7 @@ app.post("/api/home", async (req, res) => {
 // 3. Admin Pages
 app.post("/api/admin/pinksky", async (req, res) => {
   logging.write(new Date() + " - admin/pinksky POST 🚀 \n");
+  console.log(new Date() + " - admin/pinksky POST 🚀 \n");
 
   try {
     let data = req.body;
@@ -2269,6 +2313,8 @@ app.post("/api/admin/pinksky", async (req, res) => {
     }
   } catch (error) {
     logging.write(new Date() + " - admin/pinksky ❌ - " + error + " \n");
+    console.log(new Date() + " - admin/pinksky ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -2308,6 +2354,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
 // 2. Admin brand filter
 app.post("/api/brands/filter", async (req, res) => {
   logging.write(new Date() + " - brand/filter POST 🚀 \n");
+  console.log(new Date() + " - brand/filter POST 🚀 \n");
 
   try {
     let data = req.body;
@@ -2339,6 +2386,8 @@ app.post("/api/brands/filter", async (req, res) => {
     res.status(200).json({ data: namesorted, message: "Filtered Brand" });
   } catch (error) {
     logging.write(new Date() + " - brand/filter ❌ - " + error + " \n");
+    console.log(new Date() + " - brand/filter ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -2347,6 +2396,7 @@ app.post("/api/brands/filter", async (req, res) => {
 // 3. Admin event filter
 app.post("/api/events/filter", async (req, res) => {
   logging.write(new Date() + " - events POST 🚀 \n");
+  console.log(new Date() + " - events POST 🚀 \n");
 
   try {
     let data = req.body;
@@ -2379,6 +2429,8 @@ app.post("/api/events/filter", async (req, res) => {
     res.status(200).json({ data: namesorted, message: "Filtered Event" });
   } catch (error) {
     logging.write(new Date() + " - events ❌ - " + error + " \n");
+    console.log(new Date() + " - events ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -2387,6 +2439,7 @@ app.post("/api/events/filter", async (req, res) => {
 // 4. Admin coupons filter
 app.post("/api/coupons/filter", async (req, res) => {
   logging.write(new Date() + " - coupons/filter POST 🚀 \n");
+  console.log(new Date() + " - coupons/filter POST 🚀 \n");
 
   try {
     let data = req.body;
@@ -2419,6 +2472,8 @@ app.post("/api/coupons/filter", async (req, res) => {
     res.status(200).json({ data: namesorted, message: "Filtered Coupons" });
   } catch (error) {
     logging.write(new Date() + " - coupons/filter ❌ - " + error + " \n");
+    console.log(new Date() + " - coupons/filter ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -2427,6 +2482,7 @@ app.post("/api/coupons/filter", async (req, res) => {
 // 5. Influencer filter
 app.post("/api/influencer/filter", async (req, res) => {
   logging.write(new Date() + " - influencer/filter POST 🚀 \n");
+  console.log(new Date() + " - influencer/filter POST 🚀 \n");
 
   try {
     let data = req.body;
@@ -2556,6 +2612,8 @@ app.post("/api/influencer/filter", async (req, res) => {
     res.status(200).json({ data: citysorted, message: "Filtered Influencer" });
   } catch (error) {
     logging.write(new Date() + " - influencer/filter ❌ - " + error + " \n");
+    console.log(new Date() + " - influencer/filter ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -2564,6 +2622,7 @@ app.post("/api/influencer/filter", async (req, res) => {
 // 6. Campaign filter
 app.post("/api/campaign/filter", async (req, res) => {
   logging.write(new Date() + " - campaign/filter POST 🚀 \n");
+  console.log(new Date() + " - campaign/filter POST 🚀 \n");
 
   try {
     let data = req.body;
@@ -2663,6 +2722,8 @@ app.post("/api/campaign/filter", async (req, res) => {
     });
   } catch (error) {
     logging.write(new Date() + " - campaign/filter ❌ - " + error + " \n");
+    console.log(new Date() + " - campaign/filter ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -2672,6 +2733,7 @@ app.post("/api/campaign/filter", async (req, res) => {
 // 1. Influencer registeration
 app.post("/api/influencer/create", async (req, res) => {
   logging.write(new Date() + " - influencer/create POST 🚀 \n");
+  console.log(new Date() + " - influencer/create POST 🚀 \n");
 
   let userResponse = { uid: "" };
 
@@ -3037,6 +3099,8 @@ app.post("/api/influencer/create", async (req, res) => {
         logging.write(
           new Date() + " - influencer/create ❌ - " + error + " \n"
         );
+        console.log(new Date() + " - influencer/create ❌ - " + error + " \n");
+
         logging.end();
         res.status(500).json({
           message:
@@ -3047,6 +3111,8 @@ app.post("/api/influencer/create", async (req, res) => {
   } catch (error) {
     if (userResponse?.uid === "") {
       logging.write(new Date() + " - influencer/create ❌ - " + error + " \n");
+      console.log(new Date() + " - influencer/create ❌ - " + error + " \n");
+
       logging.end();
       res.status(402).json({
         message:
@@ -3062,6 +3128,8 @@ app.post("/api/influencer/create", async (req, res) => {
       }
       //console.log("error", error.message);
       logging.write(new Date() + " - influencer/create ❌ - " + error + " \n");
+      console.log(new Date() + " - influencer/create ❌ - " + error + " \n");
+
       logging.end();
       res.status(500).json({ message: error.message });
     }
@@ -3071,6 +3139,8 @@ app.post("/api/influencer/create", async (req, res) => {
 // 2. Brand registeration
 app.post("/api/brand/create", async (req, res) => {
   logging.write(new Date() + " - brand/create POST 🚀 \n");
+  console.log(new Date() + " - brand/create POST 🚀 \n");
+
   let brandData = req.body;
   let isProfileCompletedQuery = req.query.isProfileCompleted;
   //console.log("brandData", req.body);
@@ -3299,6 +3369,8 @@ app.post("/api/brand/create", async (req, res) => {
     }
   } catch (error) {
     logging.write(new Date() + " - brand/create ❌ - " + error + " \n");
+    console.log(new Date() + " - brand/create ❌ - " + error + " \n");
+
     logging.end();
     // if (error instanceof ReferenceError) {
 
@@ -3333,6 +3405,7 @@ app.post("/api/brand/create", async (req, res) => {
 // 3. Non-influencer registeration
 app.post("/api/noninfluencer/create", async (req, res) => {
   logging.write(new Date() + " - noninfluencer/create POST 🚀 \n");
+  console.log(new Date() + " - noninfluencer/create POST 🚀 \n");
 
   try {
     let data = req.body;
@@ -3384,6 +3457,8 @@ app.post("/api/noninfluencer/create", async (req, res) => {
   } catch (error) {
     //console.log("error", error);
     logging.write(new Date() + " - noninfluencer/create ❌ - " + error + " \n");
+    console.log(new Date() + " - noninfluencer/create ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -3396,6 +3471,7 @@ app.post(
   Firebase.multer.single("file"),
   async (req, res) => {
     logging.write(new Date() + " - campaign/create FILE POST 🚀 \n");
+    console.log(new Date() + " - campaign/create FILE POST 🚀 \n");
 
     try {
       let { file, body } = req;
@@ -3414,6 +3490,10 @@ app.post(
           logging.write(
             new Date() + " - campaign/create FILE ❌ - " + error + " \n"
           );
+          console.log(
+            new Date() + " - campaign/create FILE ❌ - " + error + " \n"
+          );
+
           logging.end();
           res.status(500).json({ message: error });
         });
@@ -3437,6 +3517,8 @@ app.post(
       logging.write(
         new Date() + " - campaign/create FILE ❌ - " + error + " \n"
       );
+      console.log(new Date() + " - campaign/create FILE ❌ - " + error + " \n");
+
       logging.end();
       res.status(500).json({ message: error });
     }
@@ -3449,6 +3531,7 @@ app.post(
   Firebase.multer.single("file"),
   async (req, res) => {
     logging.write(new Date() + " - event/create FILE POST 🚀 \n");
+    console.log(new Date() + " - event/create FILE POST 🚀 \n");
 
     try {
       let { file, body } = req;
@@ -3467,6 +3550,10 @@ app.post(
           logging.write(
             new Date() + " - event/create FILE ❌ - " + error + " \n"
           );
+          console.log(
+            new Date() + " - event/create FILE ❌ - " + error + " \n"
+          );
+
           logging.end();
           res.status(500).json({ message: error });
         });
@@ -3487,6 +3574,8 @@ app.post(
     } catch (error) {
       //console.log("error");
       logging.write(new Date() + " - event/create FILE ❌ - " + error + " \n");
+      console.log(new Date() + " - event/create FILE ❌ - " + error + " \n");
+
       logging.end();
       res.status(500).json({ message: error });
     }
@@ -3499,6 +3588,7 @@ app.post(
   Firebase.multer.single("file"),
   async (req, res) => {
     logging.write(new Date() + " - coupon/create FILE POST 🚀 \n");
+    console.log(new Date() + " - coupon/create FILE POST 🚀 \n");
 
     try {
       let { file, body } = req;
@@ -3517,6 +3607,10 @@ app.post(
           logging.write(
             new Date() + " - coupon/create FILE ❌ - " + error + " \n"
           );
+          console.log(
+            new Date() + " - coupon/create FILE ❌ - " + error + " \n"
+          );
+
           logging.end();
           res.status(500).json({ message: error });
         });
@@ -3538,6 +3632,8 @@ app.post(
     } catch (error) {
       //console.log("error", error);
       logging.write(new Date() + " - coupon/create FILE ❌ - " + error + " \n");
+      console.log(new Date() + " - coupon/create FILE ❌ - " + error + " \n");
+
       logging.end();
       res.status(500).json({ message: error });
     }
@@ -3550,6 +3646,7 @@ app.post(
   Firebase.gallerymulter.single("file"),
   async (req, res) => {
     logging.write(new Date() + " - gallery/create FILE POST 🚀 \n");
+    console.log(new Date() + " - gallery/create FILE POST 🚀 \n");
 
     try {
       let { file, body } = req;
@@ -3568,6 +3665,10 @@ app.post(
           logging.write(
             new Date() + " - gallery/create FILE ❌ - " + error + " \n"
           );
+          console.log(
+            new Date() + " - gallery/create FILE ❌ - " + error + " \n"
+          );
+
           logging.end();
           res.status(500).json({ message: error });
         });
@@ -3593,6 +3694,8 @@ app.post(
       logging.write(
         new Date() + " - gallery/create FILE ❌ - " + error + " \n"
       );
+      console.log(new Date() + " - gallery/create FILE ❌ - " + error + " \n");
+
       logging.end();
       res.status(500).json({ message: error });
     }
@@ -3625,6 +3728,10 @@ app.post(
           logging.write(
             new Date() + " - firestorelink/create FILE ❌ - " + error + " \n"
           );
+          console.log(
+            new Date() + " - firestorelink/create FILE ❌ - " + error + " \n"
+          );
+
           logging.end();
           res.status(500).json({ message: error });
         });
@@ -3641,6 +3748,10 @@ app.post(
       logging.write(
         new Date() + " - firestorelink/create FILE ❌ - " + error + " \n"
       );
+      console.log(
+        new Date() + " - firestorelink/create FILE ❌ - " + error + " \n"
+      );
+
       logging.end();
       res.status(500).json({ message: error });
     }
@@ -3650,6 +3761,7 @@ app.post(
 // 6. Accept Handle
 app.put("/api/acceptstatus/update", async (req, res) => {
   logging.write(new Date() + " - acceptstatus/update PUT 🚀 \n");
+  console.log(new Date() + " - acceptstatus/update PUT 🚀 \n");
 
   try {
     //console.log("hello");
@@ -3979,6 +4091,8 @@ app.put("/api/acceptstatus/update", async (req, res) => {
     }
   } catch (error) {
     logging.write(new Date() + " - acceptstatus/update ❌ - " + error + " \n");
+    console.log(new Date() + " - acceptstatus/update ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -3992,6 +4106,7 @@ app.post(
     logging.write(
       new Date() + " - acceptstatus/update/formdata FILE POST 🚀 \n"
     );
+    console.log(new Date() + " - acceptstatus/update/formdata FILE POST 🚀 \n");
 
     try {
       //console.log("hello");
@@ -4018,6 +4133,13 @@ app.post(
                 error +
                 " \n"
             );
+            console.log(
+              new Date() +
+                " - acceptstatus/update/formdata FILE ❌ - " +
+                error +
+                " \n"
+            );
+
             logging.end();
             res.status(500).json({ message: error });
           });
@@ -4071,6 +4193,12 @@ app.post(
           error +
           " \n"
       );
+      console.log(
+        new Date() +
+          " - acceptstatus/update/formdata FILE ❌ - " +
+          error +
+          " \n"
+      );
       logging.end();
       res.status(500).json({ message: error });
     }
@@ -4080,6 +4208,7 @@ app.post(
 // 8. Reject Handle
 app.put("/api/rejectstatus/update", async (req, res) => {
   logging.write(new Date() + " - rejectstatus/update PUT 🚀 \n");
+  console.log(new Date() + " - rejectstatus/update PUT 🚀 \n");
 
   try {
     let data = req.body;
@@ -4276,6 +4405,9 @@ app.put("/api/rejectstatus/update", async (req, res) => {
     }
   } catch (error) {
     logging.write(new Date() + " - rejectstatus/update ❌ - " + error + " \n");
+    console.log(
+      new Date() + " - rejectstatus/update FILE ❌ - " + error + " \n"
+    );
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4284,6 +4416,7 @@ app.put("/api/rejectstatus/update", async (req, res) => {
 // 9. Remove Campaign - In-active
 app.put("/api/removecampaign/update", async (req, res) => {
   logging.write(new Date() + " - removecampaign/update PUT 🚀 \n");
+  console.log(new Date() + " - removecampaign/update PUT 🚀 \n");
 
   try {
     const id = req.body.id;
@@ -4298,6 +4431,9 @@ app.put("/api/removecampaign/update", async (req, res) => {
     logging.write(
       new Date() + " - removecampaign/update ❌ - " + error + " \n"
     );
+    console.log(
+      new Date() + " - removecampaign/update FILE ❌ - " + error + " \n"
+    );
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4306,6 +4442,7 @@ app.put("/api/removecampaign/update", async (req, res) => {
 // 10. Remove Event - In-active
 app.put("/api/removeevent/update", async (req, res) => {
   logging.write(new Date() + " - removeevent/update PUT 🚀 \n");
+  console.log(new Date() + " - removeevent/update PUT 🚀 \n");
 
   try {
     const id = req.body.id;
@@ -4318,6 +4455,9 @@ app.put("/api/removeevent/update", async (req, res) => {
     res.status(200).json({ message: "Updated Event" });
   } catch (error) {
     logging.write(new Date() + " - removeevent/update ❌ - " + error + " \n");
+    console.log(
+      new Date() + " - removeevent/update FILE ❌ - " + error + " \n"
+    );
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4326,6 +4466,7 @@ app.put("/api/removeevent/update", async (req, res) => {
 // 11. Remove Coupons - In-active
 app.put("/api/removecoupon/update", async (req, res) => {
   logging.write(new Date() + " - removecoupon/update PUT 🚀 \n");
+  console.log(new Date() + " - removecoupon/update PUT 🚀 \n");
 
   try {
     const id = req.body.id;
@@ -4338,6 +4479,9 @@ app.put("/api/removecoupon/update", async (req, res) => {
     res.status(200).json({ message: "Updated Coupon" });
   } catch (error) {
     logging.write(new Date() + " - removecoupon/update ❌ - " + error + " \n");
+    console.log(
+      new Date() + " - removecoupon/update FILE ❌ - " + error + " \n"
+    );
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4346,6 +4490,7 @@ app.put("/api/removecoupon/update", async (req, res) => {
 // 12. Add more into gallery
 app.put("/api/gallery/update", async (req, res) => {
   logging.write(new Date() + " - gallery/update PUT 🚀 \n");
+  console.log(new Date() + " - gallery/update PUT 🚀 \n");
 
   try {
     const id = req.body.id;
@@ -4369,6 +4514,7 @@ app.put("/api/gallery/update", async (req, res) => {
     }
   } catch (error) {
     logging.write(new Date() + " - gallery/update ❌ - " + error + " \n");
+    console.log(new Date() + " - gallery/update ❌ - " + error + " \n");
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4376,6 +4522,7 @@ app.put("/api/gallery/update", async (req, res) => {
 
 app.post("/api/brandname", async (req, res) => {
   logging.write(new Date() + " - brandname POST 🚀 \n");
+  console.log(new Date() + " - brandname POST 🚀 \n");
 
   let data = req.body;
   //console.log(data);
@@ -4409,6 +4556,7 @@ app.post("/api/brandname", async (req, res) => {
 // 1. Name + Number data create
 app.post("/api/randomdata/create", async (req, res) => {
   logging.write(new Date() + " - randomdata/create POST 🚀 \n");
+  console.log(new Date() + " - randomdata/create POST 🚀 \n");
 
   try {
     const data = req.body;
@@ -4421,6 +4569,8 @@ app.post("/api/randomdata/create", async (req, res) => {
   } catch (error) {
     //console.log("error", error);
     logging.write(new Date() + " - randomdata/create ❌ - " + error + " \n");
+    console.log(new Date() + " - randomdata/create ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4429,6 +4579,7 @@ app.post("/api/randomdata/create", async (req, res) => {
 // 2. Feedback data create
 app.post("/api/feedbackdata/create", async (req, res) => {
   logging.write(new Date() + " - feedbackdata/create POST 🚀 \n");
+  console.log(new Date() + " - feedbackdata/create POST 🚀 \n");
 
   try {
     const data = req.body;
@@ -4441,6 +4592,8 @@ app.post("/api/feedbackdata/create", async (req, res) => {
   } catch (error) {
     //console.log("error", error);
     logging.write(new Date() + " - feedbackdata/create ❌ - " + error + " \n");
+    console.log(new Date() + " - feedbackdata/create ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4449,6 +4602,7 @@ app.post("/api/feedbackdata/create", async (req, res) => {
 // 3. Pinkskypopup data create
 app.post("/api/pinkskypopupentry/create", async (req, res) => {
   logging.write(new Date() + " - pinkskypopupentry/create POST 🚀 \n");
+  console.log(new Date() + " - pinkskypopupentry/create POST 🚀 \n");
 
   try {
     let data = req.body;
@@ -4470,6 +4624,10 @@ app.post("/api/pinkskypopupentry/create", async (req, res) => {
     logging.write(
       new Date() + " - pinkskypopupentry/create ❌ - " + error + " \n"
     );
+    console.log(
+      new Date() + " - pinkskypopupentry/create ❌ - " + error + " \n"
+    );
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4478,6 +4636,7 @@ app.post("/api/pinkskypopupentry/create", async (req, res) => {
 // 4. Adding payment details influencers
 app.post("/api/influencerpayment/create", async (req, res) => {
   logging.write(new Date() + " - influencerpayment/create POST 🚀 \n");
+  console.log(new Date() + " - influencerpayment/create POST 🚀 \n");
 
   try {
     let data = req.body;
@@ -4499,6 +4658,10 @@ app.post("/api/influencerpayment/create", async (req, res) => {
     logging.write(
       new Date() + " - influencerpayment/create ❌ - " + error + " \n"
     );
+    console.log(
+      new Date() + " - influencerpayment/create ❌ - " + error + " \n"
+    );
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4507,6 +4670,7 @@ app.post("/api/influencerpayment/create", async (req, res) => {
 // 5. Updating influencers details
 app.put("/api/influencer/update", async (req, res) => {
   logging.write(new Date() + " - influencer/update PUT 🚀 \n");
+  console.log(new Date() + " - influencer/update PUT 🚀 \n");
 
   try {
     const data = req.body;
@@ -4541,6 +4705,8 @@ app.put("/api/influencer/update", async (req, res) => {
       .json({ message: "Updated Influencer", updatedCookies: updatedCookies });
   } catch (error) {
     logging.write(new Date() + " - influencer/update ❌ - " + error + " \n");
+    console.log(new Date() + " - influencer/update ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4549,6 +4715,7 @@ app.put("/api/influencer/update", async (req, res) => {
 // 6. Updating Brand details
 app.put("/api/brand/update", async (req, res) => {
   logging.write(new Date() + " - brand/update PUT 🚀 \n");
+  console.log(new Date() + " - brand/update PUT 🚀 \n");
 
   try {
     const data = req.body;
@@ -4583,6 +4750,8 @@ app.put("/api/brand/update", async (req, res) => {
       .json({ message: "Updated Brand", updatedCookies: updatedCookies });
   } catch (error) {
     logging.write(new Date() + " - brand/update ❌ - " + error + " \n");
+    console.log(new Date() + " - brand/update ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4591,6 +4760,7 @@ app.put("/api/brand/update", async (req, res) => {
 // 7. Updating Brand's Comments details
 app.put("/api/brandcomments/update", async (req, res) => {
   logging.write(new Date() + " - brandcomments/update PUT 🚀 \n");
+  console.log(new Date() + " - brandcomments/update PUT 🚀 \n");
 
   const data = req.body;
   //console.log(data);
@@ -4630,6 +4800,7 @@ app.put("/api/brandcomments/update", async (req, res) => {
 // 8. Verifying account
 app.put("/api/verifyaccount/update", async (req, res) => {
   logging.write(new Date() + " - verifyaccount/update PUT 🚀 \n");
+  console.log(new Date() + " - verifyaccount/update PUT 🚀 \n");
 
   try {
     const data = req.body;
@@ -4710,6 +4881,8 @@ app.put("/api/verifyaccount/update", async (req, res) => {
     }
   } catch (error) {
     logging.write(new Date() + " - verifyaccount/update ❌ - " + error + " \n");
+    console.log(new Date() + " - verifyaccount/update ❌ - " + error + " \n");
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4719,6 +4892,7 @@ app.put("/api/verifyaccount/update", async (req, res) => {
 // 1. Mapping brand with influencer - Hire me
 app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
   logging.write(new Date() + " - mappingbrandwithinfluencer/update PUT 🚀 \n");
+  console.log(new Date() + " - mappingbrandwithinfluencer/update PUT 🚀 \n");
 
   try {
     const data = req.body;
@@ -4767,6 +4941,10 @@ app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
     logging.write(
       new Date() + " - mappingbrandwithinfluencer/update ❌ - " + error + " \n"
     );
+    console.log(
+      new Date() + " - mappingbrandwithinfluencer/update ❌ - " + error + " \n"
+    );
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4775,6 +4953,7 @@ app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
 // 2. Mapping influencer with event - Join now
 app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
   logging.write(new Date() + " - mappinginfluencerwithevent/update PUT 🚀 \n");
+  console.log(new Date() + " - mappinginfluencerwithevent/update PUT 🚀 \n");
 
   try {
     const data = req.body;
@@ -4822,6 +5001,10 @@ app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
     logging.write(
       new Date() + " - mappinginfluencerwithevent/update ❌ - " + error + " \n"
     );
+    console.log(
+      new Date() + " - mappinginfluencerwithevent/update ❌ - " + error + " \n"
+    );
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4832,6 +5015,7 @@ app.put("/api/mappinginfluencerwithcampaign/update", async (req, res) => {
   logging.write(
     new Date() + " - mappinginfluencerwithcampaign/update PUT 🚀 \n"
   );
+  console.log(new Date() + " - mappinginfluencerwithcampaign/update PUT 🚀 \n");
 
   try {
     const data = req.body;
@@ -4889,6 +5073,13 @@ app.put("/api/mappinginfluencerwithcampaign/update", async (req, res) => {
         error +
         " \n"
     );
+    console.log(
+      new Date() +
+        " - mappinginfluencerwithcampaign/update ❌ - " +
+        error +
+        " \n"
+    );
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4899,6 +5090,10 @@ app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
   logging.write(
     new Date() + " - mappinginfluencerwithcampaignlinks/update PUT 🚀 \n"
   );
+  console.log(
+    new Date() + " - mappinginfluencerwithcampaignlinks/update PUT 🚀 \n"
+  );
+
   try {
     const data = req.body;
     let snapshot = await Firebase.Influencer.doc(data.influencerId).get();
@@ -4950,6 +5145,13 @@ app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
         error +
         " \n"
     );
+    console.log(
+      new Date() +
+        " - mappinginfluencerwithcampaignlinks/update ❌ - " +
+        error +
+        " \n"
+    );
+
     logging.end();
     res.status(500).json({ message: error });
   }
@@ -4958,6 +5160,7 @@ app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
 //----------------------------------------------------------------------
 app.post("/api/v2/influencer/create", async (req, res) => {
   logging.write(new Date() + " - v2/influencer/create POST 🚀 \n");
+  console.log(new Date() + " - v2/influencer/create POST 🚀 \n");
 
   let userResponse = { uid: "" };
 
@@ -5199,8 +5402,12 @@ app.post("/api/v2/influencer/create", async (req, res) => {
         }
       } else {
         logging.write(
-          new Date() + " - influencer/create ❌ - " + error + " \n"
+          new Date() + " - v2/influencer/create ❌ - " + error + " \n"
         );
+        console.log(
+          new Date() + " - v2/influencer/create ❌ - " + error + " \n"
+        );
+
         logging.end();
         res.status(500).json({
           message:
@@ -5210,7 +5417,11 @@ app.post("/api/v2/influencer/create", async (req, res) => {
     }
   } catch (error) {
     if (userResponse?.uid === "") {
-      logging.write(new Date() + " - influencer/create ❌ - " + error + " \n");
+      logging.write(
+        new Date() + " - v2/influencer/create ❌ - " + error + " \n"
+      );
+      console.log(new Date() + " - v2/influencer/create ❌ - " + error + " \n");
+
       logging.end();
       res.status(402).json({
         message:
@@ -5225,14 +5436,20 @@ app.post("/api/v2/influencer/create", async (req, res) => {
         await Firebase.admin.auth().deleteUser(userResponse?.uid);
       }
       //console.log("error", error.message);
-      logging.write(new Date() + " - influencer/create ❌ - " + error + " \n");
+      logging.write(
+        new Date() + " - v2/influencer/create ❌ - " + error + " \n"
+      );
+      console.log(new Date() + " - v2/influencer/create ❌ - " + error + " \n");
+
       logging.end();
       res.status(500).json({ message: error.message });
     }
   }
 });
 app.post("/api/v2/brand/create", async (req, res) => {
-  logging.write(new Date() + " - brand/create POST 🚀 \n");
+  logging.write(new Date() + " - v2/brand/create POST 🚀 \n");
+  console.log(new Date() + " - v2/brand/create POST 🚀 \n");
+
   let brandData = req.body;
   let isProfileCompletedQuery = req.query.isProfileCompleted;
   //console.log("brandData", req.body);
@@ -5471,7 +5688,9 @@ app.post("/api/v2/brand/create", async (req, res) => {
       }
     }
   } catch (error) {
-    logging.write(new Date() + " - brand/create ❌ - " + error + " \n");
+    logging.write(new Date() + " - v2/brand/create ❌ - " + error + " \n");
+    console.log(new Date() + " - v2/brand/create ❌ - " + error + " \n");
+
     logging.end();
     // if (error instanceof ReferenceError) {
 
@@ -5503,7 +5722,8 @@ app.post("/api/v2/brand/create", async (req, res) => {
   }
 });
 app.post("/api/v2/signin/profileupdating", async (req, res) => {
-  logging.write(new Date() + " - signin/profileupdating POST 🚀 \n");
+  logging.write(new Date() + " - v2/signin/profileupdating POST 🚀 \n");
+  console.log(new Date() + " - v2/signin/profileupdating POST 🚀 \n");
 
   try {
     let { data, isRegistering } = req.body;
@@ -5941,433 +6161,11 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
     logging.write(
       new Date() + " - signin/profileupdating ❌ - " + error + " \n"
     );
+
+    console.log(new Date() + " - signin/profileupdating ❌ - " + error + " \n");
     logging.end();
     res.status(500).json({ message: error });
   }
 });
 
-// function getDownloadLinkFromFirebase(){
-//   const promise = new Promise((resolve, reject) => {
-
-//   });
-//   return promise;
-// }
-// function getDownloadLinkFromFirebasePromise(file) {
-//   return new Promise((resolve, reject) => {
-//     let couponFile = file;
-//     let couponFileSplit = couponFile.fileRef.metadata.id.split("/");
-//     let couponFileFirebaseURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/gallery%2F${couponFileSplit[2]}`;
-
-//     let getDownloadURL = "";
-//     axios
-//       .get(couponFileFirebaseURL)
-//       .then(async (responseforcover) => {
-//         getDownloadURL = `https://firebasestorage.googleapis.com/v0/b/${couponFileSplit[0]}/o/gallery%2F${couponFileSplit[2]}?alt=media&token=${responseforcover.data.downloadTokens}`;
-
-//         resolve(getDownloadURL);
-//       })
-//       .catch((error) => {
-//         reject(error);
-//       });
-//   });
-// }
-// function getHighlightInstaData(object) {
-//   return new Promise((resolve, reject) => {
-//     const options = {
-//       method: "POST",
-//       url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/highlight/get_stories",
-//       headers: {
-//         "content-type": "application/json",
-//         "X-RapidAPI-Key": environments.RapidAPIKey_V2,
-//         "X-RapidAPI-Host": environments.RapidAPIHost_V2,
-//       },
-//       data: `{"ids":[${object.highlightid}]}`,
-//     };
-//     //console.log("STEP 6", options);
-
-//     axios
-//       .request(options)
-//       .then(function (response) {
-//         const instadatares = response.data.response.body.reels_media[0];
-//         //console.log("STEP 7");
-
-//         resolve(instadatares);
-//       })
-//       .catch((error) => {
-//         reject(error);
-//       });
-//   });
-// }
-
-// function uploadToLocalToFirebase(
-//   filePath,
-//   optionss,
-//   file,
-//   fileFirebaseURL,
-//   fileName
-// ) {
-//   return new Promise((resolve, reject) => {
-//     request(optionss,async (err, resp, body) => {
-//       if (resp.statusCode === 200) {
-//         var bucket = Firebase.admin.storage().bucket();
-//         //console.log("STEP 8", filePath);
-//         await bucket.upload(filePath, { destination: "gallery" });
-//         setTimeout(() => {
-//           getGalleryLinkFromFirebase(fileFirebaseURL, filePath, fileName)
-//           .then((url) => {
-//             //console.log("STEP 12",{ url, file });
-//             resolve({ url, file });
-//           })
-//           .catch((error) => {
-//             reject(error);
-//           });
-//         }, 20000);
-
-//         //  bucket
-//         //   .upload(filePath, { destination: "gallery" })
-//         //   .then((res) => {
-//         //     //console.log("STEP 9");
-//         //     getGalleryLinkFromFirebase(fileFirebaseURL, filePath, fileName)
-//         //       .then((url) => {
-//         //         //console.log("STEP 12",{ url, file });
-//         //         resolve({ url, file });
-//         //       })
-//         //       .catch((error) => {
-//         //         reject(error);
-//         //       });
-//         //   })
-//         //   .catch((error) => {
-//         //     reject(error);
-//         //   });
-//       }
-//     }).pipe(fs.createWriteStream(filePath));
-//   });
-// }
-
-// function getGalleryLinkFromFirebase(fileFirebaseURL, filePath, fileName) {
-//   return new Promise((resolve, reject) => {
-//     //console.log("STEP 10", fileFirebaseURL);
-
-//     axios
-//       .get(fileFirebaseURL)
-//       .then(async (nresponse) => {
-//         let url =
-//           environments.FIRESTORE_URL +
-//           `${fileName}?alt=media&token=${nresponse.data.downloadTokens}`;
-
-//         fs.unlinkSync(filePath);
-//         //console.log("STEP 11", url);
-//         resolve(url);
-//       })
-//       .catch((error) => {
-//         reject(error);
-//       });
-//   });
-// }
-// app.post(
-//   "/api/v2/gallery/create",
-//   Firebase.gallerymulter.single("file"),
-//   async (req, res) => {
-//     logging.write(new Date() + " - gallery/create FILE POST 🚀 \n");
-//     let { file, body } = req;
-//     var object = JSON.parse(body.data);
-//     let galleryData = null;
-//     let highlightArr = [];
-//     try {
-//       getDownloadLinkFromFirebasePromise(file)
-//         .then((getDownloadURL) => {
-//           //console.log("STEP 1", getDownloadURL);
-//           if (getDownloadURL === "") {
-//             const error = new TypeError("Cover photo upload unsuccessful");
-//             throw error;
-//           } else {
-//             galleryData = {
-//               ...object,
-//               url: getDownloadURL,
-//               createdDate: new Date(),
-//               updatedDate: new Date(),
-//             };
-//             return;
-//           }
-//         })
-//         .then(() => {
-//           //console.log("STEP 2");
-//           return getHighlightInstaData(object);
-//         })
-//         .then((instadatares) => {
-//           //console.log("STEP 3");
-
-//           return instadatares;
-//         })
-//         .then((instadatares) => {
-//           let lengthOfArray = instadatares.items.length - 1;
-//           //console.log("STEP 4", lengthOfArray);
-//           instadatares.items.forEach(async (file, index) => {
-//             let interval = 20000;
-//             // if (file.media_type === 1) {
-//             //   interval = 10000;
-//             // } else {
-//             //   interval = 5000;
-//             // }
-//             setTimeout(async () => {
-//               //console.log("starting with interval > ", interval);
-//               const d = new Date();
-//               let month = d.getMonth() + 1;
-//               let date = d.getDate();
-//               let year = d.getFullYear();
-//               let time = d.getTime();
-//               //let getDownloadURL = "";
-//               let fileName = null;
-//               let filePath = null;
-//               let optionss = null;
-
-//               if (file.media_type === 1) {
-//                 fileName =
-//                   "gallery_" +
-//                   object.name.replace(/\s/g, "") +
-//                   "_" +
-//                   month +
-//                   "_" +
-//                   date +
-//                   "_" +
-//                   year +
-//                   "_" +
-//                   time +
-//                   "_" +
-//                   index +
-//                   ".jpeg";
-//                 filePath = path.join(__dirname, "/images", fileName);
-
-//                 optionss = {
-//                   url: file.image_versions2.candidates[5].url,
-//                   method: "GET",
-//                 };
-//               } else if (file.media_type === 2) {
-//                 fileName =
-//                   "gallery_" +
-//                   object.name.replace(/\s/g, "") +
-//                   "_" +
-//                   month +
-//                   "_" +
-//                   date +
-//                   "_" +
-//                   year +
-//                   "_" +
-//                   time +
-//                   "_" +
-//                   index +
-//                   ".mp4";
-//                 filePath = path.join(__dirname, "/images", fileName);
-
-//                 optionss = {
-//                   url: file.video_versions[1].url,
-//                   method: "GET",
-//                 };
-//               }
-//               let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
-
-//               await uploadToLocalToFirebase(
-//                 filePath,
-//                 optionss,file,
-//                 fileFirebaseURL,fileName
-//               ).then(async (data) => {
-//                 //console.log("STEP 5", data.url);
-//                 if (index === lengthOfArray) {
-//                   //update gallery
-//                   galleryData = {
-//                     ...galleryData,
-//                     highlights: highlightArr,
-//                     media_ids: instadatares.media_ids,
-//                   };
-
-//                   await Firebase.Gallery.add(galleryData);
-
-//                   logging.end();
-//                   res.status(200).json({ message: "Posted Gallery" });
-//                 } else {
-//                   if (data.file.media_type === 1) {
-//                     highlightArr.push({
-//                       insta_src_id: data.file.pk,
-//                       highlightType: "image/jpg",
-//                       src: data.url,
-//                       videoDuration: "0",
-//                       isActive: 1,
-//                     });
-//                   } else if (data.file.media_type === 2) {
-//                     highlightArr.push({
-//                       insta_src_id: data.file.pk,
-//                       highlightType: "image/mp4",
-//                       src: data.url,
-//                       videoDuration: data.file.video_duration * 1000,
-//                       isActive: 1,
-//                     });
-//                   }
-//                 }
-//               });
-//             }, index * interval);
-//           });
-//         })
-//         .catch((error) => {
-//           throw error;
-//         });
-//     } catch (error) {
-//       logging.write(
-//         new Date() + " - gallery/create FILE ❌ - " + error + " \n"
-//       );
-//       logging.end();
-//       res.status(500).json({ message: error });
-//     }
-//   }
-// );
-// app.post("/api/v2/gallery/firestorelink/create", async (req, res) => {
-//   logging.write(
-//     new Date() + " - v2/gallery/firestorelink/create FILE POST 🚀 \n"
-//   );
-
-//   try {
-//     const options = {
-//       method: "POST",
-//       url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/highlight/get_stories",
-//       headers: {
-//         "content-type": "application/json",
-//         "X-RapidAPI-Key": environments.RapidAPIKey_V2,
-//         "X-RapidAPI-Host": environments.RapidAPIHost_V2,
-//       },
-//       data: '{"ids":[18325340335028970]}',
-//     };
-
-//     let highlightArr = [];
-
-//     await axios
-//       .request(options)
-//       .then(function (response) {
-//         let instadatares = response.data.response.body.reels_media[0];
-//         //check if instadatares length greater than 0
-//         let interval = 8500;
-//         let lengthOfArray = instadatares.items.length - 1;
-//         instadatares.items.forEach((file, index) => {
-//           setTimeout(() => {
-//             const d = new Date();
-//             let month = d.getMonth() + 1;
-//             let date = d.getDate();
-//             let year = d.getFullYear();
-//             let time = d.getTime();
-//             let getDownloadURL = "";
-//             const fileName = null;
-//             let filePath = null;
-//             const optionss = null;
-//             if (file.media_type === 1) {
-//               fileName =
-//                 "gallery_" +
-//                 data.name.replace(/\s/g, "") +
-//                 "_" +
-//                 month +
-//                 "_" +
-//                 date +
-//                 "_" +
-//                 year +
-//                 "_" +
-//                 time +
-//                 "_" +
-//                 index +
-//                 ".jpeg";
-//               filePath = path.join(__dirname, "/images", fileName);
-
-//               optionss = {
-//                 url: file.image_versions2.candidates[5].url,
-//                 method: "GET",
-//               };
-//             } else if (file.media_type === 2) {
-//               fileName =
-//                 "gallery_" +
-//                 data.name.replace(/\s/g, "") +
-//                 "_" +
-//                 month +
-//                 "_" +
-//                 date +
-//                 "_" +
-//                 year +
-//                 "_" +
-//                 time +
-//                 "_" +
-//                 index +
-//                 ".mp4";
-//               filePath = path.join(__dirname, "/images", fileName);
-
-//               optionss = {
-//                 url: file.video_versions[1].url,
-//                 method: "GET",
-//               };
-//             }
-
-//             request(optionss, async (err, resp, body) => {
-//               if (resp.statusCode === 200) {
-//                 var bucket = Firebase.admin.storage().bucket();
-
-//                 await bucket.upload(filePath);
-//                 let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
-
-//                 axios
-//                   .get(fileFirebaseURL)
-//                   .then(async (nresponse) => {
-//                     getDownloadURL =
-//                       environments.FIRESTORE_URL +
-//                       `${fileName}?alt=media&token=${nresponse.data.downloadTokens}`;
-
-//                     //till here link is genrated
-//                     //now need to make highlight for firestore
-//                     fs.unlinkSync(filePath);
-//                     if (index === lengthOfArray) {
-//                       //update gallery
-//                       await Firebase.Gallery.doc(data.id).update({
-//                         highlights: highlightArr,
-//                         media_ids: instadatares.media_ids,
-//                       });
-
-//                       logging.end();
-//                       res.status(200).json({
-//                         message: "Updated Gallery",
-//                       });
-//                     } else {
-//                       if (file.media_type === 1) {
-//                         highlightArr.push({
-//                           insta_src_id: file.pk,
-//                           highlightType: "image/jpg",
-//                           src: getDownloadURL,
-//                           videoDuration: "0",
-//                           isActive: 1,
-//                         });
-//                       } else if (file.media_type === 2) {
-//                         highlightArr.push({
-//                           insta_src_id: file.pk,
-//                           highlightType: "image/mp4",
-//                           src: getDownloadURL,
-//                           videoDuration: file.video_duration * 1000,
-//                           isActive: 1,
-//                         });
-//                       }
-//                     }
-//                   })
-//                   .catch((error) => {
-//                     throw error;
-//                   });
-//               }
-//             }).pipe(fs.createWriteStream(filePath));
-//           }, index * interval);
-//         });
-//       })
-//       .catch(function (error) {
-//         throw error;
-//       });
-//   } catch (error) {
-//     logging.write(
-//       new Date() +
-//         " - v2/gallery/firestorelink/create FILE ❌ - " +
-//         error +
-//         " \n"
-//     );
-//     logging.end();
-//     res.status(500).json({ message: error });
-//   }
-// });
 app.listen(PORT, () => console.log("Running @5000"));
