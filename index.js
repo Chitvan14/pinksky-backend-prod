@@ -4893,7 +4893,7 @@ app.put("/api/verifyaccount/update", async (req, res) => {
 
         logging.end();
         res.status(200).json({ message: "Verified Influencer" });
-      }, 1200);
+      }, 8000);
     }
     if (data.registeras.toString().toLowerCase() === "brand") {
       const id = data.id;
@@ -6108,7 +6108,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
             //console.log("ENGAGEMENT RATE", engagementRate);
 
             influencerSchema = {
-              ...snapshot.data(),
+              // ...snapshot.data(),
               imgURL1: instagramPostDetails[0].display_url,
               imgURL2: instagramPostDetails[1].display_url,
               imgURL3: instagramPostDetails[2].display_url,
@@ -6134,7 +6134,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
             throw error;
           });
 
-        let interval = 8500;
+        let interval = 8000;
         let lengthOfArray = instagramPostDetails.length - 1;
         // let influencerArr = [];
         //console.log("lengthOfArray", lengthOfArray);
@@ -6180,7 +6180,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                 //console.log(fileFirebaseURL);
                 axios
                   .get(fileFirebaseURL)
-                  .then((response) => {
+                  .then(async(response) => {
                     getDownloadURL =
                       environments.FIRESTORE_URL +
                       `${fileName}?alt=media&token=${response.data.downloadTokens}`;
@@ -6189,8 +6189,10 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                     fs.unlinkSync(filePath);
                     if (index === lengthOfArray) {
                       //console.log("inside");
+                      const snapshot2 = await Firebase.Influencer.doc(data.id).get();
 
                       influencerSchema = {
+                        ...snapshot2.data(),
                         ...influencerSchema,
                         imgURL1: instagramPostDetails[0]?.new_url,
                         imgURL2: instagramPostDetails[1]?.new_url,
