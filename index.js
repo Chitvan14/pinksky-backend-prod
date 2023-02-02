@@ -1093,7 +1093,14 @@ app.post("/api/signin", async (req, res) => {
       } else {
         //console.log("2");
         let influencerData = [];
+        // const snapshot = await Firebase.Influencer.where(
+        //   "email",
+        //   "==",
+        //   createUser.email.toString()
+        // );
         const snapshot = await Firebase.Influencer.get();
+        // console.log("snapshot influencer signin ", snapshot);
+        
         snapshot.docs.map((doc) => {
           if (doc.data().email === createUser.email) {
             influencerData.push({ id: doc.id, ...doc.data() });
@@ -1145,7 +1152,6 @@ app.post("/api/signin", async (req, res) => {
           //console.log("Here 1");
           isMember = false;
         } else {
-          //console.log("Here 2");
           if (
             new Date(influencerData[0].pinkskymember.cooldown.seconds * 1000) <
             new Date()
@@ -4860,81 +4866,87 @@ app.put("/api/verifyaccount/update", async (req, res) => {
   console.log(new Date() + " - verifyaccount/update PUT 🚀 \n");
 
   try {
-    const data = req.body;
-    if (data.registeras === "Influencer") {
+    let data = req.body;
+    // console.log("verify data " , data);
+    if (data.registeras.toString().toLowerCase() === "influencer") {
       const id = data.id;
       const snapshot = await Firebase.Influencer.doc(id).get();
+      setTimeout(async () => {
+        await Firebase.Influencer.doc(id).update({
+          ...snapshot.data(),
+          isActive: 1,
+        });
+        if (snapshot.data().isActive === 0) {
+          sendMail("registerlaunchingsoon", {
+            tomail: snapshot.data().email,
+            ccmail: "",
+            subjectmail: "Registration Completed | Pinksky",
+            text: `Dear ${snapshot.data().name},<br/><br/>
+           Registration completed !<br/><br/>
+           Welcome to Pinksky’s secret club of influencers. We are excited to invite you to our upcoming events & be a part of the campaigns hope you are too!
+           <br/><br/>
+           Thanks for choosing Pinksky 💕 `,
+            href: environments.EML_HREF_WEBSITE,
+            hrefText: "pinkskyclub.com",
+          });
+        }
 
-      await Firebase.Influencer.doc(id).update({
-        ...snapshot.data(),
-        isActive: 1,
-      });
-      sendMail("registerlaunchingsoon", {
-        tomail: snapshot.data().email,
-        ccmail: "",
-        subjectmail: "Registration Completed | Pinksky",
-        text: `Dear ${snapshot.data().name},<br/><br/>
-
-       Registration completed !<br/><br/>
-       
-       Welcome to Pinksky’s secret club of influencers. We are excited to invite you to our upcoming events & be a part of the campaigns hope you are too!
-       <br/><br/>
-       Thanks for choosing Pinksky 💕 `,
-        href: environments.EML_HREF_WEBSITE,
-        hrefText: "pinkskyclub.com",
-      });
-      // text:
-      // "Hey " +
-      // influencerArr[0].name +
-      // ", We will be notifing when we will be launching our website. Thanks for showing your interest.",
-
-      logging.end();
-      res.status(200).json({ message: "Verified Influencer" });
+        logging.end();
+        res.status(200).json({ message: "Verified Influencer" });
+      }, 1200);
     }
-    if (data.registeras === "Brand") {
+    if (data.registeras.toString().toLowerCase() === "brand") {
       const id = data.id;
       const snapshot = await Firebase.Brand.doc(id).get();
+      setTimeout(async () => {
+        await Firebase.Brand.doc(id).update({
+          ...snapshot.data(),
+          isActive: 1,
+        });
+        if (snapshot.data().isActive === 0) {
+          sendMail("registerlaunchingsoon", {
+            tomail: snapshot.data().email,
+            ccmail: "",
+            subjectmail: "Registration Completed | Pinksky",
+            text: `Dear ${snapshot.data().companyname},<br/><br/>
+      You have successfully created an account at Pinksky! <br/><br/>
+      Pinksky welcomes your brand to a creative marketing agency. We are excited to work & grow with you. 
+      <br/><br/>
+      Thanks for choosing Pinksky 💕 `,
+            href: environments.EML_HREF_WEBSITE,
+            hrefText: "pinkskyclub.com",
+          });
+        }
 
-      await Firebase.Brand.doc(id).update({
-        ...snapshot.data(),
-        isActive: 1,
-      });
-      sendMail("registerlaunchingsoon", {
-        tomail: snapshot.data().email,
-        ccmail: "",
-        subjectmail: "Registration Completed | Pinksky",
-        text: `Dear ${snapshot.data().companyname},<br/><br/>
-        You have successfully created an account at Pinksky! <br/><br/>
-        Pinksky welcomes your brand to a creative marketing agency. We are excited to work & grow with you. 
-        <br/><br/>
-        Thanks for choosing Pinksky 💕 `,
-        href: environments.EML_HREF_WEBSITE,
-        hrefText: "pinkskyclub.com",
-      });
-      logging.end();
-      res.status(200).json({ message: "Verified Brand" });
+        logging.end();
+        res.status(200).json({ message: "Verified Brand" });
+      }, 1200);
     }
-    if (data.registeras === "Noninfluencer") {
+    if (data.registeras.toString().toLowerCase() === "noninfluencer") {
       const id = data.id;
       const snapshot = await Firebase.NonInfluencer.doc(id).get();
+      setTimeout(async () => {
+        await Firebase.NonInfluencer.doc(id).update({
+          ...snapshot.data(),
+          isActive: 1,
+        });
+        if (snapshot.data().isActive === 0) {
+          sendMail("registerlaunchingsoon", {
+            tomail: snapshot.data().email,
+            ccmail: "",
+            subjectmail: "Registration Completed | Pinksky",
+            text: `Dear ${snapshot.data().name},<br/><br/>
+     Registration completed !
+     <br/><br/>
+     Thanks for choosing Pinksky 💕`,
+            href: environments.EML_HREF_WEBSITE,
+            hrefText: "pinkskyclub.com",
+          });
+        }
 
-      await Firebase.NonInfluencer.doc(id).update({
-        ...snapshot.data(),
-        isActive: 1,
-      });
-      sendMail("registerlaunchingsoon", {
-        tomail: snapshot.data().email,
-        ccmail: "",
-        subjectmail: "Registration Completed | Pinksky",
-        text: `Dear ${snapshot.data().name},<br/><br/>
-       Registration completed !
-       <br/><br/>
-       Thanks for choosing Pinksky 💕`,
-        href: environments.EML_HREF_WEBSITE,
-        hrefText: "pinkskyclub.com",
-      });
-      logging.end();
-      res.status(200).json({ message: "Verified NonInfluencer" });
+        logging.end();
+        res.status(200).json({ message: "Verified NonInfluencer" });
+      }, 1200);
     }
   } catch (error) {
     logging.write(new Date() + " - verifyaccount/update ❌ - " + error + " \n");
@@ -6157,6 +6169,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
             //console.log("fileName", fileName);
             let getDownloadURL = "";
             request(optionss, async (err, resp, body) => {
+              console.log("v2/signin/profileupdating res while uploading images ",resp.statusCode)
               if (resp.statusCode === 200) {
                 //console.log("res.statusCode", resp.statusCode);
                 var bucket = Firebase.admin.storage().bucket();
