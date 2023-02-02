@@ -5869,7 +5869,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           new Date().getTime() - snapshot.data().updatedDate.toDate().getTime();
 
         var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
-        //console.log("daysDifference", daysDifference);
+        console.log(`daysDifference for id ${data.id} is `, daysDifference);
         if (daysDifference > 15) {
           //console.log("inside");
           let influencerSchema = null;
