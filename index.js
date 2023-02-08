@@ -79,28 +79,30 @@ const sendMail = (sendType, data) => {
   });
   let html = "";
   html = emailtemplate(sendType, data);
-  var mailOptions = {
-    from: environments.EML_USER,
-    to:
-      environments.NODE_ENV === "production"
-        ? data.tomail
-        : environments.EML_USER,
-    subject: data.subjectmail,
-    html: html,
-    cc: data.ccmail,
-    bcc: sendType === "registerdetailmail" ? environments.EML_USER : "",
-  };
-  transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log("sendMail Failed ❌ with error - ", error);
-    } else {
-      //console.log("sendMail success ✅ with response - ", {
-      //   response: info.response,
-      //   sendType,
-      //   data,
-      // });
-    }
-  });
+  setTimeout(() => {
+    var mailOptions = {
+      from: environments.EML_USER,
+      to:
+        environments.NODE_ENV === "production"
+          ? data.tomail
+          : environments.EML_USER,
+      subject: data.subjectmail,
+      html: html,
+      cc: data.ccmail,
+      bcc: sendType === "registerdetailmail" ? environments.EML_USER : "",
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log("sendMail Failed ❌ with error - ", error);
+      } else {
+        //console.log("sendMail success ✅ with response - ", {
+        //   response: info.response,
+        //   sendType,
+        //   data,
+        // });
+      }
+    });
+  }, 2000);
 };
 
 // 3. creating whatspp messages to send
