@@ -88,10 +88,7 @@ const sendMail = (sendType, data) => {
     subject: data.subjectmail,
     html: html,
     cc: data.ccmail,
-    bcc:
-      sendType === "registerdetailmail" || sendType === "verifyemail"
-        ? environments.EML_USER
-        : "",
+    bcc: sendType === "registerdetailmail" ? environments.EML_USER : "",
   };
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
