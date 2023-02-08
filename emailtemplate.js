@@ -29,8 +29,7 @@ module.exports = function (type, data) {
                                 <table style="width:100%;max-width:600px;border-collapse:collapse">
                                     <tr>
                                         <td style="padding:0">
-                                            <div style="background-image:url(https://firebasestorage.googleapis.com/v0/b/pinksky-website.appspot.com/o/Brands%2Fpinksky.png?alt=media&token=f1c44d80-06bb-414a-b08f-e9df94b90388);background-repeat:no-repeat;background-position:bottom;height:150px;background-size: 100px 100px;margin-bottom:30px;padding-top:32px;padding-left:32px">
-                                            </div>
+                                           
                                         </td>
                                     </tr>
                                 </table>
@@ -44,6 +43,7 @@ module.exports = function (type, data) {
                                                         <div style="display:flex;text-align:center;flex-direction:column;max-width:358px;padding-top:12px;vertical-align:top;margin:auto">
                                                             <p style="font-family:Lato;text-align:left;font-weight:400;font-style:normal;font-size:13px;line-height:24px;margin:auto;color:#151515">${data.text}</p>
                                                         </div>
+                                                        <a href=${data.href} target="_blank" style="font-family:Lato;font-weight:400;font-size:13px;line-height:20px;text-align:center;letter-spacing:.25px;color:#151515;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-top:14px;display:block;width:200px;text-decoration:none">${data.hrefText}</a>
                                                     </td>
                                                 </tr>
                                             </table>
@@ -74,6 +74,7 @@ module.exports = function (type, data) {
                                                         <p style="margin:auto;margin-bottom:4px;font-weight:400;font-size:13px;line-height:28.8px;text-align:center;color:#151515;font-family:Lato">If you have any questions, please reach out to us at</p>
                                                         <a href="mailto:pinkskyclubdev@gmail.com" target="_blank" style="font-family:Lato;font-weight:400;font-size:13px;line-height:20px;text-align:center;letter-spacing:.25px;color:#151515;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-bottom:14px;display:block;width:200px;text-decoration:none">Email</a>
                                                         <a href="https://pinkskyclub.com/contact" target="_blank" style="font-family:Lato;font-weight:400;font-size:13px;line-height:20px;text-align:center;letter-spacing:.25px;color:#151515;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-bottom:14px;display:block;width:200px;text-decoration:none">Contact</a>
+                                                        
                                                     </td>
                                                 </tr>
                                             </table>
