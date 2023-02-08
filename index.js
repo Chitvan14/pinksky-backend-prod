@@ -77,8 +77,8 @@ const sendMail = (sendType, data) => {
       pass: environments.EML_PASS,
     },
   });
-  let html = "";
-  html = emailtemplate(sendType, data);
+  // let html = "";
+  // html = emailtemplate(sendType, data);
   setTimeout(() => {
     var mailOptions = {
       from: environments.EML_USER,
@@ -87,7 +87,8 @@ const sendMail = (sendType, data) => {
           ? data.tomail
           : environments.EML_USER,
       subject: data.subjectmail,
-      html: html,
+      text: "Hello !",
+      html: "<b>Hello !</b>",
       cc: data.ccmail,
       bcc: sendType === "registerdetailmail" ? environments.EML_USER : "",
     };
