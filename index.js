@@ -88,7 +88,10 @@ const sendMail = (sendType, data) => {
     subject: data.subjectmail,
     html: html,
     cc: data.ccmail,
-    bcc: environments.EML_USER,
+    bcc:
+      sendType === "registerdetailmail" || sendType === "verifyemail"
+        ? environments.EML_USER
+        : "",
   };
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
@@ -1100,7 +1103,7 @@ app.post("/api/signin", async (req, res) => {
         // );
         const snapshot = await Firebase.Influencer.get();
         // console.log("snapshot influencer signin ", snapshot);
-        
+
         snapshot.docs.map((doc) => {
           if (doc.data().email === createUser.email) {
             influencerData.push({ id: doc.id, ...doc.data() });
@@ -6169,7 +6172,10 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
             //console.log("fileName", fileName);
             let getDownloadURL = "";
             request(optionss, async (err, resp, body) => {
-              console.log("v2/signin/profileupdating res while uploading images ",resp.statusCode)
+              console.log(
+                "v2/signin/profileupdating res while uploading images ",
+                resp.statusCode
+              );
               if (resp.statusCode === 200) {
                 //console.log("res.statusCode", resp.statusCode);
                 var bucket = Firebase.admin.storage().bucket();
@@ -6180,7 +6186,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                 //console.log(fileFirebaseURL);
                 axios
                   .get(fileFirebaseURL)
-                  .then(async(response) => {
+                  .then(async (response) => {
                     getDownloadURL =
                       environments.FIRESTORE_URL +
                       `${fileName}?alt=media&token=${response.data.downloadTokens}`;
@@ -6189,7 +6195,9 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                     fs.unlinkSync(filePath);
                     if (index === lengthOfArray) {
                       //console.log("inside");
-                      const snapshot2 = await Firebase.Influencer.doc(data.id).get();
+                      const snapshot2 = await Firebase.Influencer.doc(
+                        data.id
+                      ).get();
 
                       influencerSchema = {
                         ...snapshot2.data(),
