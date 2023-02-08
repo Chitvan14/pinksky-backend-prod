@@ -77,40 +77,31 @@ const sendMail = (sendType, data) => {
       pass: environments.EML_PASS,
     },
   });
-  // let html = "";
-  // html = emailtemplate(sendType, data);
-  var mailOptions = null;
-  if (sendType === "registerdetailmail" || data.ccmail !== "") {
-    mailOptions = {
+  let html = "";
+  html = emailtemplate(sendType, data);
+  setTimeout(() => {
+    var mailOptions = {
       from: environments.EML_USER,
       to:
         environments.NODE_ENV === "production"
           ? data.tomail
           : environments.EML_USER,
       subject: data.subjectmail,
-      text: "Hello , We are setting up mail!",
+      html: html,
       cc: data.ccmail,
       bcc: sendType === "registerdetailmail" ? environments.EML_USER : "",
     };
-  } else {
-    mailOptions = {
-      from: environments.EML_USER,
-      to:
-        environments.NODE_ENV === "production"
-          ? data.tomail
-          : environments.EML_USER,
-      subject: data.subjectmail,
-      text: "Hello , We are setting up mail!",
-    };
-  }
-  setTimeout(() => {
-    if (mailOptions !== null) {
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.log("sendMail Failed ❌ with error - ", error);
-        }
-      });
-    }
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log("sendMail Failed ❌ with error - ", error);
+      } else {
+        //console.log("sendMail success ✅ with response - ", {${data.href}
+        //   response: info.response,
+        //   sendType,
+        //   data,
+        // });
+      }
+    });
   }, 2000);
 };
 

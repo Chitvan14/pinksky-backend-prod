@@ -42,9 +42,9 @@ module.exports = function (type, data) {
                                                 <tr>
                                                     <td style="padding:0">
                                                         <div style="display:flex;text-align:center;flex-direction:column;max-width:358px;padding-top:12px;vertical-align:top;margin:auto">
-                                                            <p style="font-family:Lato;text-align:left;font-weight:400;font-style:normal;font-size:13px;line-height:24px;margin:auto;color:#151515">${data.text}</p>
+                                                            <p style="font-family:Lato;text-align:left;font-weight:400;font-style:normal;font-size:13px;line-height:24px;margin:auto;color:#151515">${data.text} Copy below url.</p>
                                                         </div>
-                                                        <a href=${data.href} target="_blank" style="font-family:Lato;font-weight:400;font-size:13px;line-height:20px;text-align:center;letter-spacing:.25px;color:#151515;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-top:14px;display:block;width:200px;text-decoration:none">${data.hrefText}</a>
+                                                        <a href=${data.href} target="_blank" style="font-family:Lato;font-weight:400;font-size:13px;line-height:20px;text-align:center;letter-spacing:.25px;color:#151515;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-top:14px;display:block;width:200px;text-decoration:none">${data.href}</a>
                                                     </td>
                                                 </tr>
                                             </table>
@@ -72,9 +72,9 @@ module.exports = function (type, data) {
                                             <table style="width:68%;max-width:4166px;margin:auto;border-collapse:collapse">
                                                 <tr>
                                                     <td style="padding:24px 0">
-                                                        <p style="margin:auto;margin-bottom:4px;font-weight:400;font-size:13px;line-height:28.8px;text-align:center;color:#151515;font-family:Lato">If you have any questions, please reach out to us at</p>
-                                                        <a href="mailto:pinkskyclubdev@gmail.com" target="_blank" style="font-family:Lato;font-weight:400;font-size:13px;line-height:20px;text-align:center;letter-spacing:.25px;color:#151515;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-bottom:14px;display:block;width:200px;text-decoration:none">Email</a>
-                                                        <a href="https://pinkskyclub.com/contact" target="_blank" style="font-family:Lato;font-weight:400;font-size:13px;line-height:20px;text-align:center;letter-spacing:.25px;color:#151515;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-bottom:14px;display:block;width:200px;text-decoration:none">Contact</a>
+                                                        <p style="margin:auto;margin-bottom:4px;font-weight:400;font-size:13px;line-height:28.8px;text-align:center;color:#000000;font-family:Lato">If you have any questions, please reach out to us at</p>
+                                                        <a href="mailto:pinkskyclubdev@gmail.com" target="_blank" style="font-family:Lato;font-weight:400;font-size:13px;line-height:20px;text-align:center;letter-spacing:.25px;color:#151515;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-bottom:14px;display:block;width:250px;text-decoration:none">Email</a>
+                                                        <a href="https://pinkskyclub.com/contact" target="_blank" style="font-family:Lato;font-weight:400;font-size:13px;line-height:20px;text-align:center;letter-spacing:.25px;color:#151515;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-bottom:14px;display:block;width:250px;text-decoration:none">www.pinkskyclub.com/contact</a>
                                                         <div style="filter: invert(100%);margin:0 32px 24px;text-align:center"><img src="https://firebasestorage.googleapis.com/v0/b/pinksky-8804c.appspot.com/o/brand-logo%2Fwis-line.png?alt=media&token=2c641a8a-f4f4-4616-abde-00a53de700a3"></div>
     
                                                         </div>
