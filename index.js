@@ -949,7 +949,7 @@ app.post("/api/signin", async (req, res) => {
             text:
               "Hey " +
               brandData[0].companyname +
-              ", Use the link below to verify your email.",
+              ", Copy the link below to verify your email.",
 
             href:
               environments.VERIFY_EMAIL +
@@ -1045,7 +1045,7 @@ app.post("/api/signin", async (req, res) => {
             text:
               "Hey " +
               noninfluencerData[0].name +
-              ", Use the link below to verify your email.",
+              ", Copy the link below to verify your email.",
 
             href:
               environments.VERIFY_EMAIL +
@@ -1117,7 +1117,7 @@ app.post("/api/signin", async (req, res) => {
             text:
               "Hey " +
               influencerData[0].name +
-              ", Use the link below to verify your email.",
+              ", Copy the link below to verify your email.",
 
             href:
               environments.VERIFY_EMAIL +
@@ -3068,7 +3068,7 @@ app.post("/api/influencer/create", async (req, res) => {
                               text:
                                 "Hey " +
                                 influencerArr[0].name +
-                                ", Use the link below to verify your email.",
+                                ", Copy the link below to verify your email.",
 
                               href:
                                 environments.VERIFY_EMAIL +
@@ -3337,7 +3337,7 @@ app.post("/api/brand/create", async (req, res) => {
                             text:
                               "Hey " +
                               brandArr[0].companyname +
-                              ", Use the link below to verify your email.",
+                              ", Copy the link below to verify your email.",
 
                             href:
                               environments.VERIFY_EMAIL +
@@ -3474,7 +3474,7 @@ app.post("/api/noninfluencer/create", async (req, res) => {
             text:
               "Hey " +
               noninfluencerArr[0].name +
-              ", Use the link below to verify your email.",
+              ", Copy the link below to verify your email.",
 
             href:
               environments.VERIFY_EMAIL +
@@ -5425,7 +5425,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
                 text:
                   "Hey " +
                   influencerArr[0].name +
-                  ", Use the link below to verify your email.",
+                  ", Copy the link below to verify your email.",
 
                 href:
                   environments.VERIFY_EMAIL +
@@ -5701,7 +5701,7 @@ app.post("/api/v2/brand/create", async (req, res) => {
                           text:
                             "Hey " +
                             brandArr[0].companyname +
-                            ", Use the link below to verify your email.",
+                            ", Copy the link below to verify your email.",
 
                           href:
                             environments.VERIFY_EMAIL +

@@ -42,7 +42,7 @@ module.exports = function (type, data) {
                                                 <tr>
                                                     <td style="padding:0">
                                                         <div style="display:flex;text-align:center;flex-direction:column;max-width:358px;padding-top:12px;vertical-align:top;margin:auto">
-                                                            <p style="font-family:Lato;text-align:left;font-weight:400;font-style:normal;font-size:13px;line-height:24px;margin:auto;color:#151515">${data.text} Copy below url.</p>
+                                                            <p style="font-family:Lato;text-align:left;font-weight:400;font-style:normal;font-size:13px;line-height:24px;margin:auto;color:#151515">${data.text}</p>
                                                         </div>
                                                         <a href=${data.href} target="_blank" style="font-family:Lato;font-weight:400;font-size:13px;line-height:20px;text-align:center;letter-spacing:.25px;color:#151515;padding:6px 16px;background:#f7f7f7;border-radius:6px;margin:auto;margin-top:14px;display:block;width:200px;text-decoration:none">${data.href}</a>
                                                     </td>
