@@ -71,7 +71,9 @@ app.use(cors());
 const sendMail = (sendType, data) => {
   //console.log("sendMail started 🚀");
   var transporter = nodemailer.createTransport({
-    service: environments.EML_PROVIDER,
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
     auth: {
       user: environments.EML_USER,
       pass: environments.EML_PASS,
