@@ -53,20 +53,28 @@ app.use(cors());
 
 // WHATSAPP AND EMAIL SECTION
 // 1. Logging
-// app.post("/api/testmail", async (req, res) => {
-//   // sendMail("registerdetailmail", {
-//   //   tomail: environments.EML_USER,
-//   //   ccmail: "",
-//   //   subjectmail: "Influencer Details | Pinksky",
-//   //   text: "Hi"+" <br/>"+" Chitvan Garg",
-//   //   href: environments.EML_HREF_WEBSITE,
-//   // });
-//   await Firebase.admin
-//     .auth()
-//     .generateEmailVerificationLink("gargchitvan99@gmail.com")
-//     .then((response) => {
-//     });
-// });
+app.post("/api/testaccount", async (req, res) => {
+  //const ur = await Firebase.firebase.auth()
+  const userResponse = await Firebase.firebase.auth()
+
+  .signInWithEmailAndPassword()
+  .catch((error) => {
+    throw error;
+  });
+  console.log(userResponse)
+  // sendMail("registerdetailmail", {
+  //   tomail: environments.EML_USER,
+  //   ccmail: "",
+  //   subjectmail: "Influencer Details | Pinksky",
+  //   text: "Hi"+" <br/>"+" Chitvan Garg",
+  //   href: environments.EML_HREF_WEBSITE,
+  // });
+  // await Firebase.admin
+  //   .auth()
+  //   .generateEmailVerificationLink("gargchitvan99@gmail.com")
+  //   .then((response) => {
+  //   });
+});
 // 2. creating mail to send
 const sendMail = (sendType, data) => {
   //console.log("sendMail started 🚀");
@@ -813,6 +821,7 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
 
         value.forEach((item, index) => {
           setTimeout(() => {
+            //verify not needed bcz isActive is 1
             let addvalue = {
               ...item,
               admin: false,
@@ -825,11 +834,13 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
               },
               paymentdetails: {},
               isTeam: "new",
+              gender: "",
               status: "new",
               dob: "",
               address: "",
               isNonInfluencer: "",
               city: "",
+              isNonInfluencer: { type: "N", uuid: "", id: "" },
               category: [
                 {
                   href: "/influencer",
@@ -856,12 +867,26 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
             axios
               .post(
                 environments.BASE_URL +
-                  "influencer/create?isProfileCompleted=0",
+                  "v2/influencer/create?isProfileCompleted=0",
                 addvalue
               )
-              .then((response) => {
-                logging.end();
-                res.status(200).json(response.data);
+              .then(async (response) => {
+                await axios
+                  .post(environments.BASE_URL + "v2/signin/profileupdating", {
+                    data: response.data.message,
+                    isRegistering: "Y",
+                  })
+                  .then((responsenested) => {
+                    if (value.length - 1 === index) {
+                      logging.end();
+                      res.status(200).json(response.data);
+                    } else {
+                      console.log(response.data);
+                    }
+                  })
+                  .catch((errornested) => {
+                    throw errornested;
+                  });
               })
               .catch((error) => {
                 throw error;
@@ -1640,7 +1665,7 @@ app.post("/api/brand/advance", async (req, res) => {
   }
 });
 
-// COUPON, HOME, ADMIN PAGE SECTION
+// COUPON, HOME, ADMIN PAGE, WORK SECTION
 // 1. Coupons Page
 app.get("/api/coupons", async (req, res) => {
   logging.write(new Date() + " - coupons GET 🚀 \n");
@@ -1773,9 +1798,11 @@ app.post("/api/home", async (req, res) => {
     res.status(200).json({
       isMember: isMember,
       status: status,
-      gallerylist: gallery.sort((a, b) => b.createdDate - a.createdDate),
+      gallerylist: gallery
+        .sort((a, b) => b.updatedDate - a.updatedDate)
+        .slice(0, 9),
       exhibitiongallerylist: exhibitiongallery.sort(
-        (a, b) => b.createdDate - a.createdDate
+        (a, b) => b.updatedDate - a.updatedDate
       ),
       campaignlist: campaignlist
         .sort((a, b) => b.createdDate - a.createdDate)
@@ -2362,6 +2389,62 @@ app.post("/api/admin/pinksky", async (req, res) => {
   }
 });
 
+// 4. Work Page
+app.get("/api/work", async (req, res) => {
+  logging.write(new Date() + " - work GET 🚀 \n");
+  console.log(new Date() + " - work GET 🚀 \n");
+
+  try {
+    const gallerySnapshot = await Firebase.Gallery.get();
+    let gallery = [];
+    gallerySnapshot.docs.map((doc) => {
+      if (doc.data().isActive === 1) {
+        gallery.push({ id: doc.id, ...doc.data() });
+      }
+    });
+
+    logging.end();
+    res.status(200).json({
+      gallery: gallery
+      .sort((a, b) => b.updatedDate - a.updatedDate),
+      message: "Fetched Work Page",
+    });
+  } catch (error) {
+    logging.write(new Date() + " - work ❌ - " + error + " \n");
+    console.log(new Date() + " - work ❌ - " + error + " \n");
+
+    logging.end();
+    res.status(500).json({ message: error });
+  }
+});
+// 5. Gallery Detail Page
+app.post("/api/gallerydetail", async (req, res) => {
+  logging.write(new Date() + " - gallerydetail GET 🚀 \n");
+  console.log(new Date() + " - gallerydetail GET 🚀 \n");
+const data = req.body;
+  try {
+    console.log(data.id);
+    const gallerySnapshot = await Firebase.Gallery.doc(data.id).get();
+    // let gallery = [];
+    // gallerySnapshot.docs.map((doc) => {
+    //   if (doc.data().isActive === 1) {
+    //     gallery.push({ id: doc.id, ...doc.data() });
+    //   }
+    // });
+
+    logging.end();
+    res.status(200).json({
+      gallery: gallerySnapshot.data(),
+      message: "Fetched Gallerydetail Page",
+    });
+  } catch (error) {
+    logging.write(new Date() + " - gallerydetail ❌ - " + error + " \n");
+    console.log(new Date() + " - gallerydetail ❌ - " + error + " \n");
+
+    logging.end();
+    res.status(500).json({ message: error });
+  }
+});
 // FILTER SECTION
 // 1. City filter
 // app.post("/api/city/filter", async (req, res) => {
