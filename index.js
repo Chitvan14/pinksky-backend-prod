@@ -54,39 +54,69 @@ app.use(cors());
 // WHATSAPP AND EMAIL SECTION
 // 1. Logging
 app.post("/api/testaccount", async (req, res) => {
-  signInWithEmailAndPassword(userCredential.email, userCredential.password)
-.then(loggedUser => {console.log(loggedUser.user?.uid)})
+  //Request URL: https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key=AIzaSyCqlWc1tzWj4D4cat7VRdY_DVCS2nTbuuY
+  let url = `https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key=AIzaSyCqlWc1tzWj4D4cat7VRdY_DVCS2nTbuuY`;
+  //oobCode=GJYXPA3yRuzM6dBv9t-vI1TP-X4Aj6Y9KQAhpWN-MZMAAAGGRe4rcw&apiKey=AIzaSyCqlWc1tzWj4D4cat7VRdY_DVCS2nTbuuY
+  axios
+    .post(url, {
+      oobCode: "GJYXPA3yRuzM6dBv9t-vI1TP-X4Aj6Y9KQAhpWN-MZMAAAGGRe4rcw",
+      newPassword: "Appy@123456",
+    })
+    .then(async (response) => {
+      console.log(response.data);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+
+  // let getUserByUuid = await Firebase.admin
+  //   .auth()
+  //   .generatePasswordResetLink("chitvangarg14@gmail.com");
+  // console.log("getUserByUuid ", getUserByUuid);
+
+  // await Firebase.admin.auth().updateUser(getUserByUuid?.uid, {
+  //   password: createUser.password,
+  //   emailVerified: false,
+  //   disabled: false,
+  //   displayName: createUser.name,
+  // });
+  // await Firebase.firebase.auth().getUserByEmail("chitvangarg14@gmail.com")
+  // .then(function(userRecord) {
+  //   // See the UserRecord reference doc for the contents of userRecord.
+  //   console.log("Successfully fetched user data:", userRecord.toJSON());
+  // })
+  // .catch(function(error) {
+  //   console.log("Error fetching user data:", error);
+  // });
+  //   signInWithEmailAndPassword(userCredential.email, userCredential.password)
+  // .then(loggedUser => {console.log(loggedUser.user?.uid)})
   // let getUserByUuid = await Firebase.admin
   // .auth()
   // .getUser("chitvangarg14@gmail.com");
   // console.log(getUserByUuid);
-//influencerData.isNonInfluencer.uuid.toString()
-// await Firebase.admin.auth().updateUser(getUserByUuid?.uid, {
-//   password: createUser.password,
-//   emailVerified: false,
-//   disabled: false,
-//   displayName: createUser.name,
-// });
-
-// userResponse = {
-//   email: influencerData.email,
-//   uid: getUserByUuid?.uid,
-// };
+  //influencerData.isNonInfluencer.uuid.toString()
+  // await Firebase.admin.auth().updateUser(getUserByUuid?.uid, {
+  //   password: createUser.password,
+  //   emailVerified: false,
+  //   disabled: false,
+  //   displayName: createUser.name,
+  // });
+  // userResponse = {
+  //   email: influencerData.email,
+  //   uid: getUserByUuid?.uid,
+  // };
   //const ur = await Firebase.firebase.auth()
-  //const userResponse = 
-// await Firebase.firebase.auth().getUserByEmail("chitvangarg14@gmail.com")
-// .then(user => {
-//     console.log(user);
-    // generate id
-    //const resetPasswordID = shortid.generate();
-
-    // update user ref releated to provided email
-    //ref.child(user.uid).update({ resetPasswordID });
-
-    // send email to user
-    //email.sendforgotPassword(req.body.email, resetPasswordID, user.uid);
+  //const userResponse =
+  // await Firebase.firebase.auth().getUserByEmail("chitvangarg14@gmail.com")
+  // .then(user => {
+  //     console.log(user);
+  // generate id
+  //const resetPasswordID = shortid.generate();
+  // update user ref releated to provided email
+  //ref.child(user.uid).update({ resetPasswordID });
+  // send email to user
+  //email.sendforgotPassword(req.body.email, resetPasswordID, user.uid);
   //});
-
   // user.updateProfile({
   //   displayName: "Jane Q. User",
   //   photoURL: "https://example.com/jane-q-user/profile.jpg"
@@ -96,8 +126,7 @@ app.post("/api/testaccount", async (req, res) => {
   // }).catch((error) => {
   //   // An error occurred
   //   // ...
-  // }); 
-
+  // });
   // .signInWithEmailAndPassword()
   // .catch((error) => {
   //   throw error;
@@ -964,7 +993,6 @@ app.post("/api/forgotpassword", async (req, res) => {
         throw error;
       });
     //console.log("email sent1");
-    
 
     logging.end();
     res.status(200).json({ message: "Forgot Password" });
@@ -2434,8 +2462,7 @@ app.post("/api/work", async (req, res) => {
 
     logging.end();
     res.status(200).json({
-      gallery: gallery
-      .sort((a, b) => b.updatedDate - a.updatedDate),
+      gallery: gallery.sort((a, b) => b.updatedDate - a.updatedDate),
       message: "Fetched Work Page",
     });
   } catch (error) {
@@ -2450,7 +2477,7 @@ app.post("/api/work", async (req, res) => {
 app.post("/api/gallerydetail", async (req, res) => {
   logging.write(new Date() + " - gallerydetail GET 🚀 \n");
   console.log(new Date() + " - gallerydetail GET 🚀 \n");
-const data = req.body;
+  const data = req.body;
   try {
     console.log(data.id);
     const gallerySnapshot = await Firebase.Gallery.doc(data.id).get();
@@ -5107,6 +5134,122 @@ app.post("/api/v2/gallery/create", async (req, res) => {
     logging.end();
     res.status(500).json({ message: error });
   }
+});
+
+// 10. Forgot Password update influencer/brand
+app.put("/api/influencerbrand/update", async (req, res) => {
+  logging.write(new Date() + " - influencerbrand/update PUT 🚀 \n");
+  console.log(new Date() + " - influencerbrand/update PUT 🚀 \n");
+
+  try {
+    const data = req.body;
+    console.log("Data ", data);
+    if (data.type === "influencer") {
+      const snapshot = await Firebase.Influencer.get();
+      snapshot.docs().map(async (item) => {
+        if (item.data().email === data.email) {
+          await Firebase.Influencer.doc(item.id).update({
+            password: data.password,
+          });
+        }
+      });
+    } else if (data.type === "noninfluencer") {
+      const snapshot = await Firebase.NonInfluencer.get();
+      snapshot.docs().map(async (item) => {
+        if (item.data().email === data.email) {
+          await Firebase.NonInfluencer.doc(item.id).update({
+            password: data.password,
+          });
+        }
+      });
+      //const snapshot = await Firebase.NonInfluencer.where("email", "==", data.email);
+      //await Firebase.NonInfluencer.doc(snapshot.data().id).update({ password: data.password });
+    } else if (data.type === "brand") {
+      const snapshot = await Firebase.Brand.get();
+      snapshot.docs().map(async (item) => {
+        if (item.data().email === data.email) {
+          await Firebase.Brand.doc(item.id).update({
+            password: data.password,
+          });
+        }
+      });
+      //const snapshot = await Firebase.Brand.where("email", "==", data.email);
+      //await Firebase.Brand.doc(snapshot.data().id).update({ password: data.password });
+    }
+
+    res.status(200).json({ message: "Updated" });
+  } catch (error) {
+    logging.write(
+      new Date() + " - influencerbrand/update ❌ - " + error + " \n"
+    );
+    console.log(new Date() + " - influencerbrand/update ❌ - " + error + " \n");
+
+    logging.end();
+    res.status(500).json({ message: error });
+  }
+});
+
+// 11. Get brand/influencer/noninfluencer
+app.post("/api/influencerbrand", async (req, res) => {
+  logging.write(new Date() + " - influencerbrand PUT 🚀 \n");
+  console.log(new Date() + " - influencerbrand PUT 🚀 \n");
+
+  const data = req.body;
+  console.log("data ", data);
+  let type = "";
+  if (data.type === "noninfluencer-fg") {
+    await Firebase.NonInfluencer.where("email", "==", data.email)
+      .then((res) => {
+        type = "influencer";
+        res.status(200).json({ message: "Updated", type: type });
+      })
+      .catch((error) => {
+        type = "";
+        logging.write(new Date() + " - influencerbrand ❌ - " + error + " \n");
+        console.log(new Date() + " - influencerbrand ❌ - " + error + " \n");
+
+        logging.end();
+        res.status(500).json({ message: error });
+      });
+  } else if (data.type === "influencer-fg") {
+    await Firebase.Influencer.get()
+      .where("email", "==", data.email)
+      .then((res) => {
+        type = "noninfluencer";
+        res.status(200).json({ message: "Updated", type: type });
+      })
+      .catch((error) => {
+        type = "";
+        logging.write(new Date() + " - influencerbrand ❌ - " + error + " \n");
+        console.log(new Date() + " - influencerbrand ❌ - " + error + " \n");
+
+        logging.end();
+        res.status(500).json({ message: error });
+      });
+  } else if (data.type === "brand-fg") {
+    await Firebase.Brand.where("email", "==", data.email)
+      .then((res) => {
+        type = "brand";
+        res.status(200).json({ message: "Updated", type: type });
+      })
+      .catch((error) => {
+        type = "";
+        logging.write(new Date() + " - influencerbrand ❌ - " + error + " \n");
+        console.log(new Date() + " - influencerbrand ❌ - " + error + " \n");
+
+        logging.end();
+        res.status(500).json({ message: error });
+      });
+  }
+  //console.log("type ", type);
+
+  // } catch (error) {
+  //   logging.write(new Date() + " - influencerbrand ❌ - " + error + " \n");
+  //   console.log(new Date() + " - influencerbrand ❌ - " + error + " \n");
+
+  //   logging.end();
+  //   res.status(500).json({ message: error });
+  // }
 });
 
 // MAPPING SECTION
