@@ -1042,18 +1042,22 @@ app.post("/api/signin", async (req, res) => {
           sendMail("verifyemail", {
             tomail: brandData[0].email,
             ccmail: "",
-            subjectmail: "Verify your account | Pinksky",
-            text:
-              "Hey " +
-              brandData[0].companyname +
-              ", Copy the link below to verify your email.",
-
+            subjectmail: "Registration | Pinksky",
+            text: `Dear ${brandData[0].companyname},<br/><br/>
+You have successfully created an account at Pinksky! <br/><br/>
+Pinksky welcomes your brand to a creative marketing agency. We are excited to work & grow with you.
+<br/><br/>
+Thanks for choosing Pinksky 💕`,
             href:
               environments.VERIFY_EMAIL +
               "?registeras=Brand&id=" +
               brandData[0].id,
-            hrefText: "Verify Email",
+            hrefText: "Verify your account ->",
           });
+          // text:
+          // "Hey " +
+          // brandData[0].companyname +
+          // ", Copy the link below to verify your email.",
         } else {
           verify = false;
           if (userResponse.user.displayName.toString().slice(0, 1) === "0") {
@@ -1138,18 +1142,22 @@ app.post("/api/signin", async (req, res) => {
           sendMail("verifyemail", {
             tomail: noninfluencerData[0].email,
             ccmail: "",
-            subjectmail: "Verify your account | Pinksky",
-            text:
-              "Hey " +
-              noninfluencerData[0].name +
-              ", Copy the link below to verify your email.",
+            subjectmail: "Registration | Pinksky",
 
+            text: `Dear ${noninfluencerData[0].name},<br/><br/>
+You are almost there !
+<br/><br/>
+Thanks for choosing Pinksky 💕`,
             href:
               environments.VERIFY_EMAIL +
               "?registeras=Noninfluencer&id=" +
               noninfluencerData[0].id,
-            hrefText: "Verify Email",
+            hrefText: "Verify your account ->",
           });
+          // text:
+          // "Hey " +
+          // noninfluencerData[0].name +
+          // ", Copy the link below to verify your email.",
         } else {
           verify = false;
         }
@@ -1210,18 +1218,23 @@ app.post("/api/signin", async (req, res) => {
           sendMail("verifyemail", {
             tomail: influencerData[0].email,
             ccmail: "",
-            subjectmail: "Verify your account | Pinksky",
-            text:
-              "Hey " +
-              influencerData[0].name +
-              ", Copy the link below to verify your email.",
+            subjectmail: "Registration | Pinksky",
 
+            text: `Dear ${influencerData[0].name},<br/><br/>
+       
+Welcome to Pinksky’s secret club of influencers. We are excited to invite you to our upcoming events & be a part of the campaigns hope you are too!
+<br/><br/>
+Thanks for choosing Pinksky 💕 `,
             href:
               environments.VERIFY_EMAIL +
               "?registeras=Influencer&id=" +
               influencerData[0].id,
-            hrefText: "Verify Email",
+            hrefText: "Verify your account ->",
           });
+          // text:
+          // "Hey " +
+          // influencerData[0].name +
+          // ", Copy the link below to verify your email.",
         } else {
           verify = false;
           if (userResponse.user.displayName.toString().slice(0, 1) === "0") {
@@ -3214,43 +3227,48 @@ app.post("/api/influencer/create", async (req, res) => {
                               }
                             });
                           }
+                          sendMail("registerdetailmail", {
+                            tomail: environments.EML_USER,
+                            ccmail: "",
+                            subjectmail: "Influencer Details | Pinksky",
+                            text:
+                              "Name : " +
+                              influencerArr[0].name +
+                              ", " +
+                              influencerArr[0].surname +
+                              " <br/>" +
+                              "Whatapp Number : " +
+                              influencerArr[0].whatsappnumber +
+                              " <br/>" +
+                              "Instagram : " +
+                              influencerArr[0].instagramurl +
+                              " <br/>" +
+                              "Email : " +
+                              influencerArr[0].email +
+                              " <br/>",
+                            href: environments.EML_HREF_WEBSITE,
+                          });
                           setTimeout(() => {
                             sendMail("verifyemail", {
                               tomail: influencerArr[0].email,
                               ccmail: "",
-                              subjectmail: "Verify your account | Pinksky",
-                              text:
-                                "Hey " +
-                                influencerArr[0].name +
-                                ", Copy the link below to verify your email.",
+                              subjectmail: "Registration | Pinksky",
 
+                              text: `Dear ${influencerArr[0].name},<br/><br/>
+       
+Welcome to Pinksky’s secret club of influencers. We are excited to invite you to our upcoming events & be a part of the campaigns hope you are too!
+<br/><br/>
+Thanks for choosing Pinksky 💕 `,
                               href:
                                 environments.VERIFY_EMAIL +
                                 "?registeras=Influencer&id=" +
                                 influencerArr[0].id,
-                              hrefText: "Verify Email",
+                              hrefText: "Verify your account ->",
                             });
-                            sendMail("registerdetailmail", {
-                              tomail: environments.EML_USER,
-                              ccmail: "",
-                              subjectmail: "Influencer Details | Pinksky",
-                              text:
-                                "Name : " +
-                                influencerArr[0].name +
-                                ", " +
-                                influencerArr[0].surname +
-                                " <br/>" +
-                                "Whatapp Number : " +
-                                influencerArr[0].whatsappnumber +
-                                " <br/>" +
-                                "Instagram : " +
-                                influencerArr[0].instagramurl +
-                                " <br/>" +
-                                "Email : " +
-                                influencerArr[0].email +
-                                " <br/>",
-                              href: environments.EML_HREF_WEBSITE,
-                            });
+                            // text:
+                            //     "Hey " +
+                            //     influencerArr[0].name +
+                            //     ", Copy the link below to verify your email.",
                             logging.end();
                             res.status(200).json({
                               message: {
@@ -3487,18 +3505,23 @@ app.post("/api/brand/create", async (req, res) => {
                           sendMail("verifyemail", {
                             tomail: brandArr[0].email,
                             ccmail: "",
-                            subjectmail: "Verify your account | Pinksky",
-                            text:
-                              "Hey " +
-                              brandArr[0].companyname +
-                              ", Copy the link below to verify your email.",
+                            subjectmail: "Registration | Pinksky",
 
+                            text: ` Dear ${brandArr[0].companyname},<br/><br/>
+You have successfully created an account at Pinksky! <br/><br/>
+Pinksky welcomes your brand to a creative marketing agency. We are excited to work & grow with you.
+<br/><br/>
+Thanks for choosing Pinksky 💕`,
                             href:
                               environments.VERIFY_EMAIL +
                               "?registeras=Brand&id=" +
                               brandArr[0].id,
-                            hrefText: "Verify Email",
+                            hrefText: "Verify your account ->",
                           });
+                          // text:
+                          // "Hey " +
+                          // brandArr[0].companyname +
+                          // ", Copy the link below to verify your email.",
                           sendMail("registerdetailmail", {
                             tomail: environments.EML_USER,
                             ccmail: "",
@@ -3624,18 +3647,22 @@ app.post("/api/noninfluencer/create", async (req, res) => {
           sendMail("verifyemail", {
             tomail: noninfluencerArr[0].email,
             ccmail: "",
-            subjectmail: "Verify your account | Pinksky",
-            text:
-              "Hey " +
-              noninfluencerArr[0].name +
-              ", Copy the link below to verify your email.",
+            subjectmail: "Registration | Pinksky",
 
+            text: `Dear ${noninfluencerArr[0].name},<br/><br/>
+You are almost there !
+<br/><br/>
+Thanks for choosing Pinksky 💕`,
             href:
               environments.VERIFY_EMAIL +
               "?registeras=Noninfluencer&id=" +
               noninfluencerArr[0].id,
-            hrefText: "Verify Email",
+            hrefText: "Verify your account -> ",
           });
+          // text:
+          // "Hey " +
+          // noninfluencerArr[0].name +
+          // ", Copy the link below to verify your email.",
           sendMail("registerdetailmail", {
             tomail: environments.EML_USER,
             ccmail: "",
@@ -5032,20 +5059,20 @@ app.put("/api/verifyaccount/update", async (req, res) => {
           ...snapshot.data(),
           isActive: 1,
         });
-        if (snapshot.data().isActive === 0) {
-          sendMail("registerlaunchingsoon", {
-            tomail: snapshot.data().email,
-            ccmail: "",
-            subjectmail: "Registration Completed | Pinksky",
-            text: `Dear ${snapshot.data().name},<br/><br/>
-           Registration completed !<br/><br/>
-           Welcome to Pinksky’s secret club of influencers. We are excited to invite you to our upcoming events & be a part of the campaigns hope you are too!
-           <br/><br/>
-           Thanks for choosing Pinksky 💕 `,
-            href: environments.EML_HREF_WEBSITE,
-            hrefText: "pinkskyclub.com",
-          });
-        }
+        // if (snapshot.data().isActive === 0) {
+        //   sendMail("registerlaunchingsoon", {
+        //     tomail: snapshot.data().email,
+        //     ccmail: "",
+        //     subjectmail: "Registration Completed | Pinksky",
+        //     text: `Dear ${snapshot.data().name},<br/><br/>
+        //    Registration completed !<br/><br/>
+        //    Welcome to Pinksky’s secret club of influencers. We are excited to invite you to our upcoming events & be a part of the campaigns hope you are too!
+        //    <br/><br/>
+        //    Thanks for choosing Pinksky 💕 `,
+        //     href: environments.EML_HREF_WEBSITE,
+        //     hrefText: "pinkskyclub.com",
+        //   });
+        // }
 
         logging.end();
         res.status(200).json({ message: "Verified Influencer" });
@@ -5059,20 +5086,20 @@ app.put("/api/verifyaccount/update", async (req, res) => {
           ...snapshot.data(),
           isActive: 1,
         });
-        if (snapshot.data().isActive === 0) {
-          sendMail("registerlaunchingsoon", {
-            tomail: snapshot.data().email,
-            ccmail: "",
-            subjectmail: "Registration Completed | Pinksky",
-            text: `Dear ${snapshot.data().companyname},<br/><br/>
-      You have successfully created an account at Pinksky! <br/><br/>
-      Pinksky welcomes your brand to a creative marketing agency. We are excited to work & grow with you. 
-      <br/><br/>
-      Thanks for choosing Pinksky 💕 `,
-            href: environments.EML_HREF_WEBSITE,
-            hrefText: "pinkskyclub.com",
-          });
-        }
+        //   if (snapshot.data().isActive === 0) {
+        //     sendMail("registerlaunchingsoon", {
+        //       tomail: snapshot.data().email,
+        //       ccmail: "",
+        //       subjectmail: "Registration Completed | Pinksky",
+        //       text: `Dear ${snapshot.data().companyname},<br/><br/>
+        // You have successfully created an account at Pinksky! <br/><br/>
+        // Pinksky welcomes your brand to a creative marketing agency. We are excited to work & grow with you.
+        // <br/><br/>
+        // Thanks for choosing Pinksky 💕 `,
+        //       href: environments.EML_HREF_WEBSITE,
+        //       hrefText: "pinkskyclub.com",
+        //     });
+        //   }
 
         logging.end();
         res.status(200).json({ message: "Verified Brand" });
@@ -5086,19 +5113,19 @@ app.put("/api/verifyaccount/update", async (req, res) => {
           ...snapshot.data(),
           isActive: 1,
         });
-        if (snapshot.data().isActive === 0) {
-          sendMail("registerlaunchingsoon", {
-            tomail: snapshot.data().email,
-            ccmail: "",
-            subjectmail: "Registration Completed | Pinksky",
-            text: `Dear ${snapshot.data().name},<br/><br/>
-     Registration completed !
-     <br/><br/>
-     Thanks for choosing Pinksky 💕`,
-            href: environments.EML_HREF_WEBSITE,
-            hrefText: "pinkskyclub.com",
-          });
-        }
+        //     if (snapshot.data().isActive === 0) {
+        //       sendMail("registerlaunchingsoon", {
+        //         tomail: snapshot.data().email,
+        //         ccmail: "",
+        //         subjectmail: "Registration Completed | Pinksky",
+        //         text: `Dear ${snapshot.data().name},<br/><br/>
+        //  Registration completed !
+        //  <br/><br/>
+        //  Thanks for choosing Pinksky 💕`,
+        //         href: environments.EML_HREF_WEBSITE,
+        //         hrefText: "pinkskyclub.com",
+        //       });
+        //     }
 
         logging.end();
         res.status(200).json({ message: "Verified NonInfluencer" });
@@ -5714,18 +5741,23 @@ app.post("/api/v2/influencer/create", async (req, res) => {
               sendMail("verifyemail", {
                 tomail: influencerArr[0].email,
                 ccmail: "",
-                subjectmail: "Verify your account | Pinksky",
-                text:
-                  "Hey " +
-                  influencerArr[0].name +
-                  ", Copy the link below to verify your email.",
+                subjectmail: "Registration | Pinksky",
 
+                text: `Dear ${influencerArr[0].name},<br/><br/>
+       
+Welcome to Pinksky’s secret club of influencers. We are excited to invite you to our upcoming events & be a part of the campaigns hope you are too!
+<br/><br/>
+Thanks for choosing Pinksky 💕 `,
                 href:
                   environments.VERIFY_EMAIL +
                   "?registeras=Influencer&id=" +
                   influencerArr[0].id,
-                hrefText: "Verify Email",
+                hrefText: "Verify your account -> ",
               });
+              // text:
+              // "Hey " +
+              // influencerArr[0].name +
+              // ", Copy the link below to verify your email.",
               sendMail("registerdetailmail", {
                 tomail: environments.EML_USER,
                 ccmail: "",
@@ -5990,18 +6022,23 @@ app.post("/api/v2/brand/create", async (req, res) => {
                         sendMail("verifyemail", {
                           tomail: brandArr[0].email,
                           ccmail: "",
-                          subjectmail: "Verify your account | Pinksky",
-                          text:
-                            "Hey " +
-                            brandArr[0].companyname +
-                            ", Copy the link below to verify your email.",
+                          subjectmail: "Registration | Pinksky",
 
+                          text: ` Dear ${brandArr[0].companyname},<br/><br/>
+You have successfully created an account at Pinksky! <br/><br/>
+Pinksky welcomes your brand to a creative marketing agency. We are excited to work & grow with you.
+<br/><br/>
+Thanks for choosing Pinksky 💕`,
                           href:
                             environments.VERIFY_EMAIL +
                             "?registeras=Brand&id=" +
                             brandArr[0].id,
-                          hrefText: "Verify Email",
+                          hrefText: "Verify your account -> ",
                         });
+                        // text:
+                        //     "Hey " +
+                        //     brandArr[0].companyname +
+                        //     ", Copy the link below to verify your email.",
                         sendMail("registerdetailmail", {
                           tomail: environments.EML_USER,
                           ccmail: "",
