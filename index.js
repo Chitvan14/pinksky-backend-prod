@@ -54,14 +54,55 @@ app.use(cors());
 // WHATSAPP AND EMAIL SECTION
 // 1. Logging
 app.post("/api/testaccount", async (req, res) => {
-  //const ur = await Firebase.firebase.auth()
-  const userResponse = await Firebase.firebase.auth()
+  signInWithEmailAndPassword(userCredential.email, userCredential.password)
+.then(loggedUser => {console.log(loggedUser.user?.uid)})
+  // let getUserByUuid = await Firebase.admin
+  // .auth()
+  // .getUser("chitvangarg14@gmail.com");
+  // console.log(getUserByUuid);
+//influencerData.isNonInfluencer.uuid.toString()
+// await Firebase.admin.auth().updateUser(getUserByUuid?.uid, {
+//   password: createUser.password,
+//   emailVerified: false,
+//   disabled: false,
+//   displayName: createUser.name,
+// });
 
-  .signInWithEmailAndPassword()
-  .catch((error) => {
-    throw error;
-  });
-  console.log(userResponse)
+// userResponse = {
+//   email: influencerData.email,
+//   uid: getUserByUuid?.uid,
+// };
+  //const ur = await Firebase.firebase.auth()
+  //const userResponse = 
+// await Firebase.firebase.auth().getUserByEmail("chitvangarg14@gmail.com")
+// .then(user => {
+//     console.log(user);
+    // generate id
+    //const resetPasswordID = shortid.generate();
+
+    // update user ref releated to provided email
+    //ref.child(user.uid).update({ resetPasswordID });
+
+    // send email to user
+    //email.sendforgotPassword(req.body.email, resetPasswordID, user.uid);
+  //});
+
+  // user.updateProfile({
+  //   displayName: "Jane Q. User",
+  //   photoURL: "https://example.com/jane-q-user/profile.jpg"
+  // }).then(() => {
+  //   // Update successful
+  //   // ...
+  // }).catch((error) => {
+  //   // An error occurred
+  //   // ...
+  // }); 
+
+  // .signInWithEmailAndPassword()
+  // .catch((error) => {
+  //   throw error;
+  // });
+  //console.log(userResponse)
   // sendMail("registerdetailmail", {
   //   tomail: environments.EML_USER,
   //   ccmail: "",
@@ -923,6 +964,7 @@ app.post("/api/forgotpassword", async (req, res) => {
         throw error;
       });
     //console.log("email sent1");
+    
 
     logging.end();
     res.status(200).json({ message: "Forgot Password" });
@@ -1699,20 +1741,20 @@ app.post("/api/home", async (req, res) => {
   console.log(new Date() + " - home POST 🚀 \n");
 
   try {
-    const gallerySnapshot = await Firebase.Gallery.get();
-    let gallery = [];
-    let exhibitiongallery = [];
-    gallerySnapshot.docs.map((doc) => {
-      if (doc.data().isActive === 1) {
-        if (doc.data().type === "event") {
-          gallery.push({ id: doc.id, ...doc.data() });
-        } else if (doc.data().type === "exhibition") {
-          exhibitiongallery.push({ id: doc.id, ...doc.data() });
-        } else {
-          //nothing
-        }
-      }
-    });
+    // const gallerySnapshot = await Firebase.Gallery.get();
+    // let gallery = [];
+    // let exhibitiongallery = [];
+    // gallerySnapshot.docs.map((doc) => {
+    //   if (doc.data().isActive === 1) {
+    //     if (doc.data().type === "event") {
+    //       gallery.push({ id: doc.id, ...doc.data() });
+    //     } else if (doc.data().type === "exhibition") {
+    //       exhibitiongallery.push({ id: doc.id, ...doc.data() });
+    //     } else {
+    //       //nothing
+    //     }
+    //   }
+    // });
 
     //campaign
     const snapshot = await Firebase.Campaign.get();
@@ -1785,12 +1827,12 @@ app.post("/api/home", async (req, res) => {
     res.status(200).json({
       isMember: isMember,
       status: status,
-      gallerylist: gallery
-        .sort((a, b) => b.updatedDate - a.updatedDate)
-        .slice(0, 9),
-      exhibitiongallerylist: exhibitiongallery.sort(
-        (a, b) => b.updatedDate - a.updatedDate
-      ),
+      // gallerylist: gallery
+      //   .sort((a, b) => b.updatedDate - a.updatedDate)
+      //   .slice(0, 9),
+      // exhibitiongallerylist: exhibitiongallery.sort(
+      //   (a, b) => b.updatedDate - a.updatedDate
+      // ),
       campaignlist: campaignlist
         .sort((a, b) => b.createdDate - a.createdDate)
         .slice(0, 6),
@@ -2377,7 +2419,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
 });
 
 // 4. Work Page
-app.get("/api/work", async (req, res) => {
+app.post("/api/work", async (req, res) => {
   logging.write(new Date() + " - work GET 🚀 \n");
   console.log(new Date() + " - work GET 🚀 \n");
 
@@ -5038,6 +5080,29 @@ app.put("/api/verifyaccount/update", async (req, res) => {
   } catch (error) {
     logging.write(new Date() + " - verifyaccount/update ❌ - " + error + " \n");
     console.log(new Date() + " - verifyaccount/update ❌ - " + error + " \n");
+
+    logging.end();
+    res.status(500).json({ message: error });
+  }
+});
+
+// 9. Adding Gallery
+app.post("/api/v2/gallery/create", async (req, res) => {
+  logging.write(new Date() + " - v2/gallery/create POST 🚀 \n");
+  console.log(new Date() + " - v2/gallery/create POST 🚀 \n");
+
+  try {
+    const data = req.body;
+    //console.log(data);
+
+    await Firebase.Gallery.add(data);
+
+    logging.end();
+    res.status(200).json({ message: "Posted Gallery" });
+  } catch (error) {
+    //console.log("error", error);
+    logging.write(new Date() + " - v2/gallery/create ❌ - " + error + " \n");
+    console.log(new Date() + " - v2/gallery/create ❌ - " + error + " \n");
 
     logging.end();
     res.status(500).json({ message: error });
