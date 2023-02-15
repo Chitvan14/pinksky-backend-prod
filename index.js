@@ -4765,16 +4765,22 @@ app.put("/api/gallery/update", async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
-
+//13.
 app.post("/api/brandname", async (req, res) => {
   logging.write(new Date() + " - brandname POST 🚀 \n");
   console.log(new Date() + " - brandname POST 🚀 \n");
 
   let data = req.body;
-  //console.log(data);
   try {
-    let snapshot = await Firebase.Brand.get();
+    const snapshot = await Firebase.Brand.get();
     let companynames = [];
+    // const snapshot2 = await Firebase.Brand.get();
+
+    // snapshot2.docs.map((doc) => {
+    //   console.log({data:doc.data()});
+
+    // });
+
     snapshot.docs.map((item) => {
       if (
         item
@@ -4790,14 +4796,90 @@ app.post("/api/brandname", async (req, res) => {
         });
       }
     });
-    //console.log(companynames);
+    console.log(companynames);
 
     res.json({ message: companynames });
   } catch (error) {
+    console.log(error);
     res.json({ message: error });
   }
 });
+// 14. Update Event
+app.put("/api/event/update", async (req, res) => {
+  logging.write(new Date() + " - event/update PUT 🚀 \n");
+  console.log(new Date() + " - event/update PUT 🚀 \n");
 
+  try {
+    const id = req.body.id;
+    delete req.body.id;
+    const data = {
+      datetime: req.body.datetime,
+      location: req.body.location,
+      name: req.body.name,
+    };
+
+    await Firebase.Event.doc(id).update(data);
+
+    logging.end();
+    res.status(200).json({ message: "Updated Event" });
+  } catch (error) {
+    logging.write(new Date() + " - event/update ❌ - " + error + " \n");
+    console.log(new Date() + " - event/update FILE ❌ - " + error + " \n");
+    logging.end();
+    res.status(500).json({ message: error });
+  }
+});
+// 14. Update Campaign
+app.put("/api/campaign/update", async (req, res) => {
+  logging.write(new Date() + " - campaign/update PUT 🚀 \n");
+  console.log(new Date() + " - campaign/update PUT 🚀 \n");
+
+  try {
+    const id = req.body.id;
+    //console.log(id);
+    delete req.body.id;
+    const data = req.body;
+    // console.log("check campaign update -> ",{
+    //   campaignDetail: {
+    //     goals: data.goals,
+    //     whattodo: data.whattodo,
+    //     thingstoremember: data.thingstoremember,
+    //     detail: data.detail,
+    //     deliverable: data.deliverable,
+    //     numberofinfluencer: data.numberofinfluencer,
+    //     influencerselectionstart: data.influselectionstart,
+    //     influselectionend: data.influselectionend,
+    //     contentpostingstart: data.contentpostingstart,
+    //     contentpostingend: data.contentpostingend,
+    //   },
+    //   name: data.name,
+    // });
+
+    await Firebase.Campaign.doc(id).update({
+      campaignDetail: {
+        goals: data.goals,
+        whattodo: data.whattodo,
+        thingstoremember: data.thingstoremember,
+        detail: data.detail,
+        deliverable: data.deliverable,
+        numberofinfluencer: data.numberofinfluencer,
+        influencerselectionstart: data.influencerselectionstart,
+        influselectionend: data.influselectionend,
+        contentpostingstart: data.contentpostingstart,
+        contentpostingend: data.contentpostingend,
+      },
+      name: data.name,
+    });
+
+    logging.end();
+    res.status(200).json({ message: "Updated Campaign" });
+  } catch (error) {
+    logging.write(new Date() + " - campaign/update ❌ - " + error + " \n");
+    console.log(new Date() + " - campaign/update FILE ❌ - " + error + " \n");
+    logging.end();
+    res.status(500).json({ message: error });
+  }
+});
 // MODAL FETCHING DATA SECTION
 // 1. Name + Number data create
 app.post("/api/randomdata/create", async (req, res) => {
