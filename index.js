@@ -2771,7 +2771,7 @@ app.post("/api/influencer/filter", async (req, res) => {
     let mySetCategory = new Set();
     data.radioInfluencerValue
       .filter((item) => item.status === true)
-      .map((categ) => selectedCategory.push(categ.label));
+      .map((categ) => selectedCategory.push(categ.label.split(" ")[0]));
     if (selectedCategory[0] !== "All") {
       followersorted.map((element) => {
         element.category.filter((nesele) => {
