@@ -6283,7 +6283,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           new Date().getTime() - snapshot.data().updatedDate.toDate().getTime();
 
         var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
-        console.log(`daysDifference for id ${data.id} is `, daysDifference);
+        //console.log(`daysDifference for id ${data.id} is `, daysDifference);
         if (daysDifference > 15) {
           //console.log("inside");
           let influencerSchema = null;
@@ -6495,22 +6495,38 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
             let count = 0;
 
             instadatares.edge_owner_to_timeline_media.edges.map((item) => {
-              // //console.log(item);
+              //console.log("item ", item.node);
               sum =
                 sum +
                 item.node.edge_media_to_comment.count +
                 item.node.edge_liked_by.count;
-
+              //console.log("sum ", sum);
               if (count <= 4) {
-                // //console.log("item.node.shortcode", item.node.shortcode);
+                //console.log("item.node.shortcode", item.node.shortcode);
+                //console.log("itemData1 ", item.node?.id);
+                //console.log("itemData2 ", item.node?.shortcode);
+                //console.log("itemData3 ", item.node?.display_url);
+                //console.log(
+                //  "itemData4 ",
+                //  item.node?.edge_media_to_caption.edges
+                //);
+                //console.log(
+                //  "itemData5 ",
+                //  item.node?.edge_media_to_comment.count
+                //);
+                //console.log("itemData ", item.node?.edge_liked_by.count);
                 let itemData = {
-                  id: item.node.id,
-                  shortcode: item.node.shortcode,
-                  display_url: item.node.display_url,
-                  caption: item.node.edge_media_to_caption.edges[0].node.text,
-                  edge_media_to_comment: item.node.edge_media_to_comment.count,
-                  edge_liked_by: item.node.edge_liked_by.count,
+                  id: item.node?.id,
+                  shortcode: item.node?.shortcode,
+                  display_url: item.node?.display_url,
+                  caption:
+                    item.node?.edge_media_to_caption.edges.length === 0
+                      ? []
+                      : item.node.edge_media_to_caption.edges[0].node.text,
+                  edge_media_to_comment: item.node?.edge_media_to_comment.count,
+                  edge_liked_by: item.node?.edge_liked_by.count,
                 };
+                // console.log("itemData ", itemData);
 
                 instagramPostDetails.push(itemData);
               }
