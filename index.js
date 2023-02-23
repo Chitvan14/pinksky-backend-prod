@@ -1736,6 +1736,29 @@ app.post("/api/brand/advance", async (req, res) => {
 });
 
 // COUPON, HOME, ADMIN PAGE, WORK SECTION
+//0. Campaign Page
+app.post("/api/campaign", async (req, res) => {
+  logging.write(new Date() + " - campaign POST 🚀 \n");
+  console.log(new Date() + " - campaign POST 🚀 \n");
+let data = req.body;
+  try {
+    const snapshotcampaign = await Firebase.Campaign.doc(
+      data.id
+    ).get();
+   
+    logging.end();
+    res.status(200).json({
+      data: snapshotcampaign.data(),
+      message: "Fetched Campaign Page",
+    });
+  } catch (error) {
+    logging.write(new Date() + " - campaign ❌ - " + error + " \n");
+    console.log(new Date() + " - campaign ❌ - " + error + " \n");
+
+    logging.end();
+    res.status(500).json({ message: error });
+  }
+});
 // 1. Coupons Page
 app.get("/api/coupons", async (req, res) => {
   logging.write(new Date() + " - coupons GET 🚀 \n");
