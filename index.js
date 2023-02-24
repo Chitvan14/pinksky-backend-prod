@@ -598,7 +598,8 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
 app.post("/api/firebasetospreadsheet", async (req, res) => {
   logging.write(new Date() + " - firebasetospreadsheet POST 🚀 \n");
   console.log(new Date() + " - firebasetospreadsheet POST 🚀 \n");
-
+  //when user changes its data it will not be updated
+  //need to implement this feature
   try {
     let isValid = 1;
     //Influencer
@@ -1740,12 +1741,10 @@ app.post("/api/brand/advance", async (req, res) => {
 app.post("/api/campaign", async (req, res) => {
   logging.write(new Date() + " - campaign POST 🚀 \n");
   console.log(new Date() + " - campaign POST 🚀 \n");
-let data = req.body;
+  let data = req.body;
   try {
-    const snapshotcampaign = await Firebase.Campaign.doc(
-      data.id
-    ).get();
-   
+    const snapshotcampaign = await Firebase.Campaign.doc(data.id).get();
+
     logging.end();
     res.status(200).json({
       data: snapshotcampaign.data(),
