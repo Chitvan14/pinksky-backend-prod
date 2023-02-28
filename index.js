@@ -606,6 +606,11 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     const snapshot = await Firebase.Influencer.get();
     let influencerData = [];
     snapshot.docs.map(async (doc) => {
+      let category = [];
+      doc.data().category.length > 0 &&
+        doc.data().category.map((item) => {
+          category.push(item.value);
+        });
       if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
         influencerData.push({
           id: doc.id,
@@ -617,7 +622,10 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
           phonenumber: doc.data().phonenumber,
           surname: doc.data().surname,
           whatsappnumber: doc.data().whatsappnumber,
+          category: category.length > 0 ? category.toString() : [],
         });
+        console.log({ category: category.toString(), id: doc.id });
+
         await Firebase.Influencer.doc(doc.id).update({
           dbInserted: 1,
         });
