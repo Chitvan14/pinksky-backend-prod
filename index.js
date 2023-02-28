@@ -988,6 +988,33 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
   }
 });
 
+// 3. Resetting influencers details in spreadsheet
+app.put("/api/spreadsheet/reset", async (req, res) => {
+  logging.write(new Date() + " - spreadsheet/reset PUT 🚀 \n");
+  console.log(new Date() + " - spreadsheet/reset PUT 🚀 \n");
+
+  const data = req.body;
+  try {
+    if (data.type === "influencer") {
+      console.log("data ", data.type);
+      const snapshotInfluencer = await Firebase.Influencer.get();
+      console.log("data ", snapshotInfluencer.docs);
+      snapshotInfluencer.docs.map(async (item) => {
+        console.log("item id 0 ", item.id);
+        await Firebase.Influencer.doc(item.id).update({ dbInserted: 0 });
+      });
+    }
+
+    res.status(200).json({ message: "Resetted Data" });
+  } catch (error) {
+    logging.write(new Date() + " - spreadsheet/reset ❌ - " + error + " \n");
+    console.log(new Date() + " - spreadsheet/reset ❌ - " + error + " \n");
+
+    logging.end();
+    res.status(500).json({ message: error });
+  }
+});
+
 // AUTHENTICATION SECTION
 // 1. Forgot Password
 app.post("/api/forgotpassword", async (req, res) => {
