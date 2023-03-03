@@ -1832,7 +1832,52 @@ app.get("/api/coupons", async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
+// 1.5 Auth check
+app.post("/api/pinksky/auth", async (req, res) => {
+  logging.write(new Date() + " - pinksky/auth POST 🚀 \n");
+  console.log(new Date() + " - pinksky/auth POST 🚀 \n");
 
+  try {
+    const snapshotInfl = await Firebase.Influencer.get();
+    let isMember = false;
+    let status = "new";
+    snapshotInfl.docs.map((doc) => {
+      if (doc.id === req.body.id) {
+        isMember = doc.data().pinkskymember.isMember;
+        status = doc.data().status;
+      }
+    });
+
+    const snapshotNonInfluencer = await Firebase.NonInfluencer.get();
+    snapshotNonInfluencer.docs.map((doc) => {
+      if (doc.id === req.body.id) {
+        isMember = doc.data()?.pinkskymember?.isMember;
+      }
+    });
+
+    const snapshotBrand = await Firebase.Brand.get();
+    snapshotBrand.docs.map((doc) => {
+      if (doc.id === req.body.id) {
+        isMember = doc.data()?.pinkskymember?.isMember;
+        status = doc.data().status;
+      }
+    });
+
+    logging.end();
+    res.status(200).json({
+      isMember: isMember,
+      status: status,
+
+      message: "Fetched pinksky auth",
+    });
+  } catch (error) {
+    logging.write(new Date() + " - pinksky/auth ❌ - " + error + " \n");
+    console.log(new Date() + " - pinksky/auth ❌ - " + error + " \n");
+
+    logging.end();
+    res.status(500).json({ message: error });
+  }
+});
 // 2. Home Page
 app.post("/api/home", async (req, res) => {
   logging.write(new Date() + " - home POST 🚀 \n");
@@ -1870,7 +1915,11 @@ app.post("/api/home", async (req, res) => {
     let status = "new";
     snapshotInfl.docs.map((doc) => {
       if (doc.data().status === "accepted") {
-        influencerlist.push({ id: doc.id, ...doc.data() });
+        if (doc.data().instagram !== undefined) {
+          if (doc.data().instagram.followers > 10000) {
+            influencerlist.push({ id: doc.id, ...doc.data() });
+          }
+        }
       }
       if (doc.id === req.body.id) {
         isMember = doc.data().pinkskymember.isMember;
@@ -5064,30 +5113,71 @@ app.put("/api/influencer/update", async (req, res) => {
     let updatedCookies = {};
     let displayName = data?.cookies.displayName;
     let updatedDisplayName = displayName;
-
+    //console.log("data ", data);
     if (data.flagSignOut === 1 && displayName.slice(0, 1) === "0") {
       updatedDisplayName =
         displayName.slice(0, 1) === "0" &&
         "1" + displayName.slice(1, displayName.length);
-      //console.log("updatedDisplayName", updatedDisplayName);
+      // console.log("updatedDisplayName", updatedDisplayName);
+      console.log("step 0");
+
       await Firebase.admin.auth().updateUser(data?.cookies.uuid, {
         displayName: updatedDisplayName,
       });
-    }
-    if (data.flagSignOut === 0 && displayName.slice(0, 1) === "1") {
+      console.log("step 1");
+
+      const snapshot = await Firebase.Influencer.doc(id).get();
+      let influencerData = [
+        ...snapshot.data().message,
+        {
+          statusID: "101",
+          campaignID: "",
+          campaignName: "",
+        },
+      ];
+      console.log("step 5");
+      await Firebase.Influencer.doc(id).update({
+        ...data.body,
+        status: "accepted",
+        message: influencerData,
+      });
+      updatedCookies = {
+        ...data?.cookies,
+        displayName: updatedDisplayName,
+        status: "accepted",
+      };
+    } else if (data.flagSignOut === 0 && displayName.slice(0, 1) === "1") {
       updatedDisplayName =
         displayName.slice(0, 1) === "1" &&
         "0" + displayName.slice(1, displayName.length);
       await Firebase.admin.auth().updateUser(data?.cookies.uuid, {
         displayName: updatedDisplayName,
       });
+      console.log("step 4");
+      await Firebase.Influencer.doc(id).update(data.body);
+      console.log("step 2");
+      updatedCookies = {
+        ...data?.cookies,
+        displayName: updatedDisplayName,
+      };
+      //await Firebase.Influencer.doc(id).update(data.body);
+    } else {
+      await Firebase.Influencer.doc(id).update(data.body);
+      console.log("step 2");
+      updatedCookies = {
+        ...data?.cookies,
+        displayName: updatedDisplayName,
+      };
     }
-    updatedCookies = { ...data?.cookies, displayName: updatedDisplayName };
-    //console.log("here?");
-    await Firebase.Influencer.doc(id).update(data.body);
-    res
-      .status(200)
-      .json({ message: "Updated Influencer", updatedCookies: updatedCookies });
+
+    // setTimeout(() => {
+    console.log("updatedCookies ", updatedCookies);
+
+    res.status(200).json({
+      message: "Updated Influencer",
+      updatedCookies: updatedCookies,
+    });
+    // }, 2000);
   } catch (error) {
     logging.write(new Date() + " - influencer/update ❌ - " + error + " \n");
     console.log(new Date() + " - influencer/update ❌ - " + error + " \n");
@@ -6267,6 +6357,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
 
   try {
     let { data, isRegistering } = req.body;
+    console.log({ data, isRegistering });
     if (data.displayName.slice(0, 1) === "1" && isRegistering == "N") {
       if (data.displayName.indexOf("Brand") != -1) {
         //Brand
@@ -6516,19 +6607,13 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           });
         }
       }
-    } else if (data.displayName.slice(0, 1) === "0" && isRegistering == "Y") {
+    } else if (isRegistering === "Y") {
+      //removed from condition - data.displayName.slice(0, 1) === "0" &&
       if (data.displayName.indexOf("Influencer") != -1) {
         const snapshot = await Firebase.Influencer.doc(data.id).get();
 
         let influencerSchema = null;
-        // const options = {
-        //   method: "GET",
-        //   url: environments.RAPID_USERINFO_URL + snapshot.data().instagramurl,
-        //   headers: {
-        //     "X-RapidAPI-Key": environments.RapidAPIKey,
-        //     "X-RapidAPI-Host": environments.RapidAPIHost,
-        //   },
-        // };
+
         const options = {
           method: "POST",
           url: environments.RAPID_USERINFO_URL_V2,
@@ -6539,7 +6624,6 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           },
           data: `{"username":"${snapshot.data().instagramurl}"}`,
         };
-        //pointoferror
 
         let instagramPostDetails = [];
         await axios
@@ -6547,31 +6631,15 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           .then(function (response) {
             let instadatares = response.data.response.body.data.user;
 
-            ////console.log("response", response);
             let sum = 0;
             let count = 0;
 
             instadatares.edge_owner_to_timeline_media.edges.map((item) => {
-              //console.log("item ", item.node);
               sum =
                 sum +
                 item.node.edge_media_to_comment.count +
                 item.node.edge_liked_by.count;
-              //console.log("sum ", sum);
               if (count <= 4) {
-                //console.log("item.node.shortcode", item.node.shortcode);
-                //console.log("itemData1 ", item.node?.id);
-                //console.log("itemData2 ", item.node?.shortcode);
-                //console.log("itemData3 ", item.node?.display_url);
-                //console.log(
-                //  "itemData4 ",
-                //  item.node?.edge_media_to_caption.edges
-                //);
-                //console.log(
-                //  "itemData5 ",
-                //  item.node?.edge_media_to_comment.count
-                //);
-                //console.log("itemData ", item.node?.edge_liked_by.count);
                 let itemData = {
                   id: item.node?.id,
                   shortcode: item.node?.shortcode,
@@ -6583,19 +6651,14 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                   edge_media_to_comment: item.node?.edge_media_to_comment.count,
                   edge_liked_by: item.node?.edge_liked_by.count,
                 };
-                // console.log("itemData ", itemData);
 
                 instagramPostDetails.push(itemData);
               }
               count++;
             });
-            //console.log("SUM", sum);
             let engagementRate = sum / instadatares.edge_followed_by.count;
-            //* 1000;
-            //console.log("ENGAGEMENT RATE", engagementRate);
 
             influencerSchema = {
-              // ...snapshot.data(),
               imgURL1: instagramPostDetails[0].display_url,
               imgURL2: instagramPostDetails[1].display_url,
               imgURL3: instagramPostDetails[2].display_url,
@@ -6623,12 +6686,8 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
 
         let interval = 8000;
         let lengthOfArray = instagramPostDetails.length - 1;
-        // let influencerArr = [];
-        //console.log("lengthOfArray", lengthOfArray);
         instagramPostDetails.forEach((file, index) => {
           setTimeout(() => {
-            //console.log("hi people", interval * index);
-
             const d = new Date();
             let month = d.getMonth() + 1;
             let date = d.getDate();
@@ -6648,12 +6707,10 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
               index +
               ".jpeg";
             let filePath = path.join(__dirname, "/images", fileName);
-            //let filePath = "./images/" + fileName;
             const optionss = {
               url: file.display_url,
               method: "GET",
             };
-            //console.log("fileName", fileName);
             let getDownloadURL = "";
             request(optionss, async (err, resp, body) => {
               console.log(
@@ -6661,13 +6718,10 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                 resp.statusCode
               );
               if (resp.statusCode === 200) {
-                //console.log("res.statusCode", resp.statusCode);
                 var bucket = Firebase.admin.storage().bucket();
 
                 await bucket.upload(filePath);
                 let fileFirebaseURL = environments.FIRESTORE_URL + fileName;
-                //console.log("------Here------");
-                //console.log(fileFirebaseURL);
                 axios
                   .get(fileFirebaseURL)
                   .then(async (response) => {
@@ -6675,27 +6729,22 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                       environments.FIRESTORE_URL +
                       `${fileName}?alt=media&token=${response.data.downloadTokens}`;
                     instagramPostDetails[index].new_url = getDownloadURL;
-                    //console.log("index", index);
                     fs.unlinkSync(filePath);
                     if (index === lengthOfArray) {
-                      //console.log("inside");
                       const snapshot2 = await Firebase.Influencer.doc(
                         data.id
                       ).get();
 
-                      influencerSchema = {
-                        ...snapshot2.data(),
-                        ...influencerSchema,
-                        imgURL1: instagramPostDetails[0]?.new_url,
-                        imgURL2: instagramPostDetails[1]?.new_url,
-                        imgURL3: instagramPostDetails[2]?.new_url,
-                        imgURL4: instagramPostDetails[3]?.new_url,
-                        imgURL5: instagramPostDetails[4]?.new_url,
-                      };
-                      //console.log("influencerSchema", influencerSchema);
                       setTimeout(async () => {
-                        //console.log("inside2");
-
+                        influencerSchema = {
+                          ...snapshot2.data(),
+                          ...influencerSchema,
+                          imgURL1: instagramPostDetails[0]?.new_url,
+                          imgURL2: instagramPostDetails[1]?.new_url,
+                          imgURL3: instagramPostDetails[2]?.new_url,
+                          imgURL4: instagramPostDetails[3]?.new_url,
+                          imgURL5: instagramPostDetails[4]?.new_url,
+                        };
                         await Firebase.Influencer.doc(data.id).update(
                           influencerSchema
                         );
