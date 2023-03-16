@@ -805,6 +805,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
             id: doc.id,
             category: doc.data().category,
             name: doc.data().name,
+            brandname:doc.data()?.brandname,
             number: doc.data().number,
             userid: doc.data().userid,
           });
@@ -2747,13 +2748,13 @@ app.post("/api/coupons/filter", async (req, res) => {
     const snapshot = await Firebase.Coupons.get();
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
-    //console.log("step 1");
+    let brandcategorysorted;
+
     if (
       data.inputValue.toLowerCase() === environments.ADMIN_COUPON_FILTER_TEXT
     ) {
-      namesorted = list;
+      namesorted = list.filter((item) => item.isActive === 1);
     } else if (data.inputValue !== "") {
-      //console.log("step 2");
       namesorted = list.filter((item) => {
         if (
           item.description
@@ -2764,12 +2765,25 @@ app.post("/api/coupons/filter", async (req, res) => {
         }
       });
     } else {
-      namesorted = list;
+      namesorted = list.filter((item) => item.isActive === 1);
     }
-    //console.log("namesorted length", namesorted.length);
-
+    let brandselectedCategory = [];
+    let myBrandSetCategory = new Set();
+    data.radioBrandValue
+      .filter((item) => item.status === true)
+      .map((categ) => brandselectedCategory.push(categ.label));
+    if (brandselectedCategory[0] !== "All") {
+      namesorted.map((element) => {
+        if (brandselectedCategory.includes(element.brandcategory.category)) {
+          myBrandSetCategory.add(element);
+        }
+      });
+      brandcategorysorted = Array.from(myBrandSetCategory);
+    } else {
+      brandcategorysorted = namesorted;
+    }
     logging.end();
-    res.status(200).json({ data: namesorted, message: "Filtered Coupons" });
+    res.status(200).json({ data: brandcategorysorted, message: "Filtered Coupons" });
   } catch (error) {
     logging.write(new Date() + " - coupons/filter ❌ - " + error + " \n");
     console.log(new Date() + " - coupons/filter ❌ - " + error + " \n");
