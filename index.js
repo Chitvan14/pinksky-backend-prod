@@ -805,7 +805,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
             id: doc.id,
             category: doc.data().category,
             name: doc.data().name,
-            brandname:doc.data()?.brandname,
+            brandname: doc.data()?.brandname,
             number: doc.data().number,
             userid: doc.data().userid,
           });
@@ -2749,7 +2749,7 @@ app.post("/api/coupons/filter", async (req, res) => {
     let list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     let namesorted;
     let brandcategorysorted;
-
+    let citysorted;
     if (
       data.inputValue.toLowerCase() === environments.ADMIN_COUPON_FILTER_TEXT
     ) {
@@ -2782,8 +2782,27 @@ app.post("/api/coupons/filter", async (req, res) => {
     } else {
       brandcategorysorted = namesorted;
     }
+    let selectedCity = [];
+    let mySetCity = new Set();
+    data.radioCityValue
+      .filter((item) => item.status === true)
+      .map((categ) => selectedCity.push(categ.value));
+    if (selectedCity[0] !== "All") {
+      brandcategorysorted.map((element) => {
+        if (
+          Object.values(element.brandcategory).some((r) =>
+            selectedCity.includes(r)
+          )
+        ) {
+          mySetCity.add(element);
+        }
+      });
+      citysorted = Array.from(mySetCity);
+    } else {
+      citysorted = brandcategorysorted;
+    }
     logging.end();
-    res.status(200).json({ data: brandcategorysorted, message: "Filtered Coupons" });
+    res.status(200).json({ data: citysorted, message: "Filtered Coupons" });
   } catch (error) {
     logging.write(new Date() + " - coupons/filter ❌ - " + error + " \n");
     console.log(new Date() + " - coupons/filter ❌ - " + error + " \n");
@@ -4912,11 +4931,11 @@ app.post("/api/brandname", async (req, res) => {
         companynames.push({
           category: item.data().category[0].label,
           companyname: item.data().companyname,
+          city: item.data().city,
           id: item.id,
         });
       }
     });
-    console.log(companynames);
 
     res.json({ message: companynames });
   } catch (error) {
