@@ -5251,8 +5251,47 @@ app.put("/api/brand/update", async (req, res) => {
       });
     }
     updatedCookies = { ...data?.cookies, displayName: updatedDisplayName };
-    //console.log("here?");
+    // console.log("here? ", { category: data.body.category[0].value, city: data.body.city });
     await Firebase.Brand.doc(id).update(data.body);
+    const campaignsnapshot = await Firebase.Campaign.get();
+    campaignsnapshot.docs.map(async (item) => {
+      if (item.data().brandcategory.id === id) {
+        await Firebase.Campaign.doc(item.id).update({
+          brandcategory: {
+            ...item.data().brandcategory,
+            category: data.body.category[0].value,
+            city: data.body.city,
+          },
+        });
+      }
+    });
+
+    const couponsnapshot = await Firebase.Coupons.get();
+    couponsnapshot.docs.map(async (item) => {
+      if (item.data().brandcategory.id === id) {
+        await Firebase.Coupons.doc(item.id).update({
+          brandcategory: {
+            ...item.data().brandcategory,
+            category: data.body.category[0].value,
+            city: data.body.city,
+          },
+        });
+      }
+    });
+
+    const eventsnapshot = await Firebase.Event.get();
+    eventsnapshot.docs.map(async (item) => {
+      if (item.data().brandcategory.id === id) {
+        await Firebase.Event.doc(item.id).update({
+          brandcategory: {
+            ...item.data().brandcategory,
+            category: data.body.category[0].value,
+            city: data.body.city,
+          },
+        });
+      }
+    });
+
     res
       .status(200)
       .json({ message: "Updated Brand", updatedCookies: updatedCookies });
