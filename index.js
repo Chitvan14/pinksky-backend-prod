@@ -897,9 +897,10 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
     clientSpreadsheetToDB.read().then(
       function (data) {
         let value = JSON.parse(data);
-        let interval = 60000;
+        let interval = 20000;
 
         value.forEach((item, index) => {
+          console.log("Progress -> |");
           setTimeout(() => {
             //verify not needed bcz isActive is 1
             let addvalue = {
@@ -918,32 +919,17 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
               status: "new",
               dob: "",
               address: "",
-              isNonInfluencer: "",
               city: "",
               isNonInfluencer: { type: "N", uuid: "", id: "" },
               category: [
                 {
-                  href: "/influencer",
                   id: 2,
-                  status: false,
-                  label: "Lifestyle Category",
                   value: "Lifestyle",
-                  icon: {
-                    _store: {},
-                    key: null,
-                    _owner: null,
-                    type: "img",
-                    ref: null,
-                    props: {
-                      loading: "lazy",
-                      src: "/static/media/healthy-lifestyle.adbd2600d92cbd99718b.png",
-                      width: "25px",
-                      height: "25px",
-                    },
-                  },
                 },
               ],
             };
+            console.log("Progress -> ||");
+
             axios
               .post(
                 environments.BASE_URL +
@@ -951,22 +937,29 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
                 addvalue
               )
               .then(async (response) => {
-                await axios
-                  .post(environments.BASE_URL + "v2/signin/profileupdating", {
-                    data: response.data.message,
-                    isRegistering: "Y",
-                  })
-                  .then((responsenested) => {
-                    if (value.length - 1 === index) {
-                      logging.end();
-                      res.status(200).json(response.data);
-                    } else {
-                      console.log(response.data);
-                    }
-                  })
-                  .catch((errornested) => {
-                    throw errornested;
-                  });
+                if (value.length - 1 === index) {
+                  console.log("Progress -> |||||");
+                  logging.end();
+                  res.status(200).json(response.data);
+                } else {
+                  console.log("Progress -> ||||");
+                }
+                // await axios
+                //   .post(environments.BASE_URL + "v2/signin/profileupdating", {
+                //     data: response.data.message,
+                //     isRegistering: "Y",
+                //   })
+                //   .then((responsenested) => {
+                //     if (value.length - 1 === index) {
+                //       logging.end();
+                //       res.status(200).json(response.data);
+                //     } else {
+                //       console.log(response.data);
+                //     }
+                //   })
+                //   .catch((errornested) => {
+                //     throw errornested;
+                //   });
               })
               .catch((error) => {
                 throw error;
