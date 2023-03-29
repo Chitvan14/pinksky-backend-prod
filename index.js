@@ -3,14 +3,16 @@ const cors = require("cors");
 const axios = require("axios");
 const path = require("path");
 const shortid = require("shortid");
-const environments = require("./environments.js");
+const environments = require("./environments/environments.js");
 const request = require("request");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
-const { Firebase } = require("./firebaseconfig.js");
-var emailtemplate = require("./emailtemplate.js");
-
+const { Firebase } = require("./config/firebaseconfig.js");
+var emailtemplate = require("./config/emailtemplate.js");
+// const PinkskyDB = require("./controller/PinkskyDB");
 const Razorpay = require("razorpay");
+const customFunction = require("./controller/CustomFunctions");
+// const pinkskyDB = new PinkskyDB();
 const razorpay = new Razorpay({
   key_id: environments.KEY_ID,
   key_secret: environments.KEY_SECRET,
@@ -53,21 +55,114 @@ app.use(cors());
 
 // WHATSAPP AND EMAIL SECTION
 // 1. Logging
+const test = async (i) => {
+  // return new Promise((resolve,reject) => {
+  if (i == 14) {
+    console.log(i);
+    return i;
+  }
+
+  let j = test(i++);
+
+  return j;
+  // })
+};
 app.post("/api/testaccount", async (req, res) => {
+  const  obj = {
+    field: "isActive",
+    operation: "==",
+    value: 1,
+    field2: "userCampaignMapping",
+    operation2: "!=",
+    value2: [],
+  };
+  let snapshot = await customFunction.adminPinksky(3,obj);
+
+  // snapshotInfl.docs.map((doc) => {
+  //   let localcampaignmapping = [];
+  //   let localeventmapping = [];
+  //    if (doc.data().status === "accepted") {
+  //     if (doc.data().campaignmapping.length > 0) {
+  //       doc.data().campaignmapping.map((nesitem) => {
+  //         localcampaignmapping.push({
+  //           ...nesitem,
+  //           name:
+  //             rawcampaignlist.filter(
+  //               (fun) => fun.id === nesitem.campaignId
+  //             )[0].name || "",
+  //           category:
+  //             rawcampaignlist.filter(
+  //               (fun) => fun.id === nesitem.campaignId
+  //             )[0].category || [],
+  //         });
+  //       });
+  //     }
+
+  //     if (doc.data().eventmapping.length > 0) {
+  //       doc.data().eventmapping.map((nesitem) => {
+  //         localeventmapping.push({
+  //           ...nesitem,
+  //           name:
+  //             raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
+  //               .name || "",
+  //         });
+  //       });
+  //     }
+
+  //     influencerlist.push({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //       campaignmapping: localcampaignmapping,
+  //       eventmapping: localeventmapping,
+  //     });
+  //   }
+  // });
+  res.json({ message: "done" });
+  // let snapshot = null;
+  // var a = await pinkskyDB.filter(
+  //   Firebase.Influencer,
+  //   Firebase.docid,
+  //   "==",
+  //   "abc"
+  // );
+  // // .then((val) => {
+  // //   snapshot = val;
+  // // });
+  // // return snapshot;
+  // console.log(a);
+
+  // const snapshotInfl = await Firebase.Influencer.where(
+  //   Firebase.did,
+  //   "==",
+  //   "zeKoIlcLN8YhdLmj0h4X"
+  // ).get();
+  // //.get();
+  // console.log(snapshotInfl.docs[0].data());
+  // let count = 0;
+  // snapshotInfl.
+  // snapshotInfl.docs.map((doc) => {
+  //   // if (doc.id === req.body.id) {
+  //   // console.log(doc.data());
+  //   console.log(count++);
+  //   //}
+  // });
+  // var val = await customFunction.pinkskyAuth([], 0, "zeKoIlcLN8YhdLmj0h4X");
+  // console.log(val);
+
   //Request URL: https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key=AIzaSyCqlWc1tzWj4D4cat7VRdY_DVCS2nTbuuY
-  let url = `https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key=AIzaSyCqlWc1tzWj4D4cat7VRdY_DVCS2nTbuuY`;
+  //let url = `https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key=AIzaSyCqlWc1tzWj4D4cat7VRdY_DVCS2nTbuuY`;
   //oobCode=GJYXPA3yRuzM6dBv9t-vI1TP-X4Aj6Y9KQAhpWN-MZMAAAGGRe4rcw&apiKey=AIzaSyCqlWc1tzWj4D4cat7VRdY_DVCS2nTbuuY
-  axios
-    .post(url, {
-      oobCode: "GJYXPA3yRuzM6dBv9t-vI1TP-X4Aj6Y9KQAhpWN-MZMAAAGGRe4rcw",
-      newPassword: "Appy@123456",
-    })
-    .then(async (response) => {
-      console.log(response.data);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  // axios
+  //   .post(url, {
+  //     oobCode: "GJYXPA3yRuzM6dBv9t-vI1TP-X4Aj6Y9KQAhpWN-MZMAAAGGRe4rcw",
+  //     newPassword: "Appy@123456",
+  //   })
+  //   .then(async (response) => {
+  //     console.log(response.data);
+  //   })
+  //   .catch((error) => {
+  //     console.log(error);
+  //   });
 
   // let getUserByUuid = await Firebase.admin
   //   .auth()
@@ -1834,51 +1929,56 @@ app.get("/api/coupons", async (req, res) => {
   }
 });
 // 1.5 Auth check
+
 app.post("/api/pinksky/auth", async (req, res) => {
-  logging.write(new Date() + " - pinksky/auth POST 🚀 \n");
   console.log(new Date() + " - pinksky/auth POST 🚀 \n");
 
   try {
-    const snapshotInfl = await Firebase.Influencer.get();
+    const id = req.body.id;
     let isMember = false;
     let status = "new";
-    snapshotInfl.docs.map((doc) => {
-      if (doc.id === req.body.id) {
-        isMember = doc.data().pinkskymember.isMember;
-        status = doc.data().status;
-      }
-    });
+    if (id !== null) {
+      let snapshot = await customFunction.pinkskyAuth([], 0, id);
+      snapshot.map((item) => {
+        isMember = item.pinkskymember.isMember;
+        status = item.status;
+      });
+    }
+    // const snapshotInfl = await Firebase.Influencer.get();
+    // snapshotInfl.docs.map((doc) => {
+    //   if (doc.id === req.body.id) {
+    //     isMember = doc.data().pinkskymember.isMember;
+    //     status = doc.data().status;
+    //   }
+    // });
 
-    const snapshotNonInfluencer = await Firebase.NonInfluencer.get();
-    snapshotNonInfluencer.docs.map((doc) => {
-      if (doc.id === req.body.id) {
-        isMember = doc.data()?.pinkskymember?.isMember;
-      }
-    });
+    // const snapshotNonInfluencer = await Firebase.NonInfluencer.get();
+    // snapshotNonInfluencer.docs.map((doc) => {
+    //   if (doc.id === req.body.id) {
+    //     isMember = doc.data()?.pinkskymember?.isMember;
+    //   }
+    // });
 
-    const snapshotBrand = await Firebase.Brand.get();
-    snapshotBrand.docs.map((doc) => {
-      if (doc.id === req.body.id) {
-        isMember = doc.data()?.pinkskymember?.isMember;
-        status = doc.data().status;
-      }
-    });
+    // const snapshotBrand = await Firebase.Brand.get();
+    // snapshotBrand.docs.map((doc) => {
+    //   if (doc.id === req.body.id) {
+    //     isMember = doc.data()?.pinkskymember?.isMember;
+    //     status = doc.data().status;
+    //   }
+    // });
 
     logging.end();
     res.status(200).json({
       isMember: isMember,
       status: status,
-
       message: "Fetched pinksky auth",
     });
   } catch (error) {
-    logging.write(new Date() + " - pinksky/auth ❌ - " + error + " \n");
     console.log(new Date() + " - pinksky/auth ❌ - " + error + " \n");
-
-    logging.end();
     res.status(500).json({ message: error });
   }
 });
+
 // 2. Home Page
 app.post("/api/home", async (req, res) => {
   logging.write(new Date() + " - home POST 🚀 \n");
@@ -1917,7 +2017,7 @@ app.post("/api/home", async (req, res) => {
     snapshotInfl.docs.map((doc) => {
       if (doc.data().status === "accepted") {
         if (doc.data().instagram !== undefined) {
-          if (doc.data().instagram.followers > 10000) {
+          if (doc.data().instagram?.followers > 10000) {
             influencerlist.push({ id: doc.id, ...doc.data() });
           }
         }
@@ -2004,7 +2104,6 @@ app.post("/api/home", async (req, res) => {
 
 // 3. Admin Pages
 app.post("/api/admin/pinksky", async (req, res) => {
-  logging.write(new Date() + " - admin/pinksky POST 🚀 \n");
   console.log(new Date() + " - admin/pinksky POST 🚀 \n");
 
   try {
@@ -2558,10 +2657,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
       res.status(401).json({ message: "Failed!" });
     }
   } catch (error) {
-    logging.write(new Date() + " - admin/pinksky ❌ - " + error + " \n");
     console.log(new Date() + " - admin/pinksky ❌ - " + error + " \n");
-
-    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -2892,15 +2988,15 @@ app.post("/api/influencer/filter", async (req, res) => {
     if (data.radioFollowerValue !== "All") {
       followersorted = gendersorted.filter((item) => {
         if (data.radioFollowerValue === "greaterthan1M") {
-          return item.instagram.followers > 1000000;
+          return item.instagram?.followers > 1000000;
         } else if (data.radioFollowerValue === "greaterthan100K") {
-          return item.instagram.followers > 100000;
+          return item.instagram?.followers > 100000;
         } else if (data.radioFollowerValue === "greaterthan20K") {
-          return item.instagram.followers > 20000;
+          return item.instagram?.followers > 20000;
         } else if (data.radioFollowerValue === "greaterthan1000") {
-          return item.instagram.followers > 1000;
+          return item.instagram?.followers > 1000;
         } else if (data.radioFollowerValue === "lessthan1000") {
-          return item.instagram.followers <= 1000;
+          return item.instagram?.followers <= 1000;
         }
       });
     } else {
