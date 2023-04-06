@@ -55,34 +55,55 @@ app.use(cors());
 
 // WHATSAPP AND EMAIL SECTION
 // 1. Logging
-const test = async (i) => {
-  // return new Promise((resolve,reject) => {
-  if (i == 14) {
-    console.log(i);
-    return i;
-  }
 
-  let j = test(i++);
-
-  return j;
-  // })
-};
 app.post("/api/testaccount", async (req, res) => {
-  const  obj = {
-    field: "isActive",
-    operation: "==",
-    value: 1,
-    field2: "userCampaignMapping",
-    operation2: "!=",
-    value2: [],
-  };
-  let snapshot = await customFunction.adminPinksky(3,obj);
+  // brandlist.map((bb) => {
+  //   console.log(
+  //     "bb.influencermapping for " + bb.id + " -> ",
+  //     bb.influencermapping
+  //   );
+  // });
+  const influencerlist = await customFunction.adminPinksky("influencerlist");
+  // eventlist.map(item => {
+  //   console.log(item.id);
+  // })
+  console.log(influencerlist);
+  res.json({ message: "done" });
+  // const obj = {
+  //   field: "isActive",
+  //   operation: "==",
+  //   value: 1,
+  //   field2: "userCampaignMapping",
+  //   operation2: "!=",
+  //   value2: [],
+  // };
+  // let snapshot = await customFunction.adminPinksky(3, obj);
+  // console.log(snapshot.length);
 
+  // const snapshot = await Firebase.Influencer.doc("zeKoIlcLN8YhdLmj0h4X").get();
+
+  // let influencerData = [];
+  // let influencerDataMessage = [];
+  // let useremail = "";
+  // let username = "";
+
+  //snapshot.docs.map((doc) => {
+  // if (doc.id === data.influencerid) {
+  // useremail = snapshot.data().email;
+  // username = snapshot.data().name;
+  // influencerData.push(...snapshot.data().campaignmapping);
+  // influencerDataMessage.push(...snapshot.data().message);
+  // }
+  //});
+  // let snapshot = await customFunction.fetchSingleData(
+  //   0,
+  //   "zeKoIlcLN8YhdLmj0h4X"
+  // );
   // snapshotInfl.docs.map((doc) => {
   //   let localcampaignmapping = [];
   //   let localeventmapping = [];
   //    if (doc.data().status === "accepted") {
-  //     if (doc.data().campaignmapping.length > 0) {
+  //     if (doc.data().campaignmapping?.length > 0) {
   //       doc.data().campaignmapping.map((nesitem) => {
   //         localcampaignmapping.push({
   //           ...nesitem,
@@ -98,7 +119,7 @@ app.post("/api/testaccount", async (req, res) => {
   //       });
   //     }
 
-  //     if (doc.data().eventmapping.length > 0) {
+  //     if (doc.data().eventmapping?.length > 0) {
   //       doc.data().eventmapping.map((nesitem) => {
   //         localeventmapping.push({
   //           ...nesitem,
@@ -117,7 +138,7 @@ app.post("/api/testaccount", async (req, res) => {
   //     });
   //   }
   // });
-  res.json({ message: "done" });
+
   // let snapshot = null;
   // var a = await pinkskyDB.filter(
   //   Firebase.Influencer,
@@ -307,7 +328,7 @@ const sendMail = (sendType, data) => {
 //       },
 //     });
 //   }
-//   const size = Object.keys(dataString).length;
+//   const size = Object.keys(dataString)?.length;
 //   if (size > 0) {
 //     var config = {
 //       method: "post",
@@ -361,7 +382,7 @@ app.post("/api/verify/razorpay", async (req, res) => {
           )
         ).update({
           subscription:
-            updating.data().subscription.length > 0
+            updating.data().subscription?.length > 0
               ? [...updating.data().subscription, req.body]
               : [req.body],
         });
@@ -480,7 +501,7 @@ app.post("/api/subscription/razorpay", async (req, res) => {
     let planid = "";
 
     const snapshot = await Firebase.Brand.doc(data.id).get();
-    if (snapshot.data().subscription.length > 0) {
+    if (snapshot.data().subscription?.length > 0) {
       logging.end();
       res.status(200).json({
         message: "AlreadySubscribed",
@@ -702,7 +723,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     let influencerData = [];
     snapshot.docs.map(async (doc) => {
       let category = [];
-      doc.data().category.length > 0 &&
+      doc.data().category?.length > 0 &&
         doc.data().category.map((item) => {
           category.push(item.value);
         });
@@ -717,7 +738,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
           phonenumber: doc.data().phonenumber,
           surname: doc.data().surname,
           whatsappnumber: doc.data().whatsappnumber,
-          category: category.length > 0 ? category.toString() : [],
+          category: category?.length > 0 ? category.toString() : [],
         });
         console.log({ category: category.toString(), id: doc.id });
 
@@ -728,7 +749,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
         //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
-    if (influencerData.length > 0) {
+    if (influencerData?.length > 0) {
       clientInfluencer.create(influencerData).then(
         function (data) {
           //console.log(data);
@@ -764,7 +785,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
       }
     });
 
-    if (brandData.length > 0) {
+    if (brandData?.length > 0) {
       clientBrand.create(brandData).then(
         function (data) {
           //console.log(data);
@@ -797,7 +818,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     //   }
     // });
 
-    // if (campaignData.length > 0) {
+    // if (campaignData?.length > 0) {
     //   clientCampaign.create(campaignData).then(
     //     function (data) {
     //       //console.log(data);
@@ -829,7 +850,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
       }
     });
 
-    if (noninfluencerData.length > 0) {
+    if (noninfluencerData?.length > 0) {
       clientNonInfluencer.create(noninfluencerData).then(
         function (data) {
           //console.log(data);
@@ -866,7 +887,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
       }
     });
 
-    if (pinkskyPopupData.length > 0) {
+    if (pinkskyPopupData?.length > 0) {
       clientPinkskyPopup.create(pinkskyPopupData).then(
         function (data) {
           //console.log(data);
@@ -914,7 +935,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
       }
     });
 
-    if (internData.length > 0) {
+    if (internData?.length > 0) {
       clientInternData.create(internData).then(
         function (data) {
           //console.log(data);
@@ -926,7 +947,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
       );
     }
 
-    if (randomData.length > 0) {
+    if (randomData?.length > 0) {
       clientNamePhonenumber.create(randomData).then(
         function (data) {
           //console.log(data);
@@ -957,7 +978,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
       }
     });
 
-    if (feedbackData.length > 0) {
+    if (feedbackData?.length > 0) {
       clientFeedback.create(feedbackData).then(
         function (data) {
           //console.log(data);
@@ -1052,7 +1073,7 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
                     isRegistering: "Y",
                   })
                   .then((responsenested) => {
-                    if (value.length - 1 === index) {
+                    if (value?.length - 1 === index) {
                       logging.end();
                       res.status(200).json(response.data);
                     } else {
@@ -1591,7 +1612,7 @@ app.post("/api/signin/profileupdating", async (req, res) => {
             });
 
           let interval = 8500;
-          let lengthOfArray = instagramPostDetails.length - 1;
+          let lengthOfArray = instagramPostDetails?.length - 1;
           // let influencerArr = [];
           //console.log("lengthOfArray", lengthOfArray);
           instagramPostDetails.forEach((file, index) => {
@@ -1710,33 +1731,54 @@ app.post("/api/influencer", async (req, res) => {
     const snapshot = await Firebase.Influencer.doc(req.body.id).get();
 
     let list = [];
-    //add event and campaign different and show on profile
-    snapshot.data().message.map(async (doc) => {
-      if (doc.eventId) {
-        //console.log(doc.statusID);
-        const eventsnapshot = await Firebase.Event.doc(doc.eventId).get();
-        list.push({ ...doc, eventDetails: { ...eventsnapshot.data() } });
-      }
-      if (doc.campaignID) {
-        //console.log(doc.statusID);
-        const campaignsnapshot = await Firebase.Campaign.doc(
-          doc.campaignID
-        ).get();
-        list.push({ ...doc, campaignDetails: { ...campaignsnapshot.data() } });
-      }
-    });
-    //console.log("list", list);
-    setTimeout(() => {
-      let influencerprofiledata = {
-        ...snapshot.data(),
-        message: list,
-      };
-      //console.log("influencerprofiledata", influencerprofiledata);
+    if (snapshot.data().message.length > 0) {
+      //add event and campaign different and show on profile
+      const eventsnapshot = await Firebase.Event.get();
+      const campaignsnapshot = await Firebase.Campaign.get();
+      // console.log();
+      await snapshot
+        .data()
+        .message.slice(snapshot.data().message.length - 50)
+        .map(async (doc) => {
+          if (doc.eventId) {
+            eventsnapshot.docs.map((eventdoc) => {
+              if (eventdoc.id == doc.eventId) {
+                list.push({ ...doc, eventDetails: { ...eventdoc.data() } });
+              }
+            });
+            // console.log(doc.eventId);
+            // const eventsnapshot = await Firebase.Event.doc(doc.eventId).get();
+          }
+          if (doc.campaignID) {
+            campaignsnapshot.docs.map((campdoc) => {
+              if (campdoc.id == doc.campaignID) {
+                list.push({ ...doc, campaignDetails: { ...campdoc.data() } });
+              }
+            });
+            //console.log(doc.statusID);
+            // const campaignsnapshot = await Firebase.Campaign.doc(
+            //   doc.campaignID
+            // ).get();
+            // list.push({
+            //   ...doc,
+            //   campaignDetails: { ...campaignsnapshot.data() },
+            // });
+          }
+        });
+    }
 
-      res
-        .status(200)
-        .json({ data: [influencerprofiledata], message: "Fetched Influencer" });
-    }, 1500);
+    // console.log("list", list[1367]);
+    // setTimeout(() => {
+    let influencerprofiledata = {
+      ...snapshot.data(),
+      message: list,
+    };
+    // console.log("influencerprofiledata", influencerprofiledata);
+
+    res
+      .status(200)
+      .json({ data: [influencerprofiledata], message: "Fetched Influencer" });
+    // }, 1500);
   } catch (error) {
     logging.write(new Date() + " - influencer ❌ - " + error + " \n");
     console.log(new Date() + " - influencer ❌ - " + error + " \n");
@@ -2183,7 +2225,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
             //console.log("influencerlist6?", doc.data()?.campaignmapping);
             if (
               doc.data()?.campaignmapping === undefined ||
-              doc.data()?.campaignmapping.length === 0
+              doc.data()?.campaignmapping?.length === 0
             ) {
               localcampaignmapping = [];
             } else {
@@ -2207,7 +2249,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
             //console.log("influencerlist7");
             if (
               doc.data()?.eventmapping === undefined ||
-              doc.data()?.eventmapping.length === 0
+              doc.data()?.eventmapping?.length === 0
             ) {
               localeventmapping = [];
             } else {
@@ -2215,7 +2257,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
               doc.data().eventmapping.map((nesitem) => {
                 //console.log("influencerlist777");
                 raweventlist.filter((fun) => fun.id === nesitem.eventId)
-                  .length > 0 &&
+                  ?.length > 0 &&
                   localeventmapping.push({
                     ...nesitem,
                     name:
@@ -2259,7 +2301,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
               }
             });
             //console.log("step6?");
-            if (doc.data().influencermapping.length > 0) {
+            if (doc.data().influencermapping?.length > 0) {
               doc.data().influencermapping.map((nesitem) => {
                 //console.log("Datataatat", nesitem);
                 localinfluemapping.push({
@@ -2356,7 +2398,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
             });
           } else if (doc.data().status === "accepted") {
             //console.log("influencerlist6");
-            if (doc.data().campaignmapping.length > 0) {
+            if (doc.data().campaignmapping?.length > 0) {
               doc.data().campaignmapping.map((nesitem) => {
                 //console.log("influencerlist66");
                 localcampaignmapping.push({
@@ -2373,7 +2415,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
               });
             }
 
-            if (doc.data().eventmapping.length > 0) {
+            if (doc.data().eventmapping?.length > 0) {
               doc.data().eventmapping.map((nesitem) => {
                 //console.log(
                 //   "raweventlist.filter((fun) => fun.id === nesitem.eventId)[0].name",
@@ -2447,7 +2489,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
           } else if (doc.data().status === "accepted") {
             //console.log("influencerlist6");
 
-            if (doc.data().campaignmapping.length > 0) {
+            if (doc.data().campaignmapping?.length > 0) {
               doc.data().campaignmapping.map((nesitem) => {
                 //console.log("influencerlist66");
 
@@ -2464,7 +2506,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
                 });
               });
             }
-            if (doc.data().eventmapping.length > 0) {
+            if (doc.data().eventmapping?.length > 0) {
               doc.data().eventmapping.map((nesitem) => {
                 localeventmapping.push({
                   ...nesitem,
@@ -2504,7 +2546,7 @@ app.post("/api/admin/pinksky", async (req, res) => {
                 locallaunchmapping.push(item);
               }
             });
-            if (doc.data().influencermapping.length > 0) {
+            if (doc.data().influencermapping?.length > 0) {
               doc.data().influencermapping.map((nesitem) => {
                 localinfluemapping.push({
                   ...nesitem,
@@ -2661,6 +2703,52 @@ app.post("/api/admin/pinksky", async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
+app.post("/api/v2/admin/pinksky", async (req, res) => {
+  console.log(new Date() + " - v2/admin/pinksky POST 🚀 \n");
+
+  try {
+    let data = req.body;
+
+    const getAdmin = await Firebase.Influencer.doc(data.adminid).get();
+
+    if (getAdmin.data().admin) {
+      let campaignlist = [];
+      let brandlist = [];
+      let eventlist = [];
+      let couponlist = [];
+      let influencerlist = [];
+      if (data.changesTrigger === "campaign") {
+        campaignlist = await customFunction.adminPinksky("campaignlist");
+      }
+      if (data.changesTrigger === "event") {
+        eventlist = await customFunction.adminPinksky("eventlist");
+      }
+      if (data.changesTrigger === "influencer") {
+        influencerlist = await customFunction.adminPinksky("influencerlist");
+      }
+      if (data.changesTrigger === "brand") {
+        brandlist = await customFunction.adminPinksky("brandlist");
+      }
+      if (data.changesTrigger === "coupon") {
+        couponlist = await customFunction.adminPinksky("couponlist");
+      }
+      console.log(couponlist);
+      res.status(200).json({
+        influencerlist: influencerlist,
+        campaignlist: campaignlist,
+        brandlist: brandlist,
+        eventlist: eventlist,
+        couponlist: couponlist,
+        message: "Fetched Admin",
+      });
+    } else {
+      res.status(401).json({ message: "Failed!" });
+    }
+  } catch (error) {
+    console.log(new Date() + " - v2/admin/pinksky ❌ - " + error + " \n");
+    res.status(500).json({ message: error });
+  }
+});
 
 // 4. Work Page
 app.post("/api/work", async (req, res) => {
@@ -2777,7 +2865,7 @@ app.post("/api/brands/filter", async (req, res) => {
     } else {
       namesorted = list;
     }
-    //console.log("citysorted length", namesorted.length);
+    //console.log("citysorted length", namesorted?.length);
 
     logging.end();
     res.status(200).json({ data: namesorted, message: "Filtered Brand" });
@@ -2820,7 +2908,7 @@ app.post("/api/events/filter", async (req, res) => {
     } else {
       namesorted = list;
     }
-    //console.log("citysorted length", namesorted.length);
+    //console.log("citysorted length", namesorted?.length);
 
     logging.end();
     res.status(200).json({ data: namesorted, message: "Filtered Event" });
@@ -3035,7 +3123,7 @@ app.post("/api/influencer/filter", async (req, res) => {
     } else {
       citysorted = categorysorted;
     }
-    //console.log("citysorted length", citysorted.length);
+    //console.log("citysorted length", citysorted?.length);
 
     logging.end();
     res.status(200).json({ data: citysorted, message: "Filtered Influencer" });
@@ -3064,7 +3152,7 @@ app.post("/api/campaign/filter", async (req, res) => {
     let citysorted;
     let specialValuesorted;
     let brandcategorysorted;
-    //console.log("list length", list.length);
+    //console.log("list length", list?.length);
     if (data.inputValue.toLowerCase() === "allcampaigndata") {
       namesorted = list.filter((item) => item.isActive === 1);
     } else if (data.inputValue !== "") {
@@ -3113,7 +3201,7 @@ app.post("/api/campaign/filter", async (req, res) => {
     } else {
       citysorted = categorysorted;
     }
-    //console.log("citysorted length", citysorted.length);
+    //console.log("citysorted length", citysorted?.length);
     if (data.radioSpecialValue !== "All") {
       specialValuesorted = citysorted.filter((item) => {
         if (data.radioSpecialValue === "Pinksky Privilege") {
@@ -3142,7 +3230,7 @@ app.post("/api/campaign/filter", async (req, res) => {
     } else {
       brandcategorysorted = specialValuesorted;
     }
-    //console.log("brandcategorysorted length", brandcategorysorted.length);
+    //console.log("brandcategorysorted length", brandcategorysorted?.length);
 
     logging.end();
     res.status(200).json({
@@ -3185,7 +3273,7 @@ app.post("/api/influencer/create", async (req, res) => {
   try {
     //login here
     if (createUser.email != undefined && createUser.password != undefined) {
-      if (influencerData.isNonInfluencer.uuid.toString().length > 2) {
+      if (influencerData.isNonInfluencer.uuid.toString()?.length > 2) {
         let getUserByUuid = await Firebase.admin
           .auth()
           .getUser(influencerData.isNonInfluencer.uuid.toString());
@@ -3242,10 +3330,11 @@ app.post("/api/influencer/create", async (req, res) => {
               let count = 0;
               //console.log(
               //   "response.data.data.edge_owner_to_timeline_media.edges",
-              //   response.data.data.edge_owner_to_timeline_media.edges.length
+              //   response.data.data.edge_owner_to_timeline_media.edges?.length
               // );
               if (
-                response.data.data.edge_owner_to_timeline_media.edges.length > 4
+                response.data.data.edge_owner_to_timeline_media.edges?.length >
+                4
               ) {
                 response.data.data.edge_owner_to_timeline_media.edges.map(
                   (item) => {
@@ -3324,7 +3413,7 @@ app.post("/api/influencer/create", async (req, res) => {
           throw err;
         } else {
           let interval = 8500;
-          let lengthOfArray = instagramPostDetails.length - 1;
+          let lengthOfArray = instagramPostDetails?.length - 1;
           let influencerArr = [];
           //console.log("lengthOfArray", lengthOfArray);
           instagramPostDetails.forEach((file, index) => {
@@ -3379,7 +3468,7 @@ app.post("/api/influencer/create", async (req, res) => {
                         //console.log("inside");
                         if (
                           influencerData.isNonInfluencer.uuid.toString()
-                            .length > 2
+                            ?.length > 2
                         ) {
                           const snapshotNonInfluencer =
                             await Firebase.NonInfluencer.doc(
@@ -3441,7 +3530,7 @@ app.post("/api/influencer/create", async (req, res) => {
                           //setting up coupon from noninfluencer
                           if (
                             influencerData.isNonInfluencer.uuid.toString()
-                              .length > 2 &&
+                              ?.length > 2 &&
                             influencerSchema.pinkskymember.isMember === true
                           ) {
                             const snapshotCoupon = await Firebase.Coupons.get();
@@ -3555,7 +3644,7 @@ Thanks for choosing Pinksky 💕 `,
       });
     } else {
       //console.log(userResponse?.uid);
-      if (influencerData.isNonInfluencer.uuid.length > 2) {
+      if (influencerData.isNonInfluencer.uuid?.length > 2) {
         //non influencer is safe
       } else {
         await Firebase.admin.auth().deleteUser(userResponse?.uid);
@@ -3651,7 +3740,7 @@ app.post("/api/brand/create", async (req, res) => {
           throw err;
         } else {
           let interval = 9000;
-          let lengthOfArray = instagramPostDetails.length - 1;
+          let lengthOfArray = instagramPostDetails?.length - 1;
           let brandArr = [];
 
           //console.log("lengthOfArray", lengthOfArray);
@@ -4241,7 +4330,6 @@ app.post(
 
 // 6. Accept Handle
 app.put("/api/acceptstatus/update", async (req, res) => {
-  logging.write(new Date() + " - acceptstatus/update PUT 🚀 \n");
   console.log(new Date() + " - acceptstatus/update PUT 🚀 \n");
 
   try {
@@ -4290,34 +4378,28 @@ app.put("/api/acceptstatus/update", async (req, res) => {
     //checked
     else if (data.type === "influencerCampaignRequest") {
       const data = req.body;
+      //Get - Campaign data 1
+      //Update -  Campaign with id and closing price 1
+      //Get - Influencer data 1000
+
+      //Update -  Influencer with message and campaign details 1
+
+      //const snapshot = await Firebase.Influencer.get();
+      const snapshot = await Firebase.Influencer.doc(data.influencerid).get();
       const snapshotcampaign = await Firebase.Campaign.doc(
         data.campaignid
       ).get();
-
-      await Firebase.Campaign.doc(data.campaignid).update({
-        userCampaignMapping: [
-          ...snapshotcampaign.data().userCampaignMapping,
-          {
-            influencerid: data.influencerid,
-            closingPrice: data.closingPrice,
-          },
-        ],
-      });
-      const snapshot = await Firebase.Influencer.get();
-
       let influencerData = [];
       let influencerDataMessage = [];
       let useremail = "";
       let username = "";
 
-      snapshot.docs.map((doc) => {
-        if (doc.id === data.influencerid) {
-          useremail = doc.data().email;
-          username = doc.data().name;
-          influencerData.push(...doc.data().campaignmapping);
-          influencerDataMessage.push(...doc.data().message);
-        }
-      });
+      //snapshot.docs.map((doc) => {
+      // if (doc.id === data.influencerid) {
+      useremail = snapshot.data().email;
+      username = snapshot.data().name;
+      influencerData.push(...snapshot.data().campaignmapping);
+      influencerDataMessage.push(...snapshot.data().message);
 
       let objIndex = influencerData.findIndex(
         (obj) => obj.campaignId === data.campaignid
@@ -4326,17 +4408,42 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       influencerData[objIndex].status = "accepted";
       influencerData[objIndex].closingPrice = data.closingPrice;
       //console.log("influencerData ", influencerData);
-      const campaignsnapshot = await Firebase.Campaign.doc(
-        data.campaignid
-      ).get();
+      // const campaignsnapshot = await Firebase.Campaign.doc(
+      //   data.campaignid
+      // ).get();
 
       influencerDataMessage.push({
         statusID: "201",
         campaignID: data.campaignid,
-        campaignName: campaignsnapshot.data().name,
+        campaignName: snapshotcampaign.data().name,
         closingPrice: data.closingPrice,
       });
 
+      let userCampaignMappingData = [
+        ...snapshotcampaign.data().userCampaignMapping,
+      ];
+      //campaign adding status
+      let objIndex2 = snapshotcampaign
+        .data()
+        .userCampaignMapping.findIndex(
+          (obj) => obj.influencerid === data.influencerid
+        );
+      userCampaignMappingData[objIndex2].statusID = "201";
+      userCampaignMappingData[objIndex2].closingPrice = data.closingPrice;
+      //update
+      await Firebase.Campaign.doc(data.campaignid).update({
+        userCampaignMapping: userCampaignMappingData,
+      });
+      // await Firebase.Campaign.doc(data.campaignid).update({
+      //   userCampaignMapping: [
+      //     ...snapshotcampaign.data().userCampaignMapping,
+      //     {
+      //       influencerid: data.influencerid,
+      //       closingPrice: data.closingPrice,
+      //       statusID: "201",
+      //     },
+      //   ],
+      // });
       await Firebase.Influencer.doc(data.influencerid).update({
         campaignmapping: influencerData,
         message: influencerDataMessage,
@@ -4347,7 +4454,7 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         subjectmail: "Approved request for campaign | Pinksky",
         text: `Hi ${username},<br/><br/>
         You’ve been approved to access the campaign ${
-          campaignsnapshot.data().name
+          snapshotcampaign.data().name
         } by the brand. Go ahead and complete the deliverables in the given time. 
         <br/><br/>
         Thanks for choosing Pinksky💕`,
@@ -4359,14 +4466,15 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       // username +
       // ", your profile has been approved for campaign " +
       // campaignsnapshot.data().name,
-      logging.end();
       res.status(200).json({ message: "Mapped Campaign with Influencer" });
     } else if (data.type === "influencerCampaignPaymentRequest") {
       //console.log("inside influencerCampaignPaymentRequest");
       const data = req.body;
-
+      //get
       const snapshot = await Firebase.Influencer.doc(data.influencerid).get();
-
+      const campaignsnapshot = await Firebase.Campaign.doc(
+        data.campaignid
+      ).get();
       let influencerData = [...snapshot.data().campaignmapping];
       let influencerDataMessage = [...snapshot.data().message];
 
@@ -4377,11 +4485,6 @@ app.put("/api/acceptstatus/update", async (req, res) => {
 
       influencerData[objIndex].paymentStatus = "accepted";
 
-      //console.log("inside influencerCampaignPaymentRequest 3");
-      const campaignsnapshot = await Firebase.Campaign.doc(
-        data.campaignid
-      ).get();
-      //console.log("inside influencerCampaignPaymentRequest 4");
       var dateObj = new Date();
       var month = dateObj.getUTCMonth() + 1; //months from 1-12
       var year = dateObj.getUTCFullYear();
@@ -4393,6 +4496,20 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         closingPrice: influencerData[objIndex].closingPrice,
         settlementMonth: year + "/" + month,
         viewerDetails: campaignsnapshot.data().viewerDetails,
+      });
+      let userCampaignMappingData = [
+        ...campaignsnapshot.data().userCampaignMapping,
+      ];
+      //campaign adding status
+      let objIndex2 = campaignsnapshot
+        .data()
+        .userCampaignMapping.findIndex(
+          (obj) => obj.influencerid === data.influencerid
+        );
+      userCampaignMappingData[objIndex2].statusID = "401";
+      //update
+      await Firebase.Campaign.doc(data.campaignid).update({
+        userCampaignMapping: userCampaignMappingData,
       });
       //console.log("inside influencerCampaignPaymentRequest 5", influencerData);
       await Firebase.Influencer.doc(data.influencerid).update({
@@ -4478,49 +4595,90 @@ app.put("/api/acceptstatus/update", async (req, res) => {
     //working
     else if (data.type === "influencerEventRequest") {
       const data = req.body;
-      const snapshotevent = await Firebase.Event.doc(data.eventid).get();
-
-      await Firebase.Event.doc(data.eventid).update({
-        userEventMapping: [
-          ...snapshotevent.data().userEventMapping,
-          {
-            influencerid: data.influencerid,
-          },
-        ],
-      });
       const snapshot = await Firebase.Influencer.doc(data.influencerid).get();
+
       let influencerData = [];
       let influencerDataMessage = [];
+
       influencerData.push(...snapshot.data().eventmapping);
       influencerDataMessage.push(...snapshot.data().message);
 
-      //console.log("influencerData before", influencerData);
       let objIndex = influencerData.findIndex(
         (obj) => obj.eventId === data.eventid
       );
+
       influencerData[objIndex].status = "accepted";
-      const eventsnapshot = await Firebase.Event.doc(data.eventid).get();
+
+      const snapshotevent = await Firebase.Event.doc(data.eventid).get();
 
       influencerDataMessage.push({
         statusID: "301",
         eventId: data.eventid,
-        eventName: eventsnapshot.data().name,
+        eventName: snapshotevent.data().name,
       });
-      //console.log("data", {
-      //   eventmapping: influencerData,
-      //   message: influencerDataMessage,
+      let userEventMappingData = [...snapshotevent.data().userEventMapping];
+      let objIndex2 = snapshotevent
+        .data()
+        .userEventMapping.findIndex(
+          (obj) => obj.influencerid === data.influencerid
+        );
+      userEventMappingData[objIndex2].statusID = "301";
+      //update
+      await Firebase.Event.doc(data.eventid).update({
+        userEventMapping: userEventMappingData,
+      });
+      // await Firebase.Event.doc(data.eventid).update({
+      //   userEventMapping: [
+      //     ...snapshotevent.data().userEventMapping,
+      //     {
+      //       influencerid: data.influencerid,
+      //       statusID: "301",
+      //     },
+      //   ],
       // });
       await Firebase.Influencer.doc(data.influencerid).update({
         eventmapping: influencerData,
         message: influencerDataMessage,
       });
+      // const data = req.body;
+      // const snapshotevent = await Firebase.Event.doc(data.eventid).get();
+
+      // await Firebase.Event.doc(data.eventid).update({
+      //   userEventMapping: [
+      //     ...snapshotevent.data().userEventMapping,
+      //     {
+      //       influencerid: data.influencerid,
+      //     },
+      //   ],
+      // });
+      // const snapshot = await Firebase.Influencer.doc(data.influencerid).get();
+      // let influencerData = [];
+      // let influencerDataMessage = [];
+      // influencerData.push(...snapshot.data().eventmapping);
+      // influencerDataMessage.push(...snapshot.data().message);
+
+      // let objIndex = influencerData.findIndex(
+      //   (obj) => obj.eventId === data.eventid
+      // );
+      // influencerData[objIndex].status = "accepted";
+      // const eventsnapshot = await Firebase.Event.doc(data.eventid).get();
+
+      // influencerDataMessage.push({
+      //   statusID: "301",
+      //   eventId: data.eventid,
+      //   eventName: eventsnapshot.data().name,
+      // });
+      // await Firebase.Influencer.doc(data.influencerid).update({
+      //   eventmapping: influencerData,
+      //   message: influencerDataMessage,
+      // });
       sendMail("influencereventaccepted", {
         tomail: snapshot.data().email,
         ccmail: "",
         subjectmail: "Approved request for event | Pinksky",
         text: `Hi ${snapshot.data().name},<br/><br/>
         We’re so excited to invite you to event ${
-          eventsnapshot.data().name
+          snapshotevent.data().name
         }. Make sure you follow the attire and reach on time so as to not miss any fun! 
         <br/><br/>
         Thanks for choosing Pinksky💕`,
@@ -4528,11 +4686,6 @@ app.put("/api/acceptstatus/update", async (req, res) => {
         href: environments.EML_HREF_WEBSITE,
         hrefText: "pinkskyclub.com",
       });
-      // "Hi " +
-      // snapshot.data().name +
-      // ", your profile has been approved for event " +
-      // eventsnapshot.data().name,
-      logging.end();
       res.status(200).json({ message: "Accept Event with Influencer" });
     } else if (data.type === "influencerPinkskyTeamNewRequest") {
       let snapshot = await Firebase.Influencer.doc(data.influencerid).get();
@@ -4571,10 +4724,8 @@ app.put("/api/acceptstatus/update", async (req, res) => {
       res.status(200).json({ message: "Updated Message in Launch" });
     }
   } catch (error) {
-    logging.write(new Date() + " - acceptstatus/update ❌ - " + error + " \n");
     console.log(new Date() + " - acceptstatus/update ❌ - " + error + " \n");
 
-    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -4626,15 +4777,21 @@ app.post(
           });
 
         setTimeout(async () => {
-          //console.log("1");
+          console.log("1", object);
           let snapshot = await Firebase.Influencer.doc(
             object.influencerid
+          ).get();
+          let campaignsnapshot = await Firebase.Campaign.doc(
+            object.campaignid
           ).get();
 
           let campaignmapping = [];
 
           snapshot.data().campaignmapping.map((camp) => {
-            if (camp.paymentStatus === "accepted") {
+            if (
+              camp.paymentStatus === "accepted" &&
+              camp.campaignId === object.campaignid
+            ) {
               campaignmapping.push({
                 ...camp,
                 paymentURL: getDownloadURL,
@@ -4648,19 +4805,37 @@ app.post(
           let influencerDataMessage = [];
 
           snapshot.data().message.map((item) => {
-            if (item.statusID === "401") {
+            if (
+              item.statusID === "401" &&
+              item.campaignID === object.campaignid
+            ) {
               influencerDataMessage.push({
                 ...item,
                 paymentURL: getDownloadURL,
+                statusID: "403",
               });
             } else {
               influencerDataMessage.push({ ...item });
             }
-          }),
-            await Firebase.Influencer.doc(object.influencerid).update({
-              campaignmapping: campaignmapping,
-              message: influencerDataMessage,
-            });
+          });
+          let userCampaignMappingData = [
+            ...campaignsnapshot.data().userCampaignMapping,
+          ];
+          //campaign adding status
+          let objIndex2 = campaignsnapshot
+            .data()
+            .userCampaignMapping.findIndex(
+              (obj) => obj.influencerid === object.influencerid
+            );
+          userCampaignMappingData[objIndex2].statusID = "403";
+          //update
+          await Firebase.Campaign.doc(object.campaignid).update({
+            userCampaignMapping: userCampaignMappingData,
+          });
+          await Firebase.Influencer.doc(object.influencerid).update({
+            campaignmapping: campaignmapping,
+            message: influencerDataMessage,
+          });
           //console.log("5");
 
           logging.end();
@@ -4693,7 +4868,7 @@ app.put("/api/rejectstatus/update", async (req, res) => {
 
   try {
     let data = req.body;
-    //console.log(req.body);
+    console.log(data);
 
     if (data.type === "influencerNewRequest") {
       const id = req.body.id;
@@ -4719,34 +4894,83 @@ app.put("/api/rejectstatus/update", async (req, res) => {
     } else if (data.type === "influencerCampaignRequest") {
       const data = req.body;
 
-      const snapshot = await Firebase.Influencer.get();
-      let influencerData = [];
-      let influencerDataMessage = [];
-      snapshot.docs.map((doc) => {
-        if (doc.id === data.influencerid) {
-          influencerData.push(...doc.data().campaignmapping);
-          influencerDataMessage.push(...doc.data().message);
-        }
-      });
-      //console.log("influencerData before", influencerData);
-      let objIndex = influencerData.findIndex(
-        (obj) => obj.campaignId === data.campaignid
-      );
-      influencerData[objIndex].status = "rejected";
+      const snapshot = await Firebase.Influencer.doc(data.influencerid).get();
       const campaignsnapshot = await Firebase.Campaign.doc(
         data.campaignid
       ).get();
+      let influencerData = [];
+      let influencerDataMessage = [];
+
+      influencerData.push(...snapshot.data().campaignmapping);
+      influencerDataMessage.push(...snapshot.data().message);
+
+      let objIndex = influencerData.findIndex(
+        (obj) => obj.campaignId === data.campaignid
+      );
+
+      influencerData[objIndex].status = "rejected";
+
+      console.log("check 1");
 
       influencerDataMessage.push({
         statusID: "202",
         campaignID: data.campaignid,
         campaignName: campaignsnapshot.data().name,
       });
+      console.log("check 2");
+
+      let userCampaignMappingData = [
+        ...campaignsnapshot.data().userCampaignMapping,
+      ];
+      console.log("check 3");
+
+      let objIndex2 = campaignsnapshot
+        .data()
+        .userCampaignMapping.findIndex(
+          (obj) => obj.influencerid === data.influencerid
+        );
+      userCampaignMappingData[objIndex2].statusID = "202";
+      console.log("check 4");
+
+      await Firebase.Campaign.doc(data.campaignid).update({
+        userCampaignMapping: userCampaignMappingData,
+      });
 
       await Firebase.Influencer.doc(data.influencerid).update({
         campaignmapping: influencerData,
         message: influencerDataMessage,
       });
+
+      // const data = req.body;
+
+      // const snapshot = await Firebase.Influencer.get();
+      // let influencerData = [];
+      // let influencerDataMessage = [];
+      // snapshot.docs.map((doc) => {
+      //   if (doc.id === data.influencerid) {
+      //     influencerData.push(...doc.data().campaignmapping);
+      //     influencerDataMessage.push(...doc.data().message);
+      //   }
+      // });
+      // //console.log("influencerData before", influencerData);
+      // let objIndex = influencerData.findIndex(
+      //   (obj) => obj.campaignId === data.campaignid
+      // );
+      // influencerData[objIndex].status = "rejected";
+      // const campaignsnapshot = await Firebase.Campaign.doc(
+      //   data.campaignid
+      // ).get();
+
+      // influencerDataMessage.push({
+      //   statusID: "202",
+      //   campaignID: data.campaignid,
+      //   campaignName: campaignsnapshot.data().name,
+      // });
+
+      // await Firebase.Influencer.doc(data.influencerid).update({
+      //   campaignmapping: influencerData,
+      //   message: influencerDataMessage,
+      // });
 
       logging.end();
       res.status(200).json({ message: "UnMapped Campaign with Influencer" });
@@ -4781,7 +5005,20 @@ app.put("/api/rejectstatus/update", async (req, res) => {
           reason: data.reason,
         },
       ];
-
+      let userCampaignMappingData = [
+        ...campaignsnapshot.data().userCampaignMapping,
+      ];
+      //campaign adding status
+      let objIndex2 = campaignsnapshot
+        .data()
+        .userCampaignMapping.findIndex(
+          (obj) => obj.influencerid === data.influencerid
+        );
+      userCampaignMappingData[objIndex2].statusID = "402";
+      //update
+      await Firebase.Campaign.doc(data.campaignid).update({
+        userCampaignMapping: userCampaignMappingData,
+      });
       await Firebase.Influencer.doc(data.influencerid).update({
         campaignmapping: [...campaignmapping],
         message: influencerDataMessage,
@@ -4854,10 +5091,18 @@ app.put("/api/rejectstatus/update", async (req, res) => {
         eventId: data.eventid,
         eventName: eventsnapshot.data().name,
       });
-      //console.log("data", {
-      //   eventmapping: influencerData,
-      //   message: influencerDataMessage,
-      // });
+
+      let userEventMappingData = [...eventsnapshot.data().userEventMapping];
+      let objIndex2 = eventsnapshot
+        .data()
+        .userEventMapping.findIndex(
+          (obj) => obj.influencerid === data.influencerid
+        );
+      userEventMappingData[objIndex2].statusID = "302";
+      //update
+      await Firebase.Event.doc(data.eventid).update({
+        userEventMapping: userEventMappingData,
+      });
       await Firebase.Influencer.doc(data.influencerid).update({
         eventmapping: influencerData,
         message: influencerDataMessage,
@@ -4902,7 +5147,9 @@ app.put("/api/removecampaign/update", async (req, res) => {
   try {
     const id = req.body.id;
     delete req.body.id;
-    const data = { isActive: 0 };
+    const data = {
+      isActive: req.body.isActive == false || req.body.isActive == 0 ? 0 : 1,
+    };
 
     await Firebase.Campaign.doc(id).update(data);
 
@@ -4928,8 +5175,10 @@ app.put("/api/removeevent/update", async (req, res) => {
   try {
     const id = req.body.id;
     delete req.body.id;
-    const data = { isActive: 0 };
-
+    // const data = { isActive: 0 };
+    const data = {
+      isActive: req.body.isActive == false || req.body.isActive == 0 ? 0 : 1,
+    };
     await Firebase.Event.doc(id).update(data);
 
     logging.end();
@@ -4981,7 +5230,7 @@ app.put("/api/gallery/update", async (req, res) => {
     let snapshot = await Firebase.Gallery.doc(id).get();
     //18
     //10
-    if (snapshot.data().highlights.length + data.highlights.length <= 20) {
+    if (snapshot.data().highlights?.length + data.highlights?.length <= 20) {
       let highlightData = [...snapshot.data().highlights, ...data.highlights];
       //console.log(highlightData);
 
@@ -5071,24 +5320,8 @@ app.put("/api/campaign/update", async (req, res) => {
 
   try {
     const id = req.body.id;
-    //console.log(id);
     delete req.body.id;
     const data = req.body;
-    // console.log("check campaign update -> ",{
-    //   campaignDetail: {
-    //     goals: data.goals,
-    //     whattodo: data.whattodo,
-    //     thingstoremember: data.thingstoremember,
-    //     detail: data.detail,
-    //     deliverable: data.deliverable,
-    //     numberofinfluencer: data.numberofinfluencer,
-    //     influencerselectionstart: data.influselectionstart,
-    //     influselectionend: data.influselectionend,
-    //     contentpostingstart: data.contentpostingstart,
-    //     contentpostingend: data.contentpostingend,
-    //   },
-    //   name: data.name,
-    // });
 
     await Firebase.Campaign.doc(id).update({
       campaignDetail: {
@@ -5246,7 +5479,7 @@ app.put("/api/influencer/update", async (req, res) => {
     if (data.flagSignOut === 1 && displayName.slice(0, 1) === "0") {
       updatedDisplayName =
         displayName.slice(0, 1) === "0" &&
-        "1" + displayName.slice(1, displayName.length);
+        "1" + displayName.slice(1, displayName?.length);
       // console.log("updatedDisplayName", updatedDisplayName);
       console.log("step 0");
 
@@ -5278,7 +5511,7 @@ app.put("/api/influencer/update", async (req, res) => {
     } else if (data.flagSignOut === 0 && displayName.slice(0, 1) === "1") {
       updatedDisplayName =
         displayName.slice(0, 1) === "1" &&
-        "0" + displayName.slice(1, displayName.length);
+        "0" + displayName.slice(1, displayName?.length);
       await Firebase.admin.auth().updateUser(data?.cookies.uuid, {
         displayName: updatedDisplayName,
       });
@@ -5332,7 +5565,7 @@ app.put("/api/brand/update", async (req, res) => {
     if (data.flagSignOut === 1 && displayName.slice(0, 1) === "0") {
       updatedDisplayName =
         displayName.slice(0, 1) === "0" &&
-        "1" + displayName.slice(1, displayName.length);
+        "1" + displayName.slice(1, displayName?.length);
       //console.log("updatedDisplayName", updatedDisplayName);
       await Firebase.admin.auth().updateUser(data?.cookies.uuid, {
         displayName: updatedDisplayName,
@@ -5341,7 +5574,7 @@ app.put("/api/brand/update", async (req, res) => {
     if (data.flagSignOut === 0 && displayName.slice(0, 1) === "1") {
       updatedDisplayName =
         displayName.slice(0, 1) === "1" &&
-        "0" + displayName.slice(1, displayName.length);
+        "0" + displayName.slice(1, displayName?.length);
       await Firebase.admin.auth().updateUser(data?.cookies.uuid, {
         displayName: updatedDisplayName,
       });
@@ -5679,61 +5912,77 @@ app.post("/api/influencerbrand", async (req, res) => {
 // MAPPING SECTION
 // 1. Mapping brand with influencer - Hire me
 app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
-  logging.write(new Date() + " - mappingbrandwithinfluencer/update PUT 🚀 \n");
   console.log(new Date() + " - mappingbrandwithinfluencer/update PUT 🚀 \n");
 
   try {
     const data = req.body;
     //console.log(data);
 
-    const snapshot = await Firebase.Brand.get();
-    let brandData = [];
-    let brandDataMessage = [];
-    let checkStatus = "";
-    snapshot.docs.map((doc) => {
-      if (doc.id === data.brandId) {
-        if (doc.data().influencermapping.length > 0) {
-          brandData.push(...doc.data().influencermapping);
-        }
+    // const snapshot = await Firebase.Brand.get();
 
-        brandDataMessage.push(...doc.data().message);
-        checkStatus = doc.data().status;
-      }
-    });
+    const snapshot = await customFunction.fetchSingleData(2, data.brandId);
+
+    // let checkStatus = "";
+    // snapshot.docs.map((doc) => {
+    //   if (doc.id === data.brandId) {
+    //     if (doc.data().influencermapping?.length > 0) {
+    //       brandData.push(...doc.data().influencermapping);
+    //     }
+
+    //     brandDataMessage.push(...doc.data().message);
+    //     checkStatus = doc.data().status;
+    //   }
+    // });
     //console.log("checkStatus", checkStatus);
-    if (checkStatus === "new") {
+    // if (checkStatus === "new") {
+
+    // } else {
+    // brandData.push({  });
+
+    // brandDataMessage.push({
+    //   statusID: "200",
+    //   influencerID: data.influencerId,
+    //   influencerName: influencersnapshot.data().name,
+    // });
+    if (
+      snapshot.influencermapping.some(
+        (s) => s.influencerId == data.influencerId
+      )
+    ) {
       res.status(400).json({
-        message: "Your status is pending for making changes on Pinksky.",
+        message: "Your request has already been sent to Team Pinksky",
       });
     } else {
-      brandData.push({ influencerId: data.influencerId, status: "new" });
-      const influencersnapshot = await Firebase.Influencer.doc(
+      const influencersnapshot = await customFunction.fetchSingleData(
+        0,
         data.influencerId
-      ).get();
-      brandDataMessage.push({
-        statusID: "200",
-        influencerID: data.influencerId,
-        influencerName: influencersnapshot.data().name,
-      });
+      );
 
-      //Added in brand json
+      let brandData = [
+        ...snapshot.influencermapping,
+        {
+          influencerId: data.influencerId,
+          status: "new",
+        },
+      ];
+      let brandDataMessage = [
+        ...snapshot.message,
+        {
+          statusID: "200",
+          influencerID: data.influencerId,
+          influencerName: influencersnapshot.name,
+        },
+      ];
       await Firebase.Brand.doc(data.brandId).update({
         influencermapping: brandData,
         message: brandDataMessage,
       });
-
-      logging.end();
       res.status(200).json({ message: "Updated Brand" });
     }
   } catch (error) {
-    logging.write(
-      new Date() + " - mappingbrandwithinfluencer/update ❌ - " + error + " \n"
-    );
     console.log(
       new Date() + " - mappingbrandwithinfluencer/update ❌ - " + error + " \n"
     );
-
-    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -5767,7 +6016,15 @@ app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
     //console.log("step2");
 
     const eventsnapshot = await Firebase.Event.doc(data.eventId).get();
-
+    await Firebase.Event.doc(data.eventId).update({
+      userEventMapping: [
+        ...eventsnapshot.data().userEventMapping,
+        {
+          influencerid: data.influencerId,
+          statusID: "300",
+        },
+      ],
+    });
     influencerDataMessage.push(...snapshot.data().message, {
       statusID: "300",
       eventId: data.eventId,
@@ -5800,67 +6057,55 @@ app.put("/api/mappinginfluencerwithevent/update", async (req, res) => {
 
 // 3. Mapping influencer with campaign - Apply Now
 app.put("/api/mappinginfluencerwithcampaign/update", async (req, res) => {
-  logging.write(
-    new Date() + " - mappinginfluencerwithcampaign/update PUT 🚀 \n"
-  );
   console.log(new Date() + " - mappinginfluencerwithcampaign/update PUT 🚀 \n");
 
   try {
     const data = req.body;
+    const snapshot = await customFunction.fetchSingleData(0, data.influencerId);
+    const campaignsnapshot = await customFunction.fetchSingleData(
+      3,
+      data.campaignId
+    );
 
-    const snapshot = await Firebase.Influencer.get();
-    let influencerData = [];
-    let influencerDataMessage = [];
-    snapshot.docs.map((doc) => {
-      if (doc.id === data.influencerId) {
-        if (doc.data().campaignmapping.length > 0) {
-          influencerData.push(...doc.data().campaignmapping);
-        }
-
-        influencerDataMessage.push(...doc.data().message);
-      }
-    });
-    //console.log("influencerData before ", influencerData);
-    const campaignsnapshot = await Firebase.Campaign.doc(data.campaignId).get();
-
+    let influencerData = snapshot.campaignmapping;
     if (influencerData.find((item) => item.campaignId === data.campaignId)) {
       let objIndex = influencerData.findIndex(
         (obj) => obj.campaignId === data.campaignId
       );
       influencerData[objIndex].status = "new";
       influencerData[objIndex].biddingprice = data.biddingprice;
-      influencerData[objIndex].campaignId = data.campaignId;
-      influencerData[objIndex].closingPrice = "";
     } else {
       influencerData.push({
         campaignId: data.campaignId,
         biddingprice: data.biddingprice,
         status: "new",
-        viewerDetails: campaignsnapshot.data().viewerDetails,
+        viewerDetails: campaignsnapshot.viewerDetails,
       });
     }
-
-    influencerDataMessage.push({
-      statusID: "200",
-      campaignID: data.campaignId,
-      campaignName: campaignsnapshot.data().name,
+    await Firebase.Campaign.doc(data.campaignId).update({
+      userCampaignMapping: [
+        ...campaignsnapshot.userCampaignMapping,
+        {
+          influencerid: data.influencerId,
+          statusID: "200",
+          closingPrice: data.biddingprice,
+        },
+      ],
     });
-
-    //console.log("influencerData after ", influencerData);
     await Firebase.Influencer.doc(data.influencerId).update({
       campaignmapping: influencerData,
-      message: influencerDataMessage,
+      message: [
+        ...snapshot.message,
+        {
+          statusID: "200",
+          campaignID: data.campaignId,
+          campaignName: campaignsnapshot.name,
+        },
+      ],
     });
 
-    logging.end();
     res.status(200).json({ message: "Updated Influencer" });
   } catch (error) {
-    logging.write(
-      new Date() +
-        " - mappinginfluencerwithcampaign/update ❌ - " +
-        error +
-        " \n"
-    );
     console.log(
       new Date() +
         " - mappinginfluencerwithcampaign/update ❌ - " +
@@ -5868,7 +6113,6 @@ app.put("/api/mappinginfluencerwithcampaign/update", async (req, res) => {
         " \n"
     );
 
-    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -5919,6 +6163,21 @@ app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
       }
     });
 
+    let userCampaignMappingData = [
+      ...campaignsnapshot.data().userCampaignMapping,
+    ];
+    //campaign adding status
+    let objIndex2 = campaignsnapshot
+      .data()
+      .userCampaignMapping.findIndex(
+        (obj) => obj.influencerid === data.influencerId
+      );
+    userCampaignMappingData[objIndex2].statusID = "400";
+
+    //update
+    await Firebase.Campaign.doc(data.campaignId).update({
+      userCampaignMapping: userCampaignMappingData,
+    });
     await Firebase.Influencer.doc(data.influencerId).update({
       campaignmapping: [...campaignmappinglocal],
       message: influencerDataMessage,
@@ -5971,7 +6230,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
   try {
     //login here
     if (createUser.email != undefined && createUser.password != undefined) {
-      if (influencerData.isNonInfluencer.uuid.toString().length > 2) {
+      if (influencerData.isNonInfluencer.uuid.toString()?.length > 2) {
         let getUserByUuid = await Firebase.admin
           .auth()
           .getUser(influencerData.isNonInfluencer.uuid.toString());
@@ -6041,9 +6300,9 @@ app.post("/api/v2/influencer/create", async (req, res) => {
               //let count = 0;
               //console.log(
               //   "instadatares.edge_owner_to_timeline_media.edges",
-              //   instadatares.edge_owner_to_timeline_media.edges.length
+              //   instadatares.edge_owner_to_timeline_media.edges?.length
               // );
-              if (instadatares.edge_owner_to_timeline_media.edges.length > 4) {
+              if (instadatares.edge_owner_to_timeline_media.edges?.length > 4) {
                 //do something
                 onGoingStatus = true;
               } else {
@@ -6065,22 +6324,16 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           });
 
         if (onGoingStatus === true) {
-          if (influencerData.isNonInfluencer.uuid.toString().length > 2) {
+          if (influencerData.isNonInfluencer.uuid.toString()?.length > 2) {
             const snapshotNonInfluencer = await Firebase.NonInfluencer.doc(
               influencerData.isNonInfluencer.id.toString()
             ).get();
+
             influencerSchema = {
               ...influencerData,
               pinkskymember: snapshotNonInfluencer.data().pinkskymember,
               isProfileCompleted: Math.floor(isProfileCompletedQuery),
 
-              message: [
-                {
-                  statusID: "100",
-                  campaignID: "",
-                  campaignName: "",
-                },
-              ],
               createdDate: new Date(),
               updatedDate: new Date(),
             };
@@ -6089,6 +6342,31 @@ app.post("/api/v2/influencer/create", async (req, res) => {
               ...influencerData,
               isProfileCompleted: Math.floor(isProfileCompletedQuery),
 
+              createdDate: new Date(),
+              updatedDate: new Date(),
+            };
+          }
+          if (influencerData.flagSignOut === 1) {
+            influencerSchema = {
+              ...influencerSchema,
+              status:"accepted",
+              message: [
+                {
+                  statusID: "100",
+                  campaignID: "",
+                  campaignName: "",
+                },
+                {
+                  statusID: "101",
+                  campaignID: "",
+                  campaignName: "",
+                },
+              ],
+            };
+          } else {
+            influencerSchema = {
+              ...influencerSchema,
+              status:"new",
               message: [
                 {
                   statusID: "100",
@@ -6096,11 +6374,8 @@ app.post("/api/v2/influencer/create", async (req, res) => {
                   campaignName: "",
                 },
               ],
-              createdDate: new Date(),
-              updatedDate: new Date(),
             };
           }
-
           Firebase.Influencer.add(influencerSchema);
           setTimeout(async () => {
             let influencerArr = [];
@@ -6113,7 +6388,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
             //console.log("influencerArr", influencerArr);
             //setting up coupon from noninfluencer
             if (
-              influencerData.isNonInfluencer.uuid.toString().length > 2 &&
+              influencerData.isNonInfluencer.uuid.toString()?.length > 2 &&
               influencerSchema.pinkskymember.isMember === true
             ) {
               const snapshotCoupon = await Firebase.Coupons.get();
@@ -6223,7 +6498,7 @@ Thanks for choosing Pinksky 💕 `,
       });
     } else {
       //console.log(userResponse?.uid);
-      if (influencerData.isNonInfluencer.uuid.length > 2) {
+      if (influencerData.isNonInfluencer.uuid?.length > 2) {
         //non influencer is safe
       } else {
         await Firebase.admin.auth().deleteUser(userResponse?.uid);
@@ -6330,7 +6605,7 @@ app.post("/api/v2/brand/create", async (req, res) => {
           throw err;
         } else {
           //          let interval = 9000;
-          let lengthOfArray = instagramPostDetails.length - 1;
+          let lengthOfArray = instagramPostDetails?.length - 1;
           let brandArr = [];
 
           //console.log("lengthOfArray", lengthOfArray);
@@ -6684,7 +6959,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
             });
 
           let interval = 8500;
-          let lengthOfArray = instagramPostDetails.length - 1;
+          let lengthOfArray = instagramPostDetails?.length - 1;
           // let influencerArr = [];
           //console.log("lengthOfArray", lengthOfArray);
           instagramPostDetails.forEach((file, index) => {
@@ -6813,7 +7088,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
                   shortcode: item.node?.shortcode,
                   display_url: item.node?.display_url,
                   caption:
-                    item.node?.edge_media_to_caption.edges.length === 0
+                    item.node?.edge_media_to_caption.edges?.length === 0
                       ? []
                       : item.node.edge_media_to_caption.edges[0].node.text,
                   edge_media_to_comment: item.node?.edge_media_to_comment.count,
@@ -6853,7 +7128,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
           });
 
         let interval = 8000;
-        let lengthOfArray = instagramPostDetails.length - 1;
+        let lengthOfArray = instagramPostDetails?.length - 1;
         instagramPostDetails.forEach((file, index) => {
           setTimeout(() => {
             const d = new Date();

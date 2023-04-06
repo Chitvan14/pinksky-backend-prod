@@ -21,4 +21,26 @@ module.exports = class PinkskyDB {
 
     return getFilteredArray;
   }
+
+  async orderBy(type, field, operation, lim) {
+    let snapshot = await type.orderBy(field, operation);
+    if (lim) {
+      snapshot = await snapshot.limit(lim).get();
+    } else {
+      snapshot = await snapshot.get();
+    }
+    let getOrderedArray = [];
+    snapshot.docs.map((doc) => {
+      getOrderedArray.push({ id: doc.id, ...doc.data() });
+    });
+    return getOrderedArray;
+  }
+  async getAll(type) {
+    const snapshot = await type.get();
+    let getAllArray = [];
+    snapshot.docs.map((doc) => {
+      getAllArray.push({ id: doc.id, ...doc.data() });
+    });
+    return getAllArray;
+  }
 };
