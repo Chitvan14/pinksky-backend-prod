@@ -1064,7 +1064,11 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
               .post(
                 environments.BASE_URL +
                   "v2/influencer/create?isProfileCompleted=0",
-                addvalue
+
+                {
+                  ...addvalue,
+                  flagSignOut: 0,
+                }
               )
               .then(async (response) => {
                 await axios
@@ -6349,7 +6353,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           if (influencerData.flagSignOut === 1) {
             influencerSchema = {
               ...influencerSchema,
-              status:"accepted",
+              status: "accepted",
               message: [
                 {
                   statusID: "100",
@@ -6366,7 +6370,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           } else {
             influencerSchema = {
               ...influencerSchema,
-              status:"new",
+              status: "new",
               message: [
                 {
                   statusID: "100",
