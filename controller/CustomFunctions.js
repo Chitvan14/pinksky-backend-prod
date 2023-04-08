@@ -289,3 +289,17 @@ exports.adminPinksky = async (trigger) => {
     return [...brandlist, ...brandlistnew];
   }
 };
+
+exports.spreadsheettofirebase = async (clientSpreadsheetToDB) => {
+  let value = "";
+  await clientSpreadsheetToDB.read().then(
+    (data) => {
+      value = JSON.parse(data);
+    },
+    (error) => {
+      value = error;
+    }
+  );
+
+  return value;
+};

@@ -12,6 +12,7 @@ var emailtemplate = require("./config/emailtemplate.js");
 // const PinkskyDB = require("./controller/PinkskyDB");
 const Razorpay = require("razorpay");
 const customFunction = require("./controller/CustomFunctions");
+const { influencerCategorySchema } = require("./assets/influencerCategory.js");
 // const pinkskyDB = new PinkskyDB();
 const razorpay = new Razorpay({
   key_id: environments.KEY_ID,
@@ -1010,101 +1011,93 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
   console.log(new Date() + " - spreadsheettofirebase GET 🚀 \n");
 
   try {
-    clientSpreadsheetToDB.read().then(
-      function (data) {
-        let value = JSON.parse(data);
-        let interval = 60000;
-
-        value.forEach((item, index) => {
-          setTimeout(() => {
-            //verify not needed bcz isActive is 1
-            let addvalue = {
-              ...item,
-              admin: false,
-              isActive: 1,
-              campaignmapping: [],
-              eventmapping: [],
-              pinkskymember: {
-                isMember: false,
-                cooldown: null,
-              },
-              paymentdetails: {},
-              isTeam: "new",
-              gender: "",
-              status: "new",
-              dob: "",
-              address: "",
-              isNonInfluencer: "",
-              city: "",
-              isNonInfluencer: { type: "N", uuid: "", id: "" },
-              category: [
-                {
-                  href: "/influencer",
-                  id: 2,
-                  status: false,
-                  label: "Lifestyle Category",
-                  value: "Lifestyle",
-                  icon: {
-                    _store: {},
-                    key: null,
-                    _owner: null,
-                    type: "img",
-                    ref: null,
-                    props: {
-                      loading: "lazy",
-                      src: "/static/media/healthy-lifestyle.adbd2600d92cbd99718b.png",
-                      width: "25px",
-                      height: "25px",
-                    },
-                  },
-                },
-              ],
-            };
-            axios
-              .post(
-                environments.BASE_URL +
-                  "v2/influencer/create?isProfileCompleted=0",
-
-                {
-                  ...addvalue,
-                  flagSignOut: 0,
-                }
-              )
-              .then(async (response) => {
-                await axios
-                  .post(environments.BASE_URL + "v2/signin/profileupdating", {
-                    data: response.data.message,
-                    isRegistering: "Y",
-                  })
-                  .then((responsenested) => {
-                    if (value?.length - 1 === index) {
-                      logging.end();
-                      res.status(200).json(response.data);
-                    } else {
-                      console.log(response.data);
-                    }
-                  })
-                  .catch((errornested) => {
-                    throw errornested;
-                  });
-              })
-              .catch((error) => {
-                throw error;
-              });
-          }, index * interval);
-        });
-      },
-      function (error) {
-        throw error;
+    const users = await customFunction.spreadsheettofirebase(
+      clientSpreadsheetToDB
+    );
+    let status = [];
+    if (users.length > 0) {
+      for (const user of users) {
+        let categoryFinding = {};
+        user.category.toLowerCase().includes("male") ||
+        user.category.toLowerCase().includes("geet")
+          ? (categoryFinding = influencerCategorySchema.filter(
+              (f) => f.value.toLowerCase() == "fashion"
+            ))
+          : (categoryFinding = influencerCategorySchema.filter((f) =>
+              user.category.toLowerCase().includes(f.value.toLowerCase())
+            ));
+        const addvalue = {
+          email: user.email,
+          password: user.password,
+          instagramurl: user.instagramurl,
+          name: user.name,
+          surname: user.surname,
+          phonenumber: user.phonenumber,
+          whatsappnumber: user.whatsappnumber,
+          admin: false,
+          isActive: 1,
+          campaignmapping: [],
+          eventmapping: [],
+          pinkskymember: {
+            isMember: false,
+            cooldown: null,
+          },
+          paymentdetails: {},
+          isTeam: "new",
+          gender: "",
+          status: "new",
+          dob: "",
+          address: "",
+          isNonInfluencer: "",
+          city: "",
+          isNonInfluencer: { type: "N", uuid: "", id: "" },
+          category: [...categoryFinding],
+        };
+        console.log("🟡 " + addvalue.email + " start registring...");
+        await axios
+          .post(
+            environments.BASE_URL + "v2/influencer/create?isProfileCompleted=0",
+            {
+              ...addvalue,
+              flagSignOut: 0,
+            }
+          )
+          .then(async (response) => {
+            console.log(
+              "🟢 " +
+                addvalue.email +
+                " successfully registered with display name " +
+                response.data.message.displayName
+            );
+          })
+          .catch((error) => {
+            console.log(
+              "🔴 " +
+                addvalue.email +
+                " got an error with message " +
+                error.response.data.message
+            );
+            status.push({
+              user: addvalue.email,
+              error: error.response.data.message,
+            });
+          });
       }
-    );
-  } catch (error) {
-    logging.write(
-      new Date() + " - spreadsheettofirebase ❌ - " + error + " \n"
-    );
-    console.log(new Date() + " - spreadsheettofirebase ❌ - " + error + " \n");
 
-    logging.end();
+      res
+        .status(200)
+        .json({
+          message: "Closing Spreadsheet To Firebase Connection",
+          data: status,
+        });
+    } else {
+      console.log(
+        "No user found to upload into firebase, Please check your spreadsheet."
+      );
+    }
+  } catch (error) {
+    console.log("error lvl 3", error);
+    console.log(new Date() + " - spreadsheettofirebase ❌ - " + error + " \n");
     res.status(500).json(error);
   }
 });
@@ -6210,15 +6203,12 @@ app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
 
 //----------------------------------------------------------------------
 app.post("/api/v2/influencer/create", async (req, res) => {
-  logging.write(new Date() + " - v2/influencer/create POST 🚀 \n");
   console.log(new Date() + " - v2/influencer/create POST 🚀 \n");
 
   let userResponse = { uid: "" };
 
   let influencerData = req.body;
   let isProfileCompletedQuery = req.query.isProfileCompleted;
-  //console.log("influencerData", req.body);
-  //console.log("isProfileCompletedQuery", isProfileCompletedQuery);
 
   const createUser = {
     email: influencerData.email,
@@ -6230,9 +6220,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
       "_" +
       influencerData.surname.replace(/\s/g, ""),
   };
-  //console.log("createUser", createUser);
   try {
-    //login here
     if (createUser.email != undefined && createUser.password != undefined) {
       if (influencerData.isNonInfluencer.uuid.toString()?.length > 2) {
         let getUserByUuid = await Firebase.admin
@@ -6250,9 +6238,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           email: influencerData.email,
           uid: getUserByUuid?.uid,
         };
-        //console.log("def", userResponse);
       } else {
-        //console.log("abc");
         userResponse = await Firebase.admin.auth().createUser({
           email: createUser.email,
           password: createUser.password,
@@ -6261,23 +6247,9 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           displayName: createUser.name,
         });
       }
-
-      //console.log(
-      //   "userResponse email",
-      //   environments.NODE_ENV,
-      //   userResponse.email,
-      //   userResponse.uid
-      // );
       if (userResponse.email !== undefined && userResponse.uid !== undefined) {
         let influencerSchema = null;
-        // const options = {
-        //   method: "GET",
-        //   url: environments.RAPID_USERINFO_URL + influencerData.instagramurl,
-        //   headers: {
-        //     "X-RapidAPI-Key": environments.RapidAPIKey,
-        //     "X-RapidAPI-Host": environments.RapidAPIHost,
-        //   },
-        // };
+
         const options = {
           method: "POST",
           url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
@@ -6288,26 +6260,13 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           },
           data: `{"username":"${influencerData.instagramurl}"}`,
         };
-        //pointoferror
-        //console.log(options);
-        //Here -- axios
-        //let instagramPostDetails = [];
         let onGoingStatus = false;
-        // let breakMovement = true;
         await axios
           .request(options)
           .then(function (response) {
             let instadatares = response.data.response.body.data.user;
-            // //console.log("instagram respnose",instadatares)
             if (instadatares.is_private === false) {
-              //let sum = 0;
-              //let count = 0;
-              //console.log(
-              //   "instadatares.edge_owner_to_timeline_media.edges",
-              //   instadatares.edge_owner_to_timeline_media.edges?.length
-              // );
               if (instadatares.edge_owner_to_timeline_media.edges?.length > 4) {
-                //do something
                 onGoingStatus = true;
               } else {
                 const err = new TypeError(
@@ -6315,7 +6274,6 @@ app.post("/api/v2/influencer/create", async (req, res) => {
                 );
                 throw err;
               }
-              //onGoingStatus = 200;
             } else {
               const err = new TypeError(
                 "Please Register With Public Instagram Account"
@@ -6389,8 +6347,6 @@ app.post("/api/v2/influencer/create", async (req, res) => {
                 influencerArr.push({ id: doc.id, ...doc.data() });
               }
             });
-            //console.log("influencerArr", influencerArr);
-            //setting up coupon from noninfluencer
             if (
               influencerData.isNonInfluencer.uuid.toString()?.length > 2 &&
               influencerSchema.pinkskymember.isMember === true
@@ -6473,9 +6429,6 @@ Thanks for choosing Pinksky 💕 `,
           }, 2000);
         }
       } else {
-        logging.write(
-          new Date() + " - v2/influencer/create ❌ - " + error + " \n"
-        );
         console.log(
           new Date() + " - v2/influencer/create ❌ - " + error + " \n"
         );
@@ -6489,9 +6442,6 @@ Thanks for choosing Pinksky 💕 `,
     }
   } catch (error) {
     if (userResponse?.uid === "") {
-      logging.write(
-        new Date() + " - v2/influencer/create ❌ - " + error + " \n"
-      );
       console.log(new Date() + " - v2/influencer/create ❌ - " + error + " \n");
 
       logging.end();
@@ -6501,16 +6451,11 @@ Thanks for choosing Pinksky 💕 `,
           " is already an pinksky user. Try sigging up with another user id.",
       });
     } else {
-      //console.log(userResponse?.uid);
       if (influencerData.isNonInfluencer.uuid?.length > 2) {
-        //non influencer is safe
       } else {
         await Firebase.admin.auth().deleteUser(userResponse?.uid);
       }
-      //console.log("error", error.message);
-      logging.write(
-        new Date() + " - v2/influencer/create ❌ - " + error + " \n"
-      );
+
       console.log(new Date() + " - v2/influencer/create ❌ - " + error + " \n");
 
       logging.end();
