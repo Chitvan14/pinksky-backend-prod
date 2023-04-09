@@ -99,10 +99,13 @@ exports.adminPinksky = async (trigger) => {
   }
   if (trigger == "campaignlist") {
     let campaignlist = await this.orderedData(3, orderobj);
-    campaignlist.map((campaign) => {
-      let im = campaign.userCampaignMapping.some((s) => s.statusID == "200");
 
-      if (campaign.isActive && im) {
+    campaignlist.map((campaign) => {
+      //console.log("campaign -> ", campaign.id);
+
+      let im = campaign.userCampaignMapping.some((s) => s.statusID == "200");
+      //campaign.isActive &&
+      if (im) {
         campaign.userCampaignMapping.map((userCampaignMapping) => {
           if (userCampaignMapping.statusID == "200") {
             if (
@@ -119,7 +122,7 @@ exports.adminPinksky = async (trigger) => {
         });
       }
     });
-    // console.log("influencerDataCheck -> ",influencerDataCheck);
+   // console.log("influencerDataCheck -> ", influencerDataCheck);
     const influencerBrandMappingObj = {
       field: Firebase.docid,
       operation: "in",
@@ -129,8 +132,8 @@ exports.adminPinksky = async (trigger) => {
     let influencer = await this.filteredData(0, influencerBrandMappingObj);
     campaignlist.map((campaign, index) => {
       let im = campaign.userCampaignMapping.some((s) => s.statusID == "200");
-
-      if (campaign.isActive && im) {
+      //campaign.isActive &&
+      if (im) {
         campaign.userCampaignMapping.map((userCampaignMapping, index2) => {
           if (userCampaignMapping.statusID == "200") {
             const influencerdata = influencer.filter(
@@ -160,8 +163,8 @@ exports.adminPinksky = async (trigger) => {
     let eventlist = await this.orderedData(5, orderobj);
     eventlist.map((event) => {
       let im = event.userEventMapping.some((s) => s.statusID == "300");
-
-      if (event.isActive && im) {
+      //event.isActive &&
+      if (im) {
         event.userEventMapping.map((userEventMapping) => {
           if (userEventMapping.statusID == "300") {
             if (
@@ -187,8 +190,8 @@ exports.adminPinksky = async (trigger) => {
     let influencer = await this.filteredData(0, influencerBrandMappingObj);
     eventlist.map((event, index) => {
       let im = event.userEventMapping.some((s) => s.statusID == "300");
-
-      if (event.isActive && im) {
+      //event.isActive &&
+      if (im) {
         event.userEventMapping.map((userEventMapping, index2) => {
           if (userEventMapping.statusID == "300") {
             const influencerdata = influencer.filter(
@@ -289,7 +292,6 @@ exports.adminPinksky = async (trigger) => {
     return [...brandlist, ...brandlistnew];
   }
 };
-
 exports.spreadsheettofirebase = async (clientSpreadsheetToDB) => {
   let value = "";
   await clientSpreadsheetToDB.read().then(

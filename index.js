@@ -1017,79 +1017,93 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
     let status = [];
     if (users.length > 0) {
       for (const user of users) {
-        let categoryFinding = {};
-        user.category.toLowerCase().includes("male") ||
-        user.category.toLowerCase().includes("geet")
-          ? (categoryFinding = influencerCategorySchema.filter(
-              (f) => f.value.toLowerCase() == "fashion"
-            ))
-          : (categoryFinding = influencerCategorySchema.filter((f) =>
-              user.category.toLowerCase().includes(f.value.toLowerCase())
-            ));
-        const addvalue = {
-          email: user.email,
-          password: user.password,
-          instagramurl: user.instagramurl,
-          name: user.name,
-          surname: user.surname,
-          phonenumber: user.phonenumber,
-          whatsappnumber: user.whatsappnumber,
-          admin: false,
-          isActive: 1,
-          campaignmapping: [],
-          eventmapping: [],
-          pinkskymember: {
-            isMember: false,
-            cooldown: null,
-          },
-          paymentdetails: {},
-          isTeam: "new",
-          gender: "",
-          status: "new",
-          dob: "",
-          address: "",
-          isNonInfluencer: "",
-          city: "",
-          isNonInfluencer: { type: "N", uuid: "", id: "" },
-          category: [...categoryFinding],
+        const obj = {
+          field: "whatsappnumber",
+          operation: "==",
+          value: user.whatsappnumber,
         };
-        console.log("🟡 " + addvalue.email + " start registring...");
-        await axios
-          .post(
-            environments.BASE_URL + "v2/influencer/create?isProfileCompleted=0",
-            {
-              ...addvalue,
-              flagSignOut: 0,
-            }
-          )
-          .then(async (response) => {
-            console.log(
-              "🟢 " +
-                addvalue.email +
-                " successfully registered with display name " +
-                response.data.message.displayName
-            );
-          })
-          .catch((error) => {
-            console.log(
-              "🔴 " +
-                addvalue.email +
-                " got an error with message " +
-                error.response.data.message
-            );
-            status.push({
-              user: addvalue.email,
-              error: error.response.data.message,
+        let phoneWhatsappCheck = await customFunction.filteredData(0, obj);
+        if (phoneWhatsappCheck.length == 0) {
+          let categoryFinding = {};
+          user.category.toLowerCase().includes("male") ||
+          user.category.toLowerCase().includes("geet")
+            ? (categoryFinding = influencerCategorySchema.filter(
+                (f) => f.value.toLowerCase() == "fashion"
+              ))
+            : (categoryFinding = influencerCategorySchema.filter((f) =>
+                user.category.toLowerCase().includes(f.value.toLowerCase())
+              ));
+          const addvalue = {
+            email: user.email,
+            password: user.password,
+            instagramurl: user.instagramurl,
+            name: user.name,
+            surname: user.surname,
+            phonenumber: user.phonenumber,
+            whatsappnumber: user.whatsappnumber,
+            admin: false,
+            isActive: 1,
+            campaignmapping: [],
+            eventmapping: [],
+            pinkskymember: {
+              isMember: false,
+              cooldown: null,
+            },
+            paymentdetails: {},
+            isTeam: "new",
+            gender: "",
+            status: "new",
+            dob: "",
+            address: "",
+            isNonInfluencer: "",
+            city: "",
+            isNonInfluencer: { type: "N", uuid: "", id: "" },
+            category: [...categoryFinding],
+          };
+          console.log("🟡 " + addvalue.email + " start registring...");
+          await axios
+            .post(
+              environments.BASE_URL +
+                "v2/influencer/create?isProfileCompleted=0",
+              {
+                ...addvalue,
+                flagSignOut: 0,
+              }
+            )
+            .then(async (response) => {
+              console.log(
+                "🟢 " +
+                  addvalue.email +
+                  " successfully registered with display name " +
+                  response.data.message.displayName
+              );
+            })
+            .catch((error) => {
+              console.log(
+                "🔴 " +
+                  addvalue.email +
+                  " got an error with message " +
+                  error.response.data.message
+              );
+              status.push({
+                user: addvalue.email,
+                error: error.response.data.message,
+              });
             });
+        } else {
+          status.push({
+            user: user.email,
+            error:
+              "User already there in system with whatsapp number " +
+              user.whatsappnumber,
           });
+        }
       }
 
-      res
-        .status(200)
-        .json({
-          message: "Closing Spreadsheet To Firebase Connection",
-          data: status,
-        });
+      res.status(200).json({
+        message: "Closing Spreadsheet To Firebase Connection",
+        data: status,
+      });
     } else {
       console.log(
         "No user found to upload into firebase, Please check your spreadsheet."
@@ -3006,11 +3020,11 @@ app.post("/api/influencer/filter", async (req, res) => {
 
     snapshot.docs.map((doc) => {
       //console.log(doc.id);
-      if (doc.data().status === "accepted") {
+      // if (doc.data().status === "accepted") {
         list.push({ id: doc.id, ...doc.data() });
-      } else {
+      // } else {
         //nothing
-      }
+      // }
     });
 
     let namesorted;
@@ -6261,6 +6275,25 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           data: `{"username":"${influencerData.instagramurl}"}`,
         };
         let onGoingStatus = false;
+
+        if (isProfileCompletedQuery.toString() == "1") {
+          //check if user with same whatsappnumber there
+          const obj = {
+            field: "whatsappnumber",
+            operation: "==",
+            value: influencerData.whatsappnumber,
+          };
+          let phoneWhatsappCheck = await customFunction.filteredData(0, obj);
+          //yes - delete id and data from influencer list
+          if (phoneWhatsappCheck.length > 0) {
+            //delete account + data
+            console.log(phoneWhatsappCheck[0]);
+            await Firebase.admin.auth().deleteUser(phoneWhatsappCheck[0]?.uuid);
+            await Firebase.Influencer.doc(phoneWhatsappCheck[0]?.id).delete();
+          }
+          //no - go as going
+        }
+        let instagramInfluencerSchema = null;
         await axios
           .request(options)
           .then(function (response) {
@@ -6268,6 +6301,36 @@ app.post("/api/v2/influencer/create", async (req, res) => {
             if (instadatares.is_private === false) {
               if (instadatares.edge_owner_to_timeline_media.edges?.length > 4) {
                 onGoingStatus = true;
+                let sum = 0;
+
+                instadatares.edge_owner_to_timeline_media.edges.map((item) => {
+                  sum =
+                    sum +
+                    item.node.edge_media_to_comment.count +
+                    item.node.edge_liked_by.count;
+                });
+                let engagementRate = sum / instadatares.edge_followed_by.count;
+                instagramInfluencerSchema = {
+                  instagram: {
+                    engagementRate:
+                      engagementRate
+                        .toString()
+                        .replace(".", "")
+                        .substring(0, 1) +
+                      "." +
+                      engagementRate
+                        .toString()
+                        .replace(".", "")
+                        .substring(1, 3),
+                    id: instadatares.id,
+                    is_business_account: instadatares.is_business_account,
+                    external_url: instadatares.external_url,
+                    followers: instadatares.edge_followed_by.count,
+                    edge_follow: instadatares.edge_follow.count,
+                    is_private: instadatares.is_private,
+                    is_verified: instadatares.is_verified,
+                  },
+                };
               } else {
                 const err = new TypeError(
                   "We cant't calculate your profile. Please login in with public instagram profile with more than 5 posts."
@@ -6293,17 +6356,17 @@ app.post("/api/v2/influencer/create", async (req, res) => {
 
             influencerSchema = {
               ...influencerData,
+              ...instagramInfluencerSchema,
               pinkskymember: snapshotNonInfluencer.data().pinkskymember,
               isProfileCompleted: Math.floor(isProfileCompletedQuery),
-
               createdDate: new Date(),
               updatedDate: new Date(),
             };
           } else {
             influencerSchema = {
               ...influencerData,
+              ...instagramInfluencerSchema,
               isProfileCompleted: Math.floor(isProfileCompletedQuery),
-
               createdDate: new Date(),
               updatedDate: new Date(),
             };
@@ -6312,6 +6375,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
             influencerSchema = {
               ...influencerSchema,
               status: "accepted",
+              uuid: userResponse?.uid,
               message: [
                 {
                   statusID: "100",
@@ -6329,6 +6393,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
             influencerSchema = {
               ...influencerSchema,
               status: "new",
+              uuid: userResponse?.uid,
               message: [
                 {
                   statusID: "100",
@@ -7000,7 +7065,6 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
         }
       }
     } else if (isRegistering === "Y") {
-      //removed from condition - data.displayName.slice(0, 1) === "0" &&
       if (data.displayName.indexOf("Influencer") != -1) {
         const snapshot = await Firebase.Influencer.doc(data.id).get();
 
