@@ -1,10 +1,10 @@
 const firebase = require("firebase");
 const admin = require("firebase-admin");
-const credientialsdev = require("./serviceaccount_dev.json");
-const credientialsprod = require("./serviceaccount_prod.json");
+const credientialsdev = require("../services/serviceaccount_dev.json");
+const credientialsprod = require("../services/serviceaccount_prod.json");
 const Multer = require("multer");
 const FirebaseStorage = require("multer-firebase-storage");
-const environments = require("./environments.js");
+const environments = require("../environments/environments.js");
 let credientials =
   environments.NODE_ENV === "production" ? credientialsprod : credientialsdev;
 const firebaseConfig = {
@@ -33,6 +33,7 @@ const Coupons = db.collection("Coupons");
 const RandomData = db.collection("RandomData");
 const Gallery = db.collection("Gallery");
 const Feedback = db.collection("Feedback");
+const docid = firebase.firestore.FieldPath.documentId();
 
 const multer = Multer({
   storage: FirebaseStorage({
@@ -72,4 +73,5 @@ module.exports.Firebase = {
   multer,
   gallerymulter,
   Feedback,
+  docid,
 };
