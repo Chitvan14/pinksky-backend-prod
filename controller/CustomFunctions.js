@@ -122,7 +122,7 @@ exports.adminPinksky = async (trigger) => {
         });
       }
     });
-   // console.log("influencerDataCheck -> ", influencerDataCheck);
+    // console.log("influencerDataCheck -> ", influencerDataCheck);
     const influencerBrandMappingObj = {
       field: Firebase.docid,
       operation: "in",
@@ -304,4 +304,18 @@ exports.spreadsheettofirebase = async (clientSpreadsheetToDB) => {
   );
 
   return value;
+};
+
+exports.filterlvl2AndLimit = async (index, obj, limit) => {
+  let snapshot = await pinkskyDB.filterlvl2(
+    collectionArr[index],
+    obj.field,
+    obj.operation,
+    obj.value,
+    obj.field2,
+    obj.operation2,
+    obj.value2,
+    limit
+  );
+  return snapshot;
 };

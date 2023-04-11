@@ -1124,11 +1124,8 @@ app.put("/api/spreadsheet/reset", async (req, res) => {
   const data = req.body;
   try {
     if (data.type === "influencer") {
-      console.log("data ", data.type);
       const snapshotInfluencer = await Firebase.Influencer.get();
-      console.log("data ", snapshotInfluencer.docs);
       snapshotInfluencer.docs.map(async (item) => {
-        console.log("item id 0 ", item.id);
         await Firebase.Influencer.doc(item.id).update({ dbInserted: 0 });
       });
     }
@@ -1363,20 +1360,27 @@ Thanks for choosing Pinksky 💕`,
         });
       } else {
         //console.log("2");
-        let influencerData = [];
+        //let influencerData = [];
         // const snapshot = await Firebase.Influencer.where(
         //   "email",
         //   "==",
         //   createUser.email.toString()
         // );
-        const snapshot = await Firebase.Influencer.get();
-        // console.log("snapshot influencer signin ", snapshot);
+        // const snapshot = await Firebase.Influencer.get();
+        // // console.log("snapshot influencer signin ", snapshot);
 
-        snapshot.docs.map((doc) => {
-          if (doc.data().email === createUser.email) {
-            influencerData.push({ id: doc.id, ...doc.data() });
-          }
-        });
+        // snapshot.docs.map((doc) => {
+        //   if (doc.data().email === createUser.email) {
+        //     influencerData.push({ id: doc.id, ...doc.data() });
+        //   }
+        // });
+        const obj = {
+          field: "email",
+          operation: "==",
+          value: createUser.email,
+        };
+        let influencerData = await customFunction.filteredData(0, obj);
+        //console.log(influencerData);
         if (influencerData[0].isActive === 0) {
           verify = true;
           sendMail("verifyemail", {
@@ -2034,106 +2038,94 @@ app.post("/api/pinksky/auth", async (req, res) => {
 
 // 2. Home Page
 app.post("/api/home", async (req, res) => {
-  logging.write(new Date() + " - home POST 🚀 \n");
   console.log(new Date() + " - home POST 🚀 \n");
 
   try {
-    // const gallerySnapshot = await Firebase.Gallery.get();
-    // let gallery = [];
-    // let exhibitiongallery = [];
-    // gallerySnapshot.docs.map((doc) => {
-    //   if (doc.data().isActive === 1) {
-    //     if (doc.data().type === "event") {
-    //       gallery.push({ id: doc.id, ...doc.data() });
-    //     } else if (doc.data().type === "exhibition") {
-    //       exhibitiongallery.push({ id: doc.id, ...doc.data() });
-    //     } else {
-    //       //nothing
-    //     }
-    //   }
-    // });
+    const activeobj = {
+      field: "isActive",
+      operation: "==",
+      value: 1,
+    };
+    let campaignlist = await customFunction.filteredData(3, activeobj);
+    let eventlist = await customFunction.filteredData(5, activeobj);
+    let couponsnapshot = await customFunction.filteredData(4, activeobj);
 
-    //campaign
-    const snapshot = await Firebase.Campaign.get();
-    let campaignlist = [];
-    snapshot.docs.map((doc) => {
-      if (doc.data().isActive === 1) {
-        campaignlist.push({ id: doc.id, ...doc.data() });
-      }
-    });
-
-    //influencer
-    const snapshotInfl = await Firebase.Influencer.get();
-    let influencerlist = [];
-    let isMember = false;
-    let status = "new";
-    snapshotInfl.docs.map((doc) => {
-      if (doc.data().status === "accepted") {
-        if (doc.data().instagram !== undefined) {
-          if (doc.data().instagram?.followers > 10000) {
-            influencerlist.push({ id: doc.id, ...doc.data() });
-          }
-        }
-      }
-      if (doc.id === req.body.id) {
-        isMember = doc.data().pinkskymember.isMember;
-        status = doc.data().status;
-      }
-    });
-
-    const snapshotNonInfluencer = await Firebase.NonInfluencer.get();
-    snapshotNonInfluencer.docs.map((doc) => {
-      if (doc.id === req.body.id) {
-        isMember = doc.data()?.pinkskymember?.isMember;
-      }
-    });
-
-    const snapshotBrand = await Firebase.Brand.get();
-    snapshotBrand.docs.map((doc) => {
-      if (doc.id === req.body.id) {
-        isMember = doc.data()?.pinkskymember?.isMember;
-        status = doc.data().status;
-      }
-    });
-
-    //event
-    const snapshotevent = await Firebase.Event.get();
-    let eventlist = [];
-    snapshotevent.docs.map((doc) => {
-      if (doc.data().isActive === 1) {
-        eventlist.push({ id: doc.id, ...doc.data() });
-      }
-    });
-
-    //coupon
     var q = new Date();
     var m = q.getMonth();
     var d = q.getDay();
     var y = q.getFullYear();
 
     var date = new Date(y, m, d);
-    const snapshotcoupon = await Firebase.Coupons.get();
     let couponlist = [];
-    snapshotcoupon.docs.map((doc) => {
-      if (doc.data().isActive === 1) {
-        var mydate = new Date(doc.data().date.toString());
+    couponsnapshot.map((coupon) => {
+      var mydate = new Date(coupon.date.toString());
 
-        if (mydate >= date) {
-          couponlist.push({ id: doc.id, ...doc.data() });
-        }
+      if (mydate >= date) {
+        couponlist.push(coupon);
+      }
+    });
+    const obj = {
+      field: "status",
+      operation: "==",
+      value: "accepted",
+      field2: "instagram",
+      operation2: "!=",
+      value2: {},
+    };
+    let influencerlist = [];
+    let snapshotInf = await customFunction.filterlvl2AndLimit(0, obj, 50);
+
+    snapshotInf.map((influencer) => {
+      if (influencer.instagram?.followers > 10000) {
+        influencerlist.push(influencer);
       }
     });
 
-    logging.end();
+    let isMember = false;
+    let status = "new";
+    if (req.body.id != null || req.body.id != undefined) {
+      let flag = 1;
+
+      if (flag) {
+        let snapshotInfCurrent = await customFunction.fetchSingleData(
+          0,
+          req.body.id
+        );
+        if (snapshotInfCurrent !== undefined) {
+          isMember = snapshotInfCurrent.pinkskymember.isMember;
+          status = snapshotInfCurrent.status;
+          flag = 0;
+        }
+      }
+
+      if (flag) {
+        let snapshotNonInfluencer = await customFunction.fetchSingleData(
+          1,
+          req.body.id
+        );
+
+        if (snapshotNonInfluencer !== undefined) {
+          isMember = snapshotNonInfluencer.pinkskymember.isMember;
+          flag = 0;
+        }
+      }
+
+      if (flag) {
+        let snapshotBrand = await customFunction.fetchSingleData(
+          2,
+          req.body.id
+        );
+        if (snapshotBrand !== undefined) {
+          isMember = snapshotBrand.pinkskymember.isMember;
+          status = snapshotBrand.status;
+          flag = 0;
+        }
+      }
+    }
+
     res.status(200).json({
       isMember: isMember,
       status: status,
-      // gallerylist: gallery
-      //   .sort((a, b) => b.updatedDate - a.updatedDate)
-      //   .slice(0, 9),
-      // exhibitiongallerylist: exhibitiongallery.sort(
-      //   (a, b) => b.updatedDate - a.updatedDate
-      // ),
       campaignlist: campaignlist
         .sort((a, b) => b.createdDate - a.createdDate)
         .slice(0, 6),
@@ -2147,10 +2139,8 @@ app.post("/api/home", async (req, res) => {
       message: "Fetched Home",
     });
   } catch (error) {
-    logging.write(new Date() + " - home ❌ - " + error + " \n");
     console.log(new Date() + " - home ❌ - " + error + " \n");
 
-    logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -3021,9 +3011,9 @@ app.post("/api/influencer/filter", async (req, res) => {
     snapshot.docs.map((doc) => {
       //console.log(doc.id);
       // if (doc.data().status === "accepted") {
-        list.push({ id: doc.id, ...doc.data() });
+      list.push({ id: doc.id, ...doc.data() });
       // } else {
-        //nothing
+      //nothing
       // }
     });
 
@@ -5813,13 +5803,20 @@ app.put("/api/influencerbrand/update", async (req, res) => {
     const data = req.body;
     console.log("Data ", data);
     if (data.type === "influencer") {
-      const snapshot = await Firebase.Influencer.get();
-      snapshot.docs().map(async (item) => {
-        if (item.data().email === data.email) {
-          await Firebase.Influencer.doc(item.id).update({
-            password: data.password,
-          });
-        }
+      // const snapshot = await Firebase.Influencer.get();
+      // snapshot.docs().map(async (item) => {
+      //   if (item.data().email === data.email) {
+
+      //   }
+      // });
+      const obj = {
+        field: "email",
+        operation: "==",
+        value: data.email,
+      };
+      const snapshot = await customFunction.filteredData(0, obj);
+      await Firebase.Influencer.doc(snapshot[0].id).update({
+        password: data.password,
       });
     } else if (data.type === "noninfluencer") {
       const snapshot = await Firebase.NonInfluencer.get();
@@ -6405,13 +6402,20 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           }
           Firebase.Influencer.add(influencerSchema);
           setTimeout(async () => {
-            let influencerArr = [];
-            const snapshot = await Firebase.Influencer.get();
-            snapshot.docs.map((doc) => {
-              if (doc.data().email === createUser.email) {
-                influencerArr.push({ id: doc.id, ...doc.data() });
-              }
-            });
+            // let influencerArr = [];
+            // const snapshot = await Firebase.Influencer.get();
+            // snapshot.docs.map((doc) => {
+            //   if (doc.data().email === createUser.email) {
+            //     influencerArr.push({ id: doc.id, ...doc.data() });
+            //   }
+            // });
+            const obj = {
+              field: "email",
+              operation: "==",
+              value: createUser.email,
+            };
+            let influencerArr = await customFunction.filteredData(0, obj);
+
             if (
               influencerData.isNonInfluencer.uuid.toString()?.length > 2 &&
               influencerSchema.pinkskymember.isMember === true

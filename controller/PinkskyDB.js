@@ -9,7 +9,6 @@ module.exports = class PinkskyDB {
     return getFilteredArray;
   }
   async filterlvl2(type, field, operation, value, field2, operation2, value2) {
-    console.log(field, operation, value, field2, operation2, value2);
     const snpashot = await type
       .where(field, operation, value)
       .where(field2, operation2, value2)
@@ -21,7 +20,6 @@ module.exports = class PinkskyDB {
 
     return getFilteredArray;
   }
-
   async orderBy(type, field, operation, lim) {
     let snapshot = await type.orderBy(field, operation);
     if (lim) {
@@ -42,5 +40,30 @@ module.exports = class PinkskyDB {
       getAllArray.push({ id: doc.id, ...doc.data() });
     });
     return getAllArray;
+  }
+  async filterlvl2AndLimit(
+    type,
+    field,
+    operation,
+    value,
+    field2,
+    operation2,
+    value2,
+    lim
+  ) {
+    let snapshot = await type
+      .where(field, operation, value)
+      .where(field2, operation2, value2);
+    if (lim) {
+      snapshot = await snapshot.limit(lim).get();
+    } else {
+      snapshot = await snapshot.get();
+    }
+    let getFilteredArray = [];
+    snapshot.docs.map((doc) => {
+      getFilteredArray.push({ id: doc.id, ...doc.data() });
+    });
+
+    return getFilteredArray;
   }
 };
