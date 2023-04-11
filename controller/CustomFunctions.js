@@ -231,64 +231,71 @@ exports.adminPinksky = async (trigger) => {
       operation: "==",
       value: "new",
     };
+
     let brandlist = await this.filteredDataLvl2(2, brandobj);
+
     let brandlistnew = await this.filteredData(2, brandobjnew);
-
-    brandlist.map((brand) => {
-      let im = brand.influencermapping.some((s) => s.status == "new");
-      if (im) {
-        brand.influencermapping.map(async (influencermapping) => {
-          if (influencermapping.status == "new") {
-            if (
-              influencerDataCheck.length > 0 &&
-              influencerDataCheck.some((s) =>
-                s.id === undefined
-                  ? true
-                  : s.id !== influencermapping.influencerId
-              )
-            ) {
-              influencerDataCheck.push(influencermapping.influencerId);
-            } else {
-              influencerDataCheck.push(influencermapping.influencerId);
+    if (brandlist.length > 0) {
+      brandlist.map((brand) => {
+        console.log("here ", brand.id);
+        let im = brand.influencermapping.some((s) => s.status == "new");
+        console.log(brand.id);
+        if (im) {
+          brand.influencermapping.map(async (influencermapping) => {
+            if (influencermapping.status == "new") {
+              if (
+                influencerDataCheck.length > 0 &&
+                influencerDataCheck.some((s) =>
+                  s.id === undefined
+                    ? true
+                    : s.id !== influencermapping.influencerId
+                )
+              ) {
+                influencerDataCheck.push(influencermapping.influencerId);
+              } else {
+                influencerDataCheck.push(influencermapping.influencerId);
+              }
             }
-          }
-        });
-      }
-    });
-    const influencerBrandMappingObj = {
-      field: Firebase.docid,
-      operation: "in",
-      value: [...new Set(influencerDataCheck)],
-    };
-    // let influencer = await Firebase.Influencer.getAll(...influencerDataCheck);
-    let influencer = await this.filteredData(0, influencerBrandMappingObj);
+          });
+        }
+      });
 
-    brandlist.map((brand, index) => {
-      let im = brand.influencermapping.some((s) => s.status == "new");
-      if (im) {
-        brand.influencermapping.map(async (influencermapping, index2) => {
-          if (influencermapping.status == "new") {
-            const influencerdata = influencer.filter(
-              (f) => f.id == influencermapping.influencerId
-            )[0];
-            brandlist[index].influencermapping[index2].name =
-              influencerdata.name;
-            brandlist[index].influencermapping[index2].surname =
-              influencerdata.surname;
-            brandlist[index].influencermapping[index2].phonenumber =
-              influencerdata.phonenumber;
-            brandlist[index].influencermapping[index2].whatsappnumber =
-              influencerdata.whatsappnumber;
-            brandlist[index].influencermapping[index2].instagramurl =
-              influencerdata.instagramurl;
-            brandlist[index].influencermapping[index2].email =
-              influencerdata.email;
-            brandlist[index].influencermapping[index2].category =
-              influencerdata.category;
-          }
-        });
-      }
-    });
+      const influencerBrandMappingObj = {
+        field: Firebase.docid,
+        operation: "in",
+        value: [...new Set(influencerDataCheck)],
+      };
+      // let influencer = await Firebase.Influencer.getAll(...influencerDataCheck);
+      let influencer = await this.filteredData(0, influencerBrandMappingObj);
+
+      brandlist.map((brand, index) => {
+        let im = brand.influencermapping.some((s) => s.status == "new");
+        if (im) {
+          brand.influencermapping.map(async (influencermapping, index2) => {
+            if (influencermapping.status == "new") {
+              const influencerdata = influencer.filter(
+                (f) => f.id == influencermapping.influencerId
+              )[0];
+              brandlist[index].influencermapping[index2].name =
+                influencerdata.name;
+              brandlist[index].influencermapping[index2].surname =
+                influencerdata.surname;
+              brandlist[index].influencermapping[index2].phonenumber =
+                influencerdata.phonenumber;
+              brandlist[index].influencermapping[index2].whatsappnumber =
+                influencerdata.whatsappnumber;
+              brandlist[index].influencermapping[index2].instagramurl =
+                influencerdata.instagramurl;
+              brandlist[index].influencermapping[index2].email =
+                influencerdata.email;
+              brandlist[index].influencermapping[index2].category =
+                influencerdata.category;
+            }
+          });
+        }
+      });
+    }
+
     return [...brandlist, ...brandlistnew];
   }
 };
