@@ -3004,17 +3004,12 @@ app.post("/api/influencer/filter", async (req, res) => {
 
   try {
     let data = req.body;
-
+    
     const snapshot = await Firebase.Influencer.get();
     let list = [];
 
     snapshot.docs.map((doc) => {
-      //console.log(doc.id);
-      // if (doc.data().status === "accepted") {
       list.push({ id: doc.id, ...doc.data() });
-      // } else {
-      //nothing
-      // }
     });
 
     let namesorted;
