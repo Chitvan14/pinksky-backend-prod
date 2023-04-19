@@ -1060,7 +1060,7 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
             isNonInfluencer: { type: "N", uuid: "", id: "" },
             category: [...categoryFinding],
           };
-          console.log("🟡 " + addvalue.email + " start registring...");
+          console.log("🟡 " + addvalue.phonenumber + " start registring...");
           await axios
             .post(
               environments.BASE_URL +
@@ -1073,22 +1073,45 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
             .then(async (response) => {
               console.log(
                 "🟢 " +
-                  addvalue.email +
+                  addvalue.phonenumber +
                   " successfully registered with display name " +
                   response.data.message.displayName
               );
             })
-            .catch((error) => {
+            .catch(async (error) => {
               console.log(
-                "🔴 " +
-                  addvalue.email +
-                  " got an error with message " +
-                  error.response.data.message
+                "🔵 " + addvalue.phonenumber + " re-starting registring..."
               );
-              status.push({
-                user: addvalue.email,
-                error: error.response.data.message,
-              });
+
+              await axios
+                .post(
+                  environments.BASE_URL +
+                    "v2/influencer/createwithoutinstagram?isProfileCompleted=0",
+                  {
+                    ...addvalue,
+                    flagSignOut: 0,
+                  }
+                )
+                .then(async (response) => {
+                  console.log(
+                    "🟢 " +
+                      addvalue.phonenumber +
+                      " successfully registered with display name " +
+                      response.data.message.displayName
+                  );
+                })
+                .catch((nestederror) => {
+                  console.log(
+                    "🔴 " +
+                      addvalue.phonenumber +
+                      " got an error with message " +
+                      nestederror.response.data.message
+                  );
+                  status.push({
+                    user: addvalue.phonenumber,
+                    error: nestederror.response.data.message,
+                  });
+                });
             });
         } else {
           status.push({
@@ -3004,12 +3027,14 @@ app.post("/api/influencer/filter", async (req, res) => {
 
   try {
     let data = req.body;
-    
+
     const snapshot = await Firebase.Influencer.get();
     let list = [];
 
     snapshot.docs.map((doc) => {
-      list.push({ id: doc.id, ...doc.data() });
+      if (doc.data().isActive == 1 && doc.data().status == "accepted") {
+        list.push({ id: doc.id, ...doc.data() });
+      }
     });
 
     let namesorted;
@@ -3128,6 +3153,136 @@ app.post("/api/influencer/filter", async (req, res) => {
     console.log(new Date() + " - influencer/filter ❌ - " + error + " \n");
 
     logging.end();
+    res.status(500).json({ message: error });
+  }
+});
+
+app.post("/api/influencer/adminfilter", async (req, res) => {
+  console.log(new Date() + " - influencer/adminfilter POST 🚀 \n");
+
+  try {
+    let data = req.body;
+
+    const snapshot = await Firebase.Influencer.get();
+    let list = [];
+
+    snapshot.docs.map((doc) => {
+      list.push({ id: doc.id, ...doc.data() });
+    });
+
+    let namesorted;
+    let agesorted;
+    let gendersorted;
+    let followersorted;
+    let categorysorted;
+    let citysorted;
+
+    if (
+      data.inputValue.toLowerCase() ===
+      environments.ADMIN_INFLUENCER_FILTER_TEXT
+    ) {
+      namesorted = list;
+    } else if (data.inputValue !== "") {
+      namesorted = list.filter((item) => {
+        if (
+          item.name
+            .toLowerCase()
+            .indexOf(data.inputValue.toString().toLowerCase()) !== -1
+        ) {
+          return item;
+        }
+      });
+    } else {
+      namesorted = list;
+    }
+    if (data.radioAgeValue !== "All") {
+      agesorted = namesorted.filter((item) => {
+        const ageDifMs = Date.now() - new Date(item.dob).getTime();
+        const ageDate = new Date(ageDifMs);
+        const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+
+        if (data.radioAgeValue === "lessthan20") {
+          return age < 20;
+        } else if (data.radioAgeValue === "lessthan25") {
+          return age < 25;
+        } else if (data.radioAgeValue === "lessthan30") {
+          return age < 30;
+        } else if (data.radioAgeValue === "greaterthan30") {
+          return age > 30;
+        }
+      });
+    } else {
+      agesorted = namesorted;
+    }
+    if (data.radioGenderValue !== "All") {
+      gendersorted = agesorted.filter((item) => {
+        if (data.radioGenderValue === "Male") {
+          return item.gender === "Male";
+        } else if (data.radioGenderValue === "Female") {
+          return item.gender === "Female";
+        } else if (data.radioGenderValue === "Other") {
+          return item.gender === "Other";
+        }
+      });
+    } else {
+      gendersorted = agesorted;
+    }
+    if (data.radioFollowerValue !== "All") {
+      followersorted = gendersorted.filter((item) => {
+        if (data.radioFollowerValue === "greaterthan1M") {
+          return item.instagram?.followers > 1000000;
+        } else if (data.radioFollowerValue === "greaterthan100K") {
+          return item.instagram?.followers > 100000;
+        } else if (data.radioFollowerValue === "greaterthan20K") {
+          return item.instagram?.followers > 20000;
+        } else if (data.radioFollowerValue === "greaterthan1000") {
+          return item.instagram?.followers > 1000;
+        } else if (data.radioFollowerValue === "lessthan1000") {
+          return item.instagram?.followers <= 1000;
+        }
+      });
+    } else {
+      followersorted = gendersorted;
+    }
+    let selectedCategory = [];
+    let mySetCategory = new Set();
+    data.radioInfluencerValue
+      .filter((item) => item.status === true)
+      .map((categ) => selectedCategory.push(categ.label.split(" ")[0]));
+    if (selectedCategory[0] !== "All") {
+      followersorted.map((element) => {
+        element.category.filter((nesele) => {
+          if (Object.values(nesele).some((r) => selectedCategory.includes(r))) {
+            mySetCategory.add(element);
+          }
+        });
+      });
+      categorysorted = Array.from(mySetCategory);
+    } else {
+      categorysorted = followersorted;
+    }
+
+    let selectedCity = [];
+    let mySetCity = new Set();
+    data.radioCityValue
+      .filter((item) => item.status === true)
+      .map((categ) => selectedCity.push(categ.value));
+    if (selectedCity[0] !== "All") {
+      categorysorted.map((element) => {
+        if (Object.values(element).some((r) => selectedCity.includes(r))) {
+          mySetCity.add(element);
+        }
+      });
+      citysorted = Array.from(mySetCity);
+    } else {
+      citysorted = categorysorted;
+    }
+    //console.log("citysorted length", citysorted?.length);
+
+    res.status(200).json({ data: citysorted, message: "Filtered Influencer" });
+  } catch (error) {
+    console.log(new Date() + " - influencer/adminfilter ❌ - " + error + " \n");
+
     res.status(500).json({ message: error });
   }
 });
@@ -6521,6 +6676,126 @@ Thanks for choosing Pinksky 💕 `,
       }
 
       console.log(new Date() + " - v2/influencer/create ❌ - " + error + " \n");
+
+      logging.end();
+      res.status(500).json({ message: error.message });
+    }
+  }
+});
+app.post("/api/v2/influencer/createwithoutinstagram", async (req, res) => {
+  console.log(
+    new Date() + " - v2/influencer/createwithoutinstagram POST 🚀 \n"
+  );
+
+  let userResponse = { uid: "" };
+
+  let influencerData = req.body;
+  let isProfileCompletedQuery = req.query.isProfileCompleted;
+
+  const createUser = {
+    email: influencerData.email,
+    password: influencerData.password,
+    name:
+      isProfileCompletedQuery +
+      "_Influencer_" +
+      influencerData.name.replace(/\s/g, "") +
+      "_" +
+      influencerData.surname.replace(/\s/g, ""),
+  };
+  try {
+    if (createUser.email != undefined && createUser.password != undefined) {
+      userResponse = await Firebase.admin.auth().createUser({
+        email: createUser.email,
+        password: createUser.password,
+        emailVerified: false,
+        disabled: false,
+        displayName: createUser.name,
+      });
+
+      if (userResponse.email !== undefined && userResponse.uid !== undefined) {
+        let influencerSchema = null;
+
+        influencerSchema = {
+          ...influencerData,
+          isProfileCompleted: Math.floor(isProfileCompletedQuery),
+          createdDate: new Date(),
+          updatedDate: new Date(),
+          status: "new",
+          isActive: 0,
+          uuid: userResponse?.uid,
+          message: [
+            {
+              statusID: "100",
+              campaignID: "",
+              campaignName: "",
+            },
+          ],
+        };
+
+        await Firebase.Influencer.add(influencerSchema);
+        const obj = {
+          field: "email",
+          operation: "==",
+          value: createUser.email,
+        };
+        let influencerArr = await customFunction.filteredData(0, obj);
+
+        setTimeout(() => {
+          res.status(200).json({
+            message: {
+              displayName: createUser.name,
+              id: influencerArr[0].id,
+              email: influencerArr[0].email,
+              type: "Posted Influencer",
+              uuid: userResponse?.uid,
+              member: false,
+              status: "new",
+            },
+          });
+        }, 1000);
+      }
+    } else {
+      console.log(
+        new Date() +
+          " - v2/influencer/createwithoutinstagram ❌ - " +
+          error +
+          " \n"
+      );
+
+      logging.end();
+      res.status(500).json({
+        message:
+          "Something Went wrong. User response is not defined. Please try again.",
+      });
+    }
+    //}
+  } catch (error) {
+    if (userResponse?.uid === "") {
+      console.log(
+        new Date() +
+          " - v2/influencer/createwithoutinstagram ❌ - " +
+          error +
+          " \n"
+      );
+
+      logging.end();
+      res.status(402).json({
+        message:
+          createUser.email +
+          " is already an pinksky user. Try sigging up with another user id.",
+      });
+    } else {
+      if (influencerData.isNonInfluencer.uuid?.length > 2) {
+      } else {
+        await Firebase.admin.auth().deleteUser(userResponse?.uid);
+      }
+
+      console.log(
+        new Date() +
+          " - v2/influencer/createwithoutinstagram ❌ - " +
+          error +
+          " \n"
+      );
 
       logging.end();
       res.status(500).json({ message: error.message });
