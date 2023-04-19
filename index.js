@@ -1060,7 +1060,7 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
             isNonInfluencer: { type: "N", uuid: "", id: "" },
             category: [...categoryFinding],
           };
-          console.log("🟡 " + addvalue.email + " start registring...");
+          console.log("🟡 " + addvalue.phonenumber + " start registring...");
           await axios
             .post(
               environments.BASE_URL +
@@ -1073,22 +1073,45 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
             .then(async (response) => {
               console.log(
                 "🟢 " +
-                  addvalue.email +
+                  addvalue.phonenumber +
                   " successfully registered with display name " +
                   response.data.message.displayName
               );
             })
-            .catch((error) => {
+            .catch(async (error) => {
               console.log(
-                "🔴 " +
-                  addvalue.email +
-                  " got an error with message " +
-                  error.response.data.message
+                "🔵 " + addvalue.phonenumber + " re-starting registring..."
               );
-              status.push({
-                user: addvalue.email,
-                error: error.response.data.message,
-              });
+
+              await axios
+                .post(
+                  environments.BASE_URL +
+                    "v2/influencer/createwithoutinstagram?isProfileCompleted=0",
+                  {
+                    ...addvalue,
+                    flagSignOut: 0,
+                  }
+                )
+                .then(async (response) => {
+                  console.log(
+                    "🟢 " +
+                      addvalue.phonenumber +
+                      " successfully registered with display name " +
+                      response.data.message.displayName
+                  );
+                })
+                .catch((nestederror) => {
+                  console.log(
+                    "🔴 " +
+                      addvalue.phonenumber +
+                      " got an error with message " +
+                      nestederror.response.data.message
+                  );
+                  status.push({
+                    user: addvalue.phonenumber,
+                    error: nestederror.response.data.message,
+                  });
+                });
             });
         } else {
           status.push({
@@ -3004,12 +3027,14 @@ app.post("/api/influencer/filter", async (req, res) => {
 
   try {
     let data = req.body;
-    
+
     const snapshot = await Firebase.Influencer.get();
     let list = [];
 
     snapshot.docs.map((doc) => {
-      list.push({ id: doc.id, ...doc.data() });
+      if (doc.data().isActive == 1) {
+        list.push({ id: doc.id, ...doc.data() });
+      }
     });
 
     let namesorted;
@@ -6521,6 +6546,126 @@ Thanks for choosing Pinksky 💕 `,
       }
 
       console.log(new Date() + " - v2/influencer/create ❌ - " + error + " \n");
+
+      logging.end();
+      res.status(500).json({ message: error.message });
+    }
+  }
+});
+app.post("/api/v2/influencer/createwithoutinstagram", async (req, res) => {
+  console.log(
+    new Date() + " - v2/influencer/createwithoutinstagram POST 🚀 \n"
+  );
+
+  let userResponse = { uid: "" };
+
+  let influencerData = req.body;
+  let isProfileCompletedQuery = req.query.isProfileCompleted;
+
+  const createUser = {
+    email: influencerData.email,
+    password: influencerData.password,
+    name:
+      isProfileCompletedQuery +
+      "_Influencer_" +
+      influencerData.name.replace(/\s/g, "") +
+      "_" +
+      influencerData.surname.replace(/\s/g, ""),
+  };
+  try {
+    if (createUser.email != undefined && createUser.password != undefined) {
+      userResponse = await Firebase.admin.auth().createUser({
+        email: createUser.email,
+        password: createUser.password,
+        emailVerified: false,
+        disabled: false,
+        displayName: createUser.name,
+      });
+
+      if (userResponse.email !== undefined && userResponse.uid !== undefined) {
+        let influencerSchema = null;
+
+        influencerSchema = {
+          ...influencerData,
+          isProfileCompleted: Math.floor(isProfileCompletedQuery),
+          createdDate: new Date(),
+          updatedDate: new Date(),
+          status: "new",
+          isActive: 0,
+          uuid: userResponse?.uid,
+          message: [
+            {
+              statusID: "100",
+              campaignID: "",
+              campaignName: "",
+            },
+          ],
+        };
+
+        await Firebase.Influencer.add(influencerSchema);
+        const obj = {
+          field: "email",
+          operation: "==",
+          value: createUser.email,
+        };
+        let influencerArr = await customFunction.filteredData(0, obj);
+
+        setTimeout(() => {
+          res.status(200).json({
+            message: {
+              displayName: createUser.name,
+              id: influencerArr[0].id,
+              email: influencerArr[0].email,
+              type: "Posted Influencer",
+              uuid: userResponse?.uid,
+              member: false,
+              status: "new",
+            },
+          });
+        }, 1000);
+      }
+    } else {
+      console.log(
+        new Date() +
+          " - v2/influencer/createwithoutinstagram ❌ - " +
+          error +
+          " \n"
+      );
+
+      logging.end();
+      res.status(500).json({
+        message:
+          "Something Went wrong. User response is not defined. Please try again.",
+      });
+    }
+    //}
+  } catch (error) {
+    if (userResponse?.uid === "") {
+      console.log(
+        new Date() +
+          " - v2/influencer/createwithoutinstagram ❌ - " +
+          error +
+          " \n"
+      );
+
+      logging.end();
+      res.status(402).json({
+        message:
+          createUser.email +
+          " is already an pinksky user. Try sigging up with another user id.",
+      });
+    } else {
+      if (influencerData.isNonInfluencer.uuid?.length > 2) {
+      } else {
+        await Firebase.admin.auth().deleteUser(userResponse?.uid);
+      }
+
+      console.log(
+        new Date() +
+          " - v2/influencer/createwithoutinstagram ❌ - " +
+          error +
+          " \n"
+      );
 
       logging.end();
       res.status(500).json({ message: error.message });
