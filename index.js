@@ -720,6 +720,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
   try {
     let isValid = 1;
     //Influencer
+    //filter by db inserted 
     const snapshot = await Firebase.Influencer.get();
     let influencerData = [];
     snapshot.docs.map(async (doc) => {
@@ -738,6 +739,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
           name: doc.data().name,
           phonenumber: doc.data().phonenumber,
           surname: doc.data().surname,
+          dob: doc.data().dob,
           whatsappnumber: doc.data().whatsappnumber,
           category: category?.length > 0 ? category.toString() : [],
         });
@@ -1114,6 +1116,11 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
                 });
             });
         } else {
+          console.log(
+            "🔴 " +
+              "User already there in system with whatsapp number " +
+              user.whatsappnumber
+          );
           status.push({
             user: user.email,
             error:
@@ -3162,7 +3169,31 @@ app.post("/api/influencer/adminfilter", async (req, res) => {
 
   try {
     let data = req.body;
+    //data cleaning
+    // console.log({
+    //   radioInfluencerValue: data.radioInfluencerValue.filter(
+    //     (f) => f.status == true
+    //   ),
+    //   radioFollowerValue: data.radioFollowerValue,
+    //   radioAgeValue: data.radioAgeValue,
+    //   radioGenderValue: data.radioGenderValue,
+    //   radioCityValue: data.radioCityValue.filter((f) => f.status == true),
+    // });
+    // let cityContain = [];
+    // data.radioCityValue.filter((f) => f.status == true).map(m => {
 
+    //   m.value != "All" && cityContain.push(m.value);
+    // })
+    // let obj = {
+    //   field: "city",
+    //   operation: "array-contains-any",
+    //   value: cityContain,
+    //   field2: "",
+    //   operation2: "",
+    //   value2: "",
+    // };
+    // console.log(obj);
+    //customFunction.filteredDataLvl2(0, obj);
     const snapshot = await Firebase.Influencer.get();
     let list = [];
 
