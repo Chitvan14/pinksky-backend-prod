@@ -720,7 +720,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
   try {
     let isValid = 1;
     //Influencer
-    //filter by db inserted 
+    //filter by db inserted
     const snapshot = await Firebase.Influencer.get();
     let influencerData = [];
     snapshot.docs.map(async (doc) => {
@@ -3169,119 +3169,49 @@ app.post("/api/influencer/adminfilter", async (req, res) => {
 
   try {
     let data = req.body;
-    //data cleaning
-    // console.log({
-    //   radioInfluencerValue: data.radioInfluencerValue.filter(
-    //     (f) => f.status == true
-    //   ),
-    //   radioFollowerValue: data.radioFollowerValue,
-    //   radioAgeValue: data.radioAgeValue,
-    //   radioGenderValue: data.radioGenderValue,
-    //   radioCityValue: data.radioCityValue.filter((f) => f.status == true),
-    // });
-    // let cityContain = [];
-    // data.radioCityValue.filter((f) => f.status == true).map(m => {
+    //console.log(data);
+    let obj = null;
+    let filteredarray = [];
+    let cityNotAll = data.city.filter((f) => f.id !== 0);
 
-    //   m.value != "All" && cityContain.push(m.value);
-    // })
-    // let obj = {
-    //   field: "city",
-    //   operation: "array-contains-any",
-    //   value: cityContain,
-    //   field2: "",
-    //   operation2: "",
-    //   value2: "",
-    // };
-    // console.log(obj);
-    //customFunction.filteredDataLvl2(0, obj);
-    const snapshot = await Firebase.Influencer.get();
-    let list = [];
+    if (cityNotAll.length > 0 && data.gender !== "All") {
+      obj = {
+        field: "city",
+        operation: "in",
+        value: [
+          ...cityNotAll.map((m) => {
+            return m.value;
+          }),
+        ],
+        field2: "gender",
+        operation2: "==",
+        value2: data.gender,
+      };
+      filteredarray = await customFunction.filteredDataLvl2(0, obj);
+    } else if (cityNotAll.length > 0) {
+      obj = {
+        field: "city",
+        operation: "in",
+        value: [
+          ...cityNotAll.map((m) => {
+            return m.value;
+          }),
+        ],
+      };
+      filteredarray = await customFunction.filteredData(0, obj);
+    }
 
-    snapshot.docs.map((doc) => {
-      list.push({ id: doc.id, ...doc.data() });
-    });
-
-    let namesorted;
-    let agesorted;
-    let gendersorted;
-    let followersorted;
     let categorysorted;
-    let citysorted;
+    let agesorted;
+    let followersorted;
 
-    if (
-      data.inputValue.toLowerCase() ===
-      environments.ADMIN_INFLUENCER_FILTER_TEXT
-    ) {
-      namesorted = list;
-    } else if (data.inputValue !== "") {
-      namesorted = list.filter((item) => {
-        if (
-          item.name
-            .toLowerCase()
-            .indexOf(data.inputValue.toString().toLowerCase()) !== -1
-        ) {
-          return item;
-        }
-      });
-    } else {
-      namesorted = list;
-    }
-    if (data.radioAgeValue !== "All") {
-      agesorted = namesorted.filter((item) => {
-        const ageDifMs = Date.now() - new Date(item.dob).getTime();
-        const ageDate = new Date(ageDifMs);
-        const age = Math.abs(ageDate.getUTCFullYear() - 1970);
-
-        if (data.radioAgeValue === "lessthan20") {
-          return age < 20;
-        } else if (data.radioAgeValue === "lessthan25") {
-          return age < 25;
-        } else if (data.radioAgeValue === "lessthan30") {
-          return age < 30;
-        } else if (data.radioAgeValue === "greaterthan30") {
-          return age > 30;
-        }
-      });
-    } else {
-      agesorted = namesorted;
-    }
-    if (data.radioGenderValue !== "All") {
-      gendersorted = agesorted.filter((item) => {
-        if (data.radioGenderValue === "Male") {
-          return item.gender === "Male";
-        } else if (data.radioGenderValue === "Female") {
-          return item.gender === "Female";
-        } else if (data.radioGenderValue === "Other") {
-          return item.gender === "Other";
-        }
-      });
-    } else {
-      gendersorted = agesorted;
-    }
-    if (data.radioFollowerValue !== "All") {
-      followersorted = gendersorted.filter((item) => {
-        if (data.radioFollowerValue === "greaterthan1M") {
-          return item.instagram?.followers > 1000000;
-        } else if (data.radioFollowerValue === "greaterthan100K") {
-          return item.instagram?.followers > 100000;
-        } else if (data.radioFollowerValue === "greaterthan20K") {
-          return item.instagram?.followers > 20000;
-        } else if (data.radioFollowerValue === "greaterthan1000") {
-          return item.instagram?.followers > 1000;
-        } else if (data.radioFollowerValue === "lessthan1000") {
-          return item.instagram?.followers <= 1000;
-        }
-      });
-    } else {
-      followersorted = gendersorted;
-    }
     let selectedCategory = [];
     let mySetCategory = new Set();
-    data.radioInfluencerValue
+    data.influencerValue
       .filter((item) => item.status === true)
       .map((categ) => selectedCategory.push(categ.label.split(" ")[0]));
     if (selectedCategory[0] !== "All") {
-      followersorted.map((element) => {
+      filteredarray.map((element) => {
         element.category.filter((nesele) => {
           if (Object.values(nesele).some((r) => selectedCategory.includes(r))) {
             mySetCategory.add(element);
@@ -3290,27 +3220,38 @@ app.post("/api/influencer/adminfilter", async (req, res) => {
       });
       categorysorted = Array.from(mySetCategory);
     } else {
-      categorysorted = followersorted;
+      categorysorted = filteredarray;
     }
-
-    let selectedCity = [];
-    let mySetCity = new Set();
-    data.radioCityValue
-      .filter((item) => item.status === true)
-      .map((categ) => selectedCity.push(categ.value));
-    if (selectedCity[0] !== "All") {
-      categorysorted.map((element) => {
-        if (Object.values(element).some((r) => selectedCity.includes(r))) {
-          mySetCity.add(element);
-        }
-      });
-      citysorted = Array.from(mySetCity);
+    if (
+      data.followersTo === "0" ||
+      data.followersFrom === "" ||
+      (data.followersFrom === "" && data.followersTo === "") ||
+      (data.followersFrom === "0" && data.followersTo === "0")
+    ) {
+      followersorted = categorysorted;
     } else {
-      citysorted = categorysorted;
+      if (data.followersFrom !== "" && data.followersTo === "") {
+        data.followersTo = parseInt(data.followersFrom) + 5000;
+      }
+      followersorted = categorysorted.filter(
+        (item) =>
+          item.instagram?.followers !== undefined &&
+          parseInt(item.instagram?.followers) >= parseInt(data.followersFrom) &&
+          parseInt(item.instagram?.followers) <= parseInt(data.followersTo)
+      );
     }
-    //console.log("citysorted length", citysorted?.length);
+    if (data.other === "Upcoming Birthday") {
+      const m = new Date().getMonth();
+      agesorted = followersorted.filter(
+        (item) =>
+          item.dob.split("-")[1] != undefined &&
+          item.dob.split("-")[1].includes(m.toString())
+      );
+    } else {
+      agesorted = followersorted;
+    }
 
-    res.status(200).json({ data: citysorted, message: "Filtered Influencer" });
+    res.status(200).json({ data: agesorted, message: "Filtered Influencer" });
   } catch (error) {
     console.log(new Date() + " - influencer/adminfilter ❌ - " + error + " \n");
 
