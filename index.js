@@ -1058,7 +1058,7 @@ app.get("/api/spreadsheettofirebase", async (req, res) => {
             dob: "",
             address: "",
             isNonInfluencer: "",
-            city: "",
+            city: "Chandigarh",
             isNonInfluencer: { type: "N", uuid: "", id: "" },
             category: [...categoryFinding],
           };
@@ -6404,18 +6404,21 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           };
           let phoneWhatsappCheck = await customFunction.filteredData(0, obj);
           //yes - delete id and data from influencer list
+
           if (phoneWhatsappCheck.length > 0) {
             //delete account + data
-            console.log(phoneWhatsappCheck[0]);
+            // console.log(phoneWhatsappCheck[0]);
             await Firebase.admin.auth().deleteUser(phoneWhatsappCheck[0]?.uuid);
             await Firebase.Influencer.doc(phoneWhatsappCheck[0]?.id).delete();
           }
           //no - go as going
         }
+
         let instagramInfluencerSchema = null;
         await axios
           .request(options)
           .then(function (response) {
+
             let instadatares = response.data.response.body.data.user;
             if (instadatares.is_private === false) {
               if (instadatares.edge_owner_to_timeline_media.edges?.length > 4) {
@@ -6468,6 +6471,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           });
 
         if (onGoingStatus === true) {
+
           if (influencerData.isNonInfluencer.uuid.toString()?.length > 2) {
             const snapshotNonInfluencer = await Firebase.NonInfluencer.doc(
               influencerData.isNonInfluencer.id.toString()
@@ -6901,7 +6905,7 @@ app.post("/api/v2/brand/create", async (req, res) => {
             //console.log("fileName", fileName);
             let getDownloadURL = "";
             request(options, async (err, resp, body) => {
-              if (resp.statusCode === 200) {
+              if (resp?.statusCode === 200) {
                 //console.log("res.statusCode", resp.statusCode);
                 var bucket = Firebase.admin.storage().bucket();
 
@@ -7253,7 +7257,7 @@ app.post("/api/v2/signin/profileupdating", async (req, res) => {
               //console.log("fileName", fileName);
               let getDownloadURL = "";
               request(options, async (err, resp, body) => {
-                if (resp.statusCode === 200) {
+                if (resp?.statusCode === 200) {
                   //console.log("res.statusCode", resp.statusCode);
                   var bucket = Firebase.admin.storage().bucket();
 
