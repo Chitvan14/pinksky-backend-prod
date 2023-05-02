@@ -58,210 +58,17 @@ app.use(cors());
 // 1. Logging
 
 app.post("/api/testaccount", async (req, res) => {
-  // brandlist.map((bb) => {
-  //   console.log(
-  //     "bb.influencermapping for " + bb.id + " -> ",
-  //     bb.influencermapping
-  //   );
-  // });
-  const influencerlist = await customFunction.adminPinksky("influencerlist");
-  // eventlist.map(item => {
-  //   console.log(item.id);
-  // })
-  console.log(influencerlist);
+  let obj = {
+    field: "dbInserted",
+    operation: "!=",
+    value: "1",
+  };
+  
+  const snapshot = await customFunction.filteredData(0, obj);
+  console.log(snapshot.length);
   res.json({ message: "done" });
-  // const obj = {
-  //   field: "isActive",
-  //   operation: "==",
-  //   value: 1,
-  //   field2: "userCampaignMapping",
-  //   operation2: "!=",
-  //   value2: [],
-  // };
-  // let snapshot = await customFunction.adminPinksky(3, obj);
-  // console.log(snapshot.length);
-
-  // const snapshot = await Firebase.Influencer.doc("zeKoIlcLN8YhdLmj0h4X").get();
-
-  // let influencerData = [];
-  // let influencerDataMessage = [];
-  // let useremail = "";
-  // let username = "";
-
-  //snapshot.docs.map((doc) => {
-  // if (doc.id === data.influencerid) {
-  // useremail = snapshot.data().email;
-  // username = snapshot.data().name;
-  // influencerData.push(...snapshot.data().campaignmapping);
-  // influencerDataMessage.push(...snapshot.data().message);
-  // }
-  //});
-  // let snapshot = await customFunction.fetchSingleData(
-  //   0,
-  //   "zeKoIlcLN8YhdLmj0h4X"
-  // );
-  // snapshotInfl.docs.map((doc) => {
-  //   let localcampaignmapping = [];
-  //   let localeventmapping = [];
-  //    if (doc.data().status === "accepted") {
-  //     if (doc.data().campaignmapping?.length > 0) {
-  //       doc.data().campaignmapping.map((nesitem) => {
-  //         localcampaignmapping.push({
-  //           ...nesitem,
-  //           name:
-  //             rawcampaignlist.filter(
-  //               (fun) => fun.id === nesitem.campaignId
-  //             )[0].name || "",
-  //           category:
-  //             rawcampaignlist.filter(
-  //               (fun) => fun.id === nesitem.campaignId
-  //             )[0].category || [],
-  //         });
-  //       });
-  //     }
-
-  //     if (doc.data().eventmapping?.length > 0) {
-  //       doc.data().eventmapping.map((nesitem) => {
-  //         localeventmapping.push({
-  //           ...nesitem,
-  //           name:
-  //             raweventlist.filter((fun) => fun.id === nesitem.eventId)[0]
-  //               .name || "",
-  //         });
-  //       });
-  //     }
-
-  //     influencerlist.push({
-  //       id: doc.id,
-  //       ...doc.data(),
-  //       campaignmapping: localcampaignmapping,
-  //       eventmapping: localeventmapping,
-  //     });
-  //   }
-  // });
-
-  // let snapshot = null;
-  // var a = await pinkskyDB.filter(
-  //   Firebase.Influencer,
-  //   Firebase.docid,
-  //   "==",
-  //   "abc"
-  // );
-  // // .then((val) => {
-  // //   snapshot = val;
-  // // });
-  // // return snapshot;
-  // console.log(a);
-
-  // const snapshotInfl = await Firebase.Influencer.where(
-  //   Firebase.did,
-  //   "==",
-  //   "zeKoIlcLN8YhdLmj0h4X"
-  // ).get();
-  // //.get();
-  // console.log(snapshotInfl.docs[0].data());
-  // let count = 0;
-  // snapshotInfl.
-  // snapshotInfl.docs.map((doc) => {
-  //   // if (doc.id === req.body.id) {
-  //   // console.log(doc.data());
-  //   console.log(count++);
-  //   //}
-  // });
-  // var val = await customFunction.pinkskyAuth([], 0, "zeKoIlcLN8YhdLmj0h4X");
-  // console.log(val);
-
-  //Request URL: https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key=AIzaSyCqlWc1tzWj4D4cat7VRdY_DVCS2nTbuuY
-  //let url = `https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key=AIzaSyCqlWc1tzWj4D4cat7VRdY_DVCS2nTbuuY`;
-  //oobCode=GJYXPA3yRuzM6dBv9t-vI1TP-X4Aj6Y9KQAhpWN-MZMAAAGGRe4rcw&apiKey=AIzaSyCqlWc1tzWj4D4cat7VRdY_DVCS2nTbuuY
-  // axios
-  //   .post(url, {
-  //     oobCode: "GJYXPA3yRuzM6dBv9t-vI1TP-X4Aj6Y9KQAhpWN-MZMAAAGGRe4rcw",
-  //     newPassword: "Appy@123456",
-  //   })
-  //   .then(async (response) => {
-  //     console.log(response.data);
-  //   })
-  //   .catch((error) => {
-  //     console.log(error);
-  //   });
-
-  // let getUserByUuid = await Firebase.admin
-  //   .auth()
-  //   .generatePasswordResetLink("chitvangarg14@gmail.com");
-  // console.log("getUserByUuid ", getUserByUuid);
-
-  // await Firebase.admin.auth().updateUser(getUserByUuid?.uid, {
-  //   password: createUser.password,
-  //   emailVerified: false,
-  //   disabled: false,
-  //   displayName: createUser.name,
-  // });
-  // await Firebase.firebase.auth().getUserByEmail("chitvangarg14@gmail.com")
-  // .then(function(userRecord) {
-  //   // See the UserRecord reference doc for the contents of userRecord.
-  //   console.log("Successfully fetched user data:", userRecord.toJSON());
-  // })
-  // .catch(function(error) {
-  //   console.log("Error fetching user data:", error);
-  // });
-  //   signInWithEmailAndPassword(userCredential.email, userCredential.password)
-  // .then(loggedUser => {console.log(loggedUser.user?.uid)})
-  // let getUserByUuid = await Firebase.admin
-  // .auth()
-  // .getUser("chitvangarg14@gmail.com");
-  // console.log(getUserByUuid);
-  //influencerData.isNonInfluencer.uuid.toString()
-  // await Firebase.admin.auth().updateUser(getUserByUuid?.uid, {
-  //   password: createUser.password,
-  //   emailVerified: false,
-  //   disabled: false,
-  //   displayName: createUser.name,
-  // });
-  // userResponse = {
-  //   email: influencerData.email,
-  //   uid: getUserByUuid?.uid,
-  // };
-  //const ur = await Firebase.firebase.auth()
-  //const userResponse =
-  // await Firebase.firebase.auth().getUserByEmail("chitvangarg14@gmail.com")
-  // .then(user => {
-  //     console.log(user);
-  // generate id
-  //const resetPasswordID = shortid.generate();
-  // update user ref releated to provided email
-  //ref.child(user.uid).update({ resetPasswordID });
-  // send email to user
-  //email.sendforgotPassword(req.body.email, resetPasswordID, user.uid);
-  //});
-  // user.updateProfile({
-  //   displayName: "Jane Q. User",
-  //   photoURL: "https://example.com/jane-q-user/profile.jpg"
-  // }).then(() => {
-  //   // Update successful
-  //   // ...
-  // }).catch((error) => {
-  //   // An error occurred
-  //   // ...
-  // });
-  // .signInWithEmailAndPassword()
-  // .catch((error) => {
-  //   throw error;
-  // });
-  //console.log(userResponse)
-  // sendMail("registerdetailmail", {
-  //   tomail: environments.EML_USER,
-  //   ccmail: "",
-  //   subjectmail: "Influencer Details | Pinksky",
-  //   text: "Hi"+" <br/>"+" Chitvan Garg",
-  //   href: environments.EML_HREF_WEBSITE,
-  // });
-  // await Firebase.admin
-  //   .auth()
-  //   .generateEmailVerificationLink("gargchitvan99@gmail.com")
-  //   .then((response) => {
-  //   });
 });
+
 // 2. creating mail to send
 const sendMail = (sendType, data) => {
   //console.log("sendMail started 🚀");
@@ -713,7 +520,6 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
 // SPREADSHEET SECTION
 // 1. Sending data from firebase to spreadsheet
 app.post("/api/firebasetospreadsheet", async (req, res) => {
-  logging.write(new Date() + " - firebasetospreadsheet POST 🚀 \n");
   console.log(new Date() + " - firebasetospreadsheet POST 🚀 \n");
   //when user changes its data it will not be updated
   //need to implement this feature
@@ -721,6 +527,12 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     let isValid = 1;
     //Influencer
     //filter by db inserted
+    let obj = {
+      field: "dbInserted",
+      operation: "!=",
+      value: "1",
+    };
+    // const snapshot =await customFunction.filteredData(0,obj);
     const snapshot = await Firebase.Influencer.get();
     let influencerData = [];
     snapshot.docs.map(async (doc) => {
@@ -999,10 +811,8 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
         .json({ message: "Excel Updated", url: environments.SPREADSHEET_URL });
     }
   } catch (err) {
-    logging.write(new Date() + " - firebasetospreadsheet ❌ - " + err + " \n");
     console.log(new Date() + " - firebasetospreadsheet ❌ - " + err + " \n");
 
-    logging.end();
     res.status(500).json(err);
   }
 });
@@ -2747,16 +2557,16 @@ app.post("/api/v2/admin/pinksky", async (req, res) => {
       let brandlist = [];
       let eventlist = [];
       let couponlist = [];
-      let influencerlist = [];
+      // let influencerlist = [];
       if (data.changesTrigger === "campaign") {
         campaignlist = await customFunction.adminPinksky("campaignlist");
       }
       if (data.changesTrigger === "event") {
         eventlist = await customFunction.adminPinksky("eventlist");
       }
-      if (data.changesTrigger === "influencer") {
-        influencerlist = await customFunction.adminPinksky("influencerlist");
-      }
+      // if (data.changesTrigger === "influencer") {
+      //   influencerlist = await customFunction.adminPinksky("influencerlist");
+      // }
       if (data.changesTrigger === "brand") {
         brandlist = await customFunction.adminPinksky("brandlist");
       }
@@ -2765,7 +2575,7 @@ app.post("/api/v2/admin/pinksky", async (req, res) => {
       }
       console.log(couponlist);
       res.status(200).json({
-        influencerlist: influencerlist,
+        // influencerlist: influencerlist,
         campaignlist: campaignlist,
         brandlist: brandlist,
         eventlist: eventlist,
@@ -6418,7 +6228,6 @@ app.post("/api/v2/influencer/create", async (req, res) => {
         await axios
           .request(options)
           .then(function (response) {
-
             let instadatares = response.data.response.body.data.user;
             if (instadatares.is_private === false) {
               if (instadatares.edge_owner_to_timeline_media.edges?.length > 4) {
@@ -6471,7 +6280,6 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           });
 
         if (onGoingStatus === true) {
-
           if (influencerData.isNonInfluencer.uuid.toString()?.length > 2) {
             const snapshotNonInfluencer = await Firebase.NonInfluencer.doc(
               influencerData.isNonInfluencer.id.toString()

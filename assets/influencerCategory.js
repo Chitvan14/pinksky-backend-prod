@@ -29,7 +29,7 @@ exports.influencerCategorySchema = [
   },
   {
     id: 8,
-    value: "MOMInfluencer",
+    value: "Mom",
   },
   {
     id: 9,
