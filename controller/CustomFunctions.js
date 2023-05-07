@@ -83,6 +83,7 @@ exports.adminPinksky = async (trigger) => {
     field: "createdDate",
     operation: "desc",
   };
+  const chunkSize = 10;
   let influencerDataCheck = [];
   if (trigger == "influencerlist") {
     const infobj = {
@@ -101,7 +102,6 @@ exports.adminPinksky = async (trigger) => {
     let campaignlist = await this.orderedData(3, orderobj);
 
     campaignlist.map((campaign) => {
-      //console.log("campaign -> ", campaign.id);
 
       let im = campaign.userCampaignMapping.some((s) => s.statusID == "200");
       //campaign.isActive &&
@@ -122,14 +122,20 @@ exports.adminPinksky = async (trigger) => {
         });
       }
     });
-    // console.log("influencerDataCheck -> ", influencerDataCheck);
-    const influencerBrandMappingObj = {
-      field: Firebase.docid,
-      operation: "in",
-      value: [...new Set(influencerDataCheck)],
-    };
+    // divide into 10's of arr
+    let influencer = [];
+    for (let i = 0; i < influencerDataCheck.length; i += chunkSize) {
+      const chunk = influencerDataCheck.slice(i, i + chunkSize);
+      const influencerBrandMappingObj = {
+        field: Firebase.docid,
+        operation: "in",
+        value: [...new Set(chunk)],
+      };
+      let influencerf = await this.filteredData(0, influencerBrandMappingObj);
+      influencer.push(...influencerf);
+    }
+
     // let influencer = await Firebase.Influencer.getAll(...influencerDataCheck);
-    let influencer = await this.filteredData(0, influencerBrandMappingObj);
     campaignlist.map((campaign, index) => {
       let im = campaign.userCampaignMapping.some((s) => s.statusID == "200");
       //campaign.isActive &&
@@ -181,13 +187,24 @@ exports.adminPinksky = async (trigger) => {
         });
       }
     });
-    const influencerBrandMappingObj = {
-      field: Firebase.docid,
-      operation: "in",
-      value: [...new Set(influencerDataCheck)],
-    };
+    let influencer = [];
+    for (let i = 0; i < influencerDataCheck.length; i += chunkSize) {
+      const chunk = influencerDataCheck.slice(i, i + chunkSize);
+      const influencerBrandMappingObj = {
+        field: Firebase.docid,
+        operation: "in",
+        value: [...new Set(chunk)],
+      };
+      let influencerf = await this.filteredData(0, influencerBrandMappingObj);
+      influencer.push(...influencerf);
+    }
+    // const influencerBrandMappingObj = {
+    //   field: Firebase.docid,
+    //   operation: "in",
+    //   value: [...new Set(influencerDataCheck)],
+    // };
     // let influencer = await Firebase.Influencer.getAll(...influencerDataCheck);
-    let influencer = await this.filteredData(0, influencerBrandMappingObj);
+    //let influencer = await this.filteredData(0, influencerBrandMappingObj);
     eventlist.map((event, index) => {
       let im = event.userEventMapping.some((s) => s.statusID == "300");
       //event.isActive &&
@@ -237,9 +254,7 @@ exports.adminPinksky = async (trigger) => {
     let brandlistnew = await this.filteredData(2, brandobjnew);
     if (brandlist.length > 0) {
       brandlist.map((brand) => {
-        console.log("here ", brand.id);
         let im = brand.influencermapping.some((s) => s.status == "new");
-        console.log(brand.id);
         if (im) {
           brand.influencermapping.map(async (influencermapping) => {
             if (influencermapping.status == "new") {
