@@ -63,7 +63,7 @@ app.post("/api/testaccount", async (req, res) => {
     operation: "!=",
     value: "1",
   };
-  
+
   const snapshot = await customFunction.filteredData(0, obj);
   console.log(snapshot.length);
   res.json({ message: "done" });
@@ -2979,11 +2979,10 @@ app.post("/api/influencer/adminfilter", async (req, res) => {
 
   try {
     let data = req.body;
-    //console.log(data);
+    console.log(data.input);
     let obj = null;
     let filteredarray = [];
     let cityNotAll = data.city.filter((f) => f.id !== 0);
-
     if (cityNotAll.length > 0 && data.gender !== "All") {
       obj = {
         field: "city",
@@ -3014,6 +3013,7 @@ app.post("/api/influencer/adminfilter", async (req, res) => {
     let categorysorted;
     let agesorted;
     let followersorted;
+    let namesorted;
 
     let selectedCategory = [];
     let mySetCategory = new Set();
@@ -3060,8 +3060,20 @@ app.post("/api/influencer/adminfilter", async (req, res) => {
     } else {
       agesorted = followersorted;
     }
-
-    res.status(200).json({ data: agesorted, message: "Filtered Influencer" });
+    if (data.input !== "") {
+      namesorted = agesorted.filter((item) => {
+        if (
+          item.name
+            .toLowerCase()
+            .indexOf(data.input.toString().toLowerCase()) !== -1
+        ) {
+          return item;
+        }
+      });
+    } else {
+      namesorted = agesorted;
+    }
+    res.status(200).json({ data: namesorted, message: "Filtered Influencer" });
   } catch (error) {
     console.log(new Date() + " - influencer/adminfilter ❌ - " + error + " \n");
 
