@@ -59,13 +59,23 @@ app.use(cors());
 
 app.post("/api/testaccount", async (req, res) => {
   let obj = {
-    field: "dbInserted",
-    operation: "!=",
-    value: "1",
+    field: "city",
+    operation: "==",
+    value: "",
   };
-
   const snapshot = await customFunction.filteredData(0, obj);
   console.log(snapshot.length);
+
+  // let index = 0;
+  // for (const item of snapshot) {
+  //   console.log("updating " + item.id);
+  //   await Firebase.Influencer.doc(item.id).update({
+  //     ...item,
+  //     city: "Chandigarh",
+  //   });
+  //   index++;
+  // }
+
   res.json({ message: "done" });
 });
 
@@ -2982,86 +2992,16 @@ app.post("/api/influencer/adminfilter", async (req, res) => {
     console.log(data.input);
     let obj = null;
     let filteredarray = [];
-    let cityNotAll = data.city.filter((f) => f.id !== 0);
-    if (cityNotAll.length > 0 && data.gender !== "All") {
+
+    if (data.input !== "") {
+      let namesorted;
       obj = {
-        field: "city",
-        operation: "in",
-        value: [
-          ...cityNotAll.map((m) => {
-            return m.value;
-          }),
-        ],
-        field2: "gender",
-        operation2: "==",
-        value2: data.gender,
-      };
-      filteredarray = await customFunction.filteredDataLvl2(0, obj);
-    } else if (cityNotAll.length > 0) {
-      obj = {
-        field: "city",
-        operation: "in",
-        value: [
-          ...cityNotAll.map((m) => {
-            return m.value;
-          }),
-        ],
+        field: "name",
+        operation: "==",
+        value: data.input,
       };
       filteredarray = await customFunction.filteredData(0, obj);
-    }
-
-    let categorysorted;
-    let agesorted;
-    let followersorted;
-    let namesorted;
-
-    let selectedCategory = [];
-    let mySetCategory = new Set();
-    data.influencerValue
-      .filter((item) => item.status === true)
-      .map((categ) => selectedCategory.push(categ.label.split(" ")[0]));
-    if (selectedCategory[0] !== "All") {
-      filteredarray.map((element) => {
-        element.category.filter((nesele) => {
-          if (Object.values(nesele).some((r) => selectedCategory.includes(r))) {
-            mySetCategory.add(element);
-          }
-        });
-      });
-      categorysorted = Array.from(mySetCategory);
-    } else {
-      categorysorted = filteredarray;
-    }
-    if (
-      data.followersTo === "0" ||
-      data.followersFrom === "" ||
-      (data.followersFrom === "" && data.followersTo === "") ||
-      (data.followersFrom === "0" && data.followersTo === "0")
-    ) {
-      followersorted = categorysorted;
-    } else {
-      if (data.followersFrom !== "" && data.followersTo === "") {
-        data.followersTo = parseInt(data.followersFrom) + 5000;
-      }
-      followersorted = categorysorted.filter(
-        (item) =>
-          item.instagram?.followers !== undefined &&
-          parseInt(item.instagram?.followers) >= parseInt(data.followersFrom) &&
-          parseInt(item.instagram?.followers) <= parseInt(data.followersTo)
-      );
-    }
-    if (data.other === "Upcoming Birthday") {
-      const m = new Date().getMonth();
-      agesorted = followersorted.filter(
-        (item) =>
-          item.dob.split("-")[1] != undefined &&
-          item.dob.split("-")[1].includes(m.toString())
-      );
-    } else {
-      agesorted = followersorted;
-    }
-    if (data.input !== "") {
-      namesorted = agesorted.filter((item) => {
+      namesorted = filteredarray.filter((item) => {
         if (
           item.name
             .toLowerCase()
@@ -3070,10 +3010,92 @@ app.post("/api/influencer/adminfilter", async (req, res) => {
           return item;
         }
       });
+      res
+        .status(200)
+        .json({ data: namesorted, message: "Filtered Influencer" });
     } else {
-      namesorted = agesorted;
+      let cityNotAll = data.city.filter((f) => f.id !== 0);
+      if (cityNotAll.length > 0 && data.gender !== "All") {
+        obj = {
+          field: "city",
+          operation: "in",
+          value: [
+            ...cityNotAll.map((m) => {
+              return m.value;
+            }),
+          ],
+          field2: "gender",
+          operation2: "==",
+          value2: data.gender,
+        };
+        filteredarray = await customFunction.filteredDataLvl2(0, obj);
+      } else if (cityNotAll.length > 0) {
+        obj = {
+          field: "city",
+          operation: "in",
+          value: [
+            ...cityNotAll.map((m) => {
+              return m.value;
+            }),
+          ],
+        };
+        filteredarray = await customFunction.filteredData(0, obj);
+      }
+
+      let categorysorted;
+      let agesorted;
+      let followersorted;
+
+      let selectedCategory = [];
+      let mySetCategory = new Set();
+      data.influencerValue
+        .filter((item) => item.status === true)
+        .map((categ) => selectedCategory.push(categ.label.split(" ")[0]));
+      if (selectedCategory[0] !== "All") {
+        filteredarray.map((element) => {
+          element.category.filter((nesele) => {
+            if (
+              Object.values(nesele).some((r) => selectedCategory.includes(r))
+            ) {
+              mySetCategory.add(element);
+            }
+          });
+        });
+        categorysorted = Array.from(mySetCategory);
+      } else {
+        categorysorted = filteredarray;
+      }
+      if (
+        data.followersTo === "0" ||
+        data.followersFrom === "" ||
+        (data.followersFrom === "" && data.followersTo === "") ||
+        (data.followersFrom === "0" && data.followersTo === "0")
+      ) {
+        followersorted = categorysorted;
+      } else {
+        if (data.followersFrom !== "" && data.followersTo === "") {
+          data.followersTo = parseInt(data.followersFrom) + 5000;
+        }
+        followersorted = categorysorted.filter(
+          (item) =>
+            item.instagram?.followers !== undefined &&
+            parseInt(item.instagram?.followers) >=
+              parseInt(data.followersFrom) &&
+            parseInt(item.instagram?.followers) <= parseInt(data.followersTo)
+        );
+      }
+      if (data.other === "Upcoming Birthday") {
+        const m = new Date().getMonth();
+        agesorted = followersorted.filter(
+          (item) =>
+            item.dob.split("-")[1] != undefined &&
+            item.dob.split("-")[1].includes(m.toString())
+        );
+      } else {
+        agesorted = followersorted;
+      }
+      res.status(200).json({ data: agesorted, message: "Filtered Influencer" });
     }
-    res.status(200).json({ data: namesorted, message: "Filtered Influencer" });
   } catch (error) {
     console.log(new Date() + " - influencer/adminfilter ❌ - " + error + " \n");
 
