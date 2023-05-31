@@ -2564,7 +2564,7 @@ app.post("/api/v2/admin/pinksky", async (req, res) => {
 
     if (getAdmin.data().admin) {
       let campaignlist = [];
-      let brandlist = [];
+      // let brandlist = [];
       let eventlist = [];
       let couponlist = [];
       // let influencerlist = [];
@@ -2577,9 +2577,9 @@ app.post("/api/v2/admin/pinksky", async (req, res) => {
       // if (data.changesTrigger === "influencer") {
       //   influencerlist = await customFunction.adminPinksky("influencerlist");
       // }
-      if (data.changesTrigger === "brand") {
-        brandlist = await customFunction.adminPinksky("brandlist");
-      }
+      // if (data.changesTrigger === "brand") {
+      //   brandlist = await customFunction.adminPinksky("brandlist");
+      // }
       if (data.changesTrigger === "coupon") {
         couponlist = await customFunction.adminPinksky("couponlist");
       }
@@ -2587,7 +2587,7 @@ app.post("/api/v2/admin/pinksky", async (req, res) => {
       res.status(200).json({
         // influencerlist: influencerlist,
         campaignlist: campaignlist,
-        brandlist: brandlist,
+        // brandlist: brandlist,
         eventlist: eventlist,
         couponlist: couponlist,
         message: "Fetched Admin",
