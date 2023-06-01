@@ -33,6 +33,8 @@ const Coupons = db.collection("Coupons");
 const RandomData = db.collection("RandomData");
 const Gallery = db.collection("Gallery");
 const Feedback = db.collection("Feedback");
+const BrandRequirement = db.collection("BrandRequirement");
+const CampaignRequirement = db.collection("CampaignRequirement");
 const docid = firebase.firestore.FieldPath.documentId();
 
 const multer = Multer({
@@ -61,6 +63,8 @@ const gallerymulter = Multer({
 module.exports.Firebase = {
   Influencer,
   RandomData,
+  CampaignRequirement,
+  BrandRequirement,
   Gallery,
   Brand,
   Campaign,

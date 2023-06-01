@@ -5883,6 +5883,39 @@ app.post("/api/influencerbrand", async (req, res) => {
   // }
 });
 
+// 12. Brand Requirement Create
+app.post("/api/brand-requirement/create", async (req, res) => {
+  console.log(new Date() + " - brand-requirement/create POST 🚀 \n");
+
+  try {
+    const data = req.body;
+
+    await Firebase.BrandRequirement.add(data);
+
+    res.status(200).json({ message: "Posted brand-requirement" });
+  } catch (error) {
+    console.log(new Date() + " - brand-requirement/create ❌ - " + error + " \n");
+
+    res.status(500).json({ message: error });
+  }
+});
+// 13. Create own campaign
+app.post("/api/campaign-requirement/create", async (req, res) => {
+  console.log(new Date() + " - campaign-requirement/create POST 🚀 \n");
+
+  try {
+    const data = req.body;
+
+    await Firebase.CampaignRequirement.add(data);
+
+    res.status(200).json({ message: "Posted campaign-requirement" });
+  } catch (error) {
+    console.log(new Date() + " - campaign-requirement/create ❌ - " + error + " \n");
+
+    res.status(500).json({ message: error });
+  }
+});
+
 // MAPPING SECTION
 // 1. Mapping brand with influencer - Hire me
 app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
