@@ -8,6 +8,11 @@ const collectionArr = [
   Firebase.Campaign, //3
   Firebase.Coupons, //4
   Firebase.Event, //5
+  Firebase.PinkskyPopup, //6
+  Firebase.RandomData, //7
+  Firebase.Feedback, //8
+  Firebase.BrandRequirement, //9
+  Firebase.CampaignRequirement, //10
 ];
 exports.fetchSingleData = async (index, id) => {
   // const snapshot = await pinkskyDB.filter(

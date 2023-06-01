@@ -47,7 +47,12 @@ const clientNamePhonenumber = sheetdb({
 const clientFeedback = sheetdb({
   address: environments.SPREADSHEET + "?sheet=Feedback",
 });
-
+const clientBrandRequirement = sheetdb({
+  address: environments.SPREADSHEET + "?sheet=BrandRequirement",
+});
+const clientCampaignRequirement = sheetdb({
+  address: environments.SPREADSHEET + "?sheet=CampaignRequirement",
+});
 const app = express();
 const PORT = environments.PORT;
 let logging = fs.createWriteStream("log.txt", { flags: "a" });
@@ -59,12 +64,14 @@ app.use(cors());
 
 app.post("/api/testaccount", async (req, res) => {
   let obj = {
-    field: "city",
-    operation: "==",
-    value: "",
+    field: "dbInserted",
+    operation: "!=",
+    value: 1,
   };
-  const snapshot = await customFunction.filteredData(0, obj);
-  console.log(snapshot.length);
+  const snapshotbrandreq = await customFunction.filteredData(9, obj);
+  const snapshotcampaignreq = await customFunction.filteredData(10, obj);
+  console.log(snapshotbrandreq.length);
+  console.log(snapshotcampaignreq.length);
 
   // let index = 0;
   // for (const item of snapshot) {
@@ -540,29 +547,37 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     let obj = {
       field: "dbInserted",
       operation: "!=",
-      value: "1",
+      value: 1,
     };
-    // const snapshot =await customFunction.filteredData(0,obj);
-    const snapshot = await Firebase.Influencer.get();
+    const snapshotinfluencer = await customFunction.filteredData(0, obj);
+    const snapshotbrand = await customFunction.filteredData(2, obj);
+    const snapshotnoninfluencer = await customFunction.filteredData(1, obj);
+    const snapshotpopup = await customFunction.filteredData(6, obj);
+    const snapshotrandomdata = await customFunction.filteredData(7, obj);
+    const snapshotfeedback = await customFunction.filteredData(8, obj);
+    const snapshotbrandreq = await customFunction.filteredData(9, obj);
+    const snapshotcampaignreq = await customFunction.filteredData(10, obj);
+
+    // const snapshot = await Firebase.Influencer.get();
     let influencerData = [];
-    snapshot.docs.map(async (doc) => {
+    snapshotinfluencer.map(async (doc) => {
       let category = [];
-      doc.data().category?.length > 0 &&
-        doc.data().category.map((item) => {
+      doc.category?.length > 0 &&
+        doc.category.map((item) => {
           category.push(item.value);
         });
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
+      if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
         influencerData.push({
           id: doc.id,
-          city: doc.data().city,
-          email: doc.data().email,
-          gender: doc.data().gender,
-          instagramurl: doc.data().instagramurl,
-          name: doc.data().name,
-          phonenumber: doc.data().phonenumber,
-          surname: doc.data().surname,
-          dob: doc.data().dob,
-          whatsappnumber: doc.data().whatsappnumber,
+          city: doc.city,
+          email: doc.email,
+          gender: doc.gender,
+          instagramurl: doc.instagramurl,
+          name: doc.name,
+          phonenumber: doc.phonenumber,
+          surname: doc.surname,
+          dob: doc.dob,
+          whatsappnumber: doc.whatsappnumber,
           category: category?.length > 0 ? category.toString() : [],
         });
         console.log({ category: category.toString(), id: doc.id });
@@ -570,8 +585,6 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
         await Firebase.Influencer.doc(doc.id).update({
           dbInserted: 1,
         });
-      } else {
-        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
     if (influencerData?.length > 0) {
@@ -587,26 +600,24 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     }
 
     //Brand
-    const brandsnapshot = await Firebase.Brand.get();
+    //const brandsnapshot = await Firebase.Brand.get();
     let brandData = [];
-    brandsnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
+    snapshotbrand.map(async (doc) => {
+      if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
         brandData.push({
           id: doc.id,
-          companyname: doc.data().companyname,
-          designation: doc.data().designation,
-          email: doc.data().email,
-          instagramurl: doc.data().instagramurl,
-          name: doc.data().name,
-          phonenumber: doc.data().phonenumber,
-          city: doc.data().city,
-          whatsappnumber: doc.data().whatsappnumber,
+          companyname: doc.companyname,
+          designation: doc.designation,
+          email: doc.email,
+          instagramurl: doc.instagramurl,
+          name: doc.name,
+          phonenumber: doc.phonenumber,
+          city: doc.city,
+          whatsappnumber: doc.whatsappnumber,
         });
         await Firebase.Brand.doc(doc.id).update({
           dbInserted: 1,
         });
-      } else {
-        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
 
@@ -626,20 +637,20 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     // const campaignsnapshot = await Firebase.Campaign.get();
     // let campaignData = [];
     // campaignsnapshot.docs.map(async (doc) => {
-    //   if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
+    //   if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
     //     campaignData.push({
     //       id: doc.id,
-    //       brandcategory: doc.data().brandcategory,
-    //       city: doc.data().city,
-    //       name: doc.data().name,
-    //       paidPrivilege: doc.data().viewerDetails.paidPrivilege,
-    //       pinkskyPrivilege: doc.data().viewerDetails.pinkskyPrivilege,
+    //       brandcategory: doc.brandcategory,
+    //       city: doc.city,
+    //       name: doc.name,
+    //       paidPrivilege: doc.viewerDetails.paidPrivilege,
+    //       pinkskyPrivilege: doc.viewerDetails.pinkskyPrivilege,
     //     });
     //     await Firebase.Campaign.doc(doc.id).update({
     //       dbInserted: 1,
     //     });
     //   } else {
-    //     //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+    //     //console.log({ id: doc.id, dbInserted: doc.dbInserted });
     //   }
     // });
 
@@ -656,22 +667,21 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     // }
 
     //NonInfluencer
-    const noninfluencersnapshot = await Firebase.NonInfluencer.get();
+
+    //const noninfluencersnapshot = await Firebase.NonInfluencer.get();
     let noninfluencerData = [];
-    noninfluencersnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
+    snapshotnoninfluencer.map(async (doc) => {
+      if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
         noninfluencerData.push({
           id: doc.id,
-          email: doc.data().email,
-          instagramid: doc.data().instagramid,
-          name: doc.data().name,
-          whatsappnumber: doc.data().whatsappnumber,
+          email: doc.email,
+          instagramid: doc.instagramid,
+          name: doc.name,
+          whatsappnumber: doc.whatsappnumber,
         });
         await Firebase.NonInfluencer.doc(doc.id).update({
           dbInserted: 1,
         });
-      } else {
-        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
 
@@ -688,27 +698,25 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     }
 
     //Pinksky Popup
-    const pinkskyPopupsnapshot = await Firebase.PinkskyPopup.get();
+    //const pinkskyPopupsnapshot = await Firebase.PinkskyPopup.get();
     let pinkskyPopupData = [];
-    pinkskyPopupsnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
+    snapshotpopup.map(async (doc) => {
+      if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
         pinkskyPopupData.push({
           id: doc.id,
-          // targetage: doc.data().age,
-          brandname: doc.data().brandname,
-          email: doc.data().email,
-          // targetgender: doc.data().gender,
-          instagramid: doc.data().instagramid,
-          name: doc.data().name,
-          // whatdoyousell: doc.data().whatdoyousell,
-          // yesnoppe: doc.data().yesnoppe,
-          whatsappnumber: doc.data().whatsappnumber,
+          // targetage: doc.age,
+          brandname: doc.brandname,
+          email: doc.email,
+          // targetgender: doc.gender,
+          instagramid: doc.instagramid,
+          name: doc.name,
+          // whatdoyousell: doc.whatdoyousell,
+          // yesnoppe: doc.yesnoppe,
+          whatsappnumber: doc.whatsappnumber,
         });
         await Firebase.PinkskyPopup.doc(doc.id).update({
           dbInserted: 1,
         });
-      } else {
-        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
       }
     });
 
@@ -725,30 +733,30 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     }
 
     //Random Data
-    const randomDatasnapshot = await Firebase.RandomData.get();
+    //const randomDatasnapshot = await Firebase.RandomData.get();
     let randomData = [];
     let internData = [];
 
-    randomDatasnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
-        if (doc.data().category.toLowerCase().indexOf("intern") !== -1) {
+    snapshotrandomdata.map(async (doc) => {
+      if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
+        if (doc.category.toLowerCase().indexOf("intern") !== -1) {
           internData.push({
             id: doc.id,
-            category: doc.data().category,
-            name: doc.data().name,
-            number: doc.data().number,
-            userid: doc.data().userid,
-            internCategory: doc.data().internCat,
-            resumelink: doc.data().resumelink,
+            category: doc.category,
+            name: doc.name,
+            number: doc.number,
+            userid: doc.userid,
+            internCategory: doc.internCat,
+            resumelink: doc.resumelink,
           });
         } else {
           randomData.push({
             id: doc.id,
-            category: doc.data().category,
-            name: doc.data().name,
-            brandname: doc.data()?.brandname,
-            number: doc.data().number,
-            userid: doc.data().userid,
+            category: doc.category,
+            name: doc.name,
+            brandname: doc?.brandname,
+            number: doc.number,
+            userid: doc.userid,
           });
         }
 
@@ -756,7 +764,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
           dbInserted: 1,
         });
       } else {
-        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+        //console.log({ id: doc.id, dbInserted: doc.dbInserted });
       }
     });
 
@@ -785,21 +793,21 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     }
 
     //Feedback
-    const feedbackDatasnapshot = await Firebase.Feedback.get();
+    //const feedbackDatasnapshot = await Firebase.Feedback.get();
     let feedbackData = [];
-    feedbackDatasnapshot.docs.map(async (doc) => {
-      if (doc.data().dbInserted === 0 || doc.data().dbInserted === undefined) {
+    snapshotfeedback.map(async (doc) => {
+      if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
         feedbackData.push({
           id: doc.id,
 
-          name: doc.data().name,
-          message: doc.data().message,
+          name: doc.name,
+          message: doc.message,
         });
         await Firebase.Feedback.doc(doc.id).update({
           dbInserted: 1,
         });
       } else {
-        //console.log({ id: doc.id, dbInserted: doc.data().dbInserted });
+        //console.log({ id: doc.id, dbInserted: doc.dbInserted });
       }
     });
 
@@ -815,6 +823,71 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
       );
     }
 
+    //Brandrequirement
+    //const BrandRequirementsnapshot = await Firebase.BrandRequirement.get();
+    let BrandRequirementData = [];
+    snapshotbrandreq.map(async (doc) => {
+      if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
+        BrandRequirementData.push({
+          id: doc.id,
+
+          city: doc.city,
+          companyname: doc.companyname,
+          designation: doc.designation,
+          name: doc.name,
+          service: doc.service,
+          whatsappnumber: doc.whatsappnumber,
+        });
+        await Firebase.BrandRequirement.doc(doc.id).update({
+          dbInserted: 1,
+        });
+      }
+    });
+
+    if (BrandRequirementData?.length > 0) {
+      clientBrandRequirement.create(BrandRequirementData).then(
+        function (data) {
+          //console.log(data);
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
+    //Campaign Requirement
+    //const feedbackDatasnapshot = await Firebase.Feedback.get();
+    let campaignReqData = [];
+    snapshotcampaignreq.map(async (doc) => {
+      if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
+        campaignReqData.push({
+          id: doc.id,
+
+          budget: doc.budget,
+          companyname: doc.companyname,
+          category: doc.category.join(", "),
+          deliverable: doc.deliverable.join(", "),
+          marketinggoals: doc.marketinggoals,
+          numberofinfluencerrequired: doc.numberofinfluencerrequired,
+          postingdate: doc.postingdate,
+        });
+        await Firebase.CampaignRequirement.doc(doc.id).update({
+          dbInserted: 1,
+        });
+      }
+    });
+
+    if (campaignReqData?.length > 0) {
+      clientCampaignRequirement.create(campaignReqData).then(
+        function (data) {
+          //console.log(data);
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
     if (isValid === 1) {
       res
         .status(200)
@@ -5894,7 +5967,9 @@ app.post("/api/brand-requirement/create", async (req, res) => {
 
     res.status(200).json({ message: "Posted brand-requirement" });
   } catch (error) {
-    console.log(new Date() + " - brand-requirement/create ❌ - " + error + " \n");
+    console.log(
+      new Date() + " - brand-requirement/create ❌ - " + error + " \n"
+    );
 
     res.status(500).json({ message: error });
   }
@@ -5910,7 +5985,9 @@ app.post("/api/campaign-requirement/create", async (req, res) => {
 
     res.status(200).json({ message: "Posted campaign-requirement" });
   } catch (error) {
-    console.log(new Date() + " - campaign-requirement/create ❌ - " + error + " \n");
+    console.log(
+      new Date() + " - campaign-requirement/create ❌ - " + error + " \n"
+    );
 
     res.status(500).json({ message: error });
   }
