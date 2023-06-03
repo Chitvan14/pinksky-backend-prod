@@ -748,6 +748,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
             userid: doc.userid,
             internCategory: doc.internCat,
             resumelink: doc.resumelink,
+            role: doc.role == undefined ? "" : doc.role,
           });
         } else {
           randomData.push({
@@ -862,7 +863,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
       if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
         campaignReqData.push({
           id: doc.id,
-
+          contactnumber:doc.contactnumber,
           budget: doc.budget,
           companyname: doc.companyname,
           category: doc.category.join(", "),
