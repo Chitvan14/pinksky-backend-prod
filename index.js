@@ -63,25 +63,43 @@ app.use(cors());
 // 1. Logging
 
 app.post("/api/testaccount", async (req, res) => {
-  let obj = {
-    field: "dbInserted",
-    operation: "!=",
-    value: 1,
-  };
-  const snapshotbrandreq = await customFunction.filteredData(9, obj);
-  const snapshotcampaignreq = await customFunction.filteredData(10, obj);
-  console.log(snapshotbrandreq.length);
-  console.log(snapshotcampaignreq.length);
-
-  // let index = 0;
-  // for (const item of snapshot) {
-  //   console.log("updating " + item.id);
-  //   await Firebase.Influencer.doc(item.id).update({
-  //     ...item,
-  //     city: "Chandigarh",
-  //   });
-  //   index++;
-  // }
+  const users = await customFunction.spreadsheettofirebase(
+    clientSpreadsheetToDB
+  );
+  for (const user of users) {
+    const options = {
+      method: "POST",
+      url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
+      headers: {
+        "content-type": "application/json",
+        "X-RapidAPI-Key": environments.RapidAPIKey_V2,
+        "X-RapidAPI-Host": environments.RapidAPIHost_V2,
+      },
+      data: `{"username":"${user.instagramurl}"}`,
+    };
+    await axios
+      .request(options)
+      .then(function (response) {
+        let instadatares = response.data.response.body.data.user;
+        if (instadatares.is_private === false) {
+          if (instadatares.edge_owner_to_timeline_media.edges?.length > 4) {
+          } else {
+            const err = new TypeError(
+              "We cant't calculate your profile. Please login in with public instagram profile with more than 5 posts."
+            );
+            throw err;
+          }
+        } else {
+          const err = new TypeError(
+            "Please Register With Public Instagram Account"
+          );
+          throw err;
+        }
+      })
+      .catch(function (error) {
+        throw error;
+      });
+  }
 
   res.json({ message: "done" });
 });
@@ -863,7 +881,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
       if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
         campaignReqData.push({
           id: doc.id,
-          contactnumber:doc.contactnumber,
+          contactnumber: doc.contactnumber,
           budget: doc.budget,
           companyname: doc.companyname,
           category: doc.category.join(", "),
