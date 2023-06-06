@@ -767,6 +767,7 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
             internCategory: doc.internCat,
             resumelink: doc.resumelink,
             role: doc.role == undefined ? "" : doc.role,
+            city: doc.city == undefined ? "" : doc.city,
           });
         } else {
           randomData.push({
@@ -5734,7 +5735,7 @@ app.put("/api/brandcomments/update", async (req, res) => {
 
 // 8. Verifying account
 app.put("/api/verifyaccount/update", async (req, res) => {
-  logging.write(new Date() + " - verifyaccount/update PUT 🚀 \n");
+  // logging.write(new Date() + " - verifyaccount/update PUT 🚀 \n");
   console.log(new Date() + " - verifyaccount/update PUT 🚀 \n");
 
   try {
@@ -5743,88 +5744,88 @@ app.put("/api/verifyaccount/update", async (req, res) => {
     if (data.registeras.toString().toLowerCase() === "influencer") {
       const id = data.id;
       const snapshot = await Firebase.Influencer.doc(id).get();
-      setTimeout(async () => {
-        await Firebase.Influencer.doc(id).update({
-          ...snapshot.data(),
-          isActive: 1,
-        });
-        // if (snapshot.data().isActive === 0) {
-        //   sendMail("registerlaunchingsoon", {
-        //     tomail: snapshot.data().email,
-        //     ccmail: "",
-        //     subjectmail: "Registration Completed | Pinksky",
-        //     text: `Dear ${snapshot.data().name},<br/><br/>
-        //    Registration completed !<br/><br/>
-        //    Welcome to Pinksky’s secret club of influencers. We are excited to invite you to our upcoming events & be a part of the campaigns hope you are too!
-        //    <br/><br/>
-        //    Thanks for choosing Pinksky 💕 `,
-        //     href: environments.EML_HREF_WEBSITE,
-        //     hrefText: "pinkskyclub.com",
-        //   });
-        // }
+      // setTimeout(async () => {
+      await Firebase.Influencer.doc(id).update({
+        ...snapshot.data(),
+        isActive: 1,
+      });
+      // if (snapshot.data().isActive === 0) {
+      //   sendMail("registerlaunchingsoon", {
+      //     tomail: snapshot.data().email,
+      //     ccmail: "",
+      //     subjectmail: "Registration Completed | Pinksky",
+      //     text: `Dear ${snapshot.data().name},<br/><br/>
+      //    Registration completed !<br/><br/>
+      //    Welcome to Pinksky’s secret club of influencers. We are excited to invite you to our upcoming events & be a part of the campaigns hope you are too!
+      //    <br/><br/>
+      //    Thanks for choosing Pinksky 💕 `,
+      //     href: environments.EML_HREF_WEBSITE,
+      //     hrefText: "pinkskyclub.com",
+      //   });
+      // }
 
-        logging.end();
-        res.status(200).json({ message: "Verified Influencer" });
-      }, 8000);
+      // logging.end();
+      res.status(200).json({ message: "Verified Influencer" });
+      // }, 8000);
     }
     if (data.registeras.toString().toLowerCase() === "brand") {
       const id = data.id;
       const snapshot = await Firebase.Brand.doc(id).get();
-      setTimeout(async () => {
-        await Firebase.Brand.doc(id).update({
-          ...snapshot.data(),
-          isActive: 1,
-        });
-        //   if (snapshot.data().isActive === 0) {
-        //     sendMail("registerlaunchingsoon", {
-        //       tomail: snapshot.data().email,
-        //       ccmail: "",
-        //       subjectmail: "Registration Completed | Pinksky",
-        //       text: `Dear ${snapshot.data().companyname},<br/><br/>
-        // You have successfully created an account at Pinksky! <br/><br/>
-        // Pinksky welcomes your brand to a creative marketing agency. We are excited to work & grow with you.
-        // <br/><br/>
-        // Thanks for choosing Pinksky 💕 `,
-        //       href: environments.EML_HREF_WEBSITE,
-        //       hrefText: "pinkskyclub.com",
-        //     });
-        //   }
+      // setTimeout(async () => {
+      await Firebase.Brand.doc(id).update({
+        ...snapshot.data(),
+        isActive: 1,
+      });
+      //   if (snapshot.data().isActive === 0) {
+      //     sendMail("registerlaunchingsoon", {
+      //       tomail: snapshot.data().email,
+      //       ccmail: "",
+      //       subjectmail: "Registration Completed | Pinksky",
+      //       text: `Dear ${snapshot.data().companyname},<br/><br/>
+      // You have successfully created an account at Pinksky! <br/><br/>
+      // Pinksky welcomes your brand to a creative marketing agency. We are excited to work & grow with you.
+      // <br/><br/>
+      // Thanks for choosing Pinksky 💕 `,
+      //       href: environments.EML_HREF_WEBSITE,
+      //       hrefText: "pinkskyclub.com",
+      //     });
+      //   }
 
-        logging.end();
-        res.status(200).json({ message: "Verified Brand" });
-      }, 1200);
+      // logging.end();
+      res.status(200).json({ message: "Verified Brand" });
+      // }, 1200);
     }
     if (data.registeras.toString().toLowerCase() === "noninfluencer") {
       const id = data.id;
       const snapshot = await Firebase.NonInfluencer.doc(id).get();
-      setTimeout(async () => {
-        await Firebase.NonInfluencer.doc(id).update({
-          ...snapshot.data(),
-          isActive: 1,
-        });
-        //     if (snapshot.data().isActive === 0) {
-        //       sendMail("registerlaunchingsoon", {
-        //         tomail: snapshot.data().email,
-        //         ccmail: "",
-        //         subjectmail: "Registration Completed | Pinksky",
-        //         text: `Dear ${snapshot.data().name},<br/><br/>
-        //  Registration completed !
-        //  <br/><br/>
-        //  Thanks for choosing Pinksky 💕`,
-        //         href: environments.EML_HREF_WEBSITE,
-        //         hrefText: "pinkskyclub.com",
-        //       });
-        //     }
+      // setTimeout(async () => {
+      await Firebase.NonInfluencer.doc(id).update({
+        ...snapshot.data(),
+        isActive: 1,
+      });
+      //     if (snapshot.data().isActive === 0) {
+      //       sendMail("registerlaunchingsoon", {
+      //         tomail: snapshot.data().email,
+      //         ccmail: "",
+      //         subjectmail: "Registration Completed | Pinksky",
+      //         text: `Dear ${snapshot.data().name},<br/><br/>
+      //  Registration completed !
+      //  <br/><br/>
+      //  Thanks for choosing Pinksky 💕`,
+      //         href: environments.EML_HREF_WEBSITE,
+      //         hrefText: "pinkskyclub.com",
+      //       });
+      //     }
 
-        logging.end();
-        res.status(200).json({ message: "Verified NonInfluencer" });
-      }, 1200);
+      // logging.end();
+      res.status(200).json({ message: "Verified NonInfluencer" });
+      // }, 1200);
     }
   } catch (error) {
-    logging.write(new Date() + " - verifyaccount/update ❌ - " + error + " \n");
+    // logging.write(new Date() + " - verifyaccount/update ❌ - " + error + " \n");
     console.log(new Date() + " - verifyaccount/update ❌ - " + error + " \n");
 
-    logging.end();
+    // logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -6344,6 +6345,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           email: influencerData.email,
           uid: getUserByUuid?.uid,
         };
+        //console.log(userResponse);
       } else {
         userResponse = await Firebase.admin.auth().createUser({
           email: createUser.email,
@@ -6377,7 +6379,6 @@ app.post("/api/v2/influencer/create", async (req, res) => {
           };
           let phoneWhatsappCheck = await customFunction.filteredData(0, obj);
           //yes - delete id and data from influencer list
-
           if (phoneWhatsappCheck.length > 0) {
             //delete account + data
             // console.log(phoneWhatsappCheck[0]);
@@ -6455,6 +6456,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
               isProfileCompleted: Math.floor(isProfileCompletedQuery),
               createdDate: new Date(),
               updatedDate: new Date(),
+              isActive: 1,
             };
           } else {
             influencerSchema = {
@@ -6536,22 +6538,26 @@ app.post("/api/v2/influencer/create", async (req, res) => {
               });
             }
             setTimeout(() => {
-              sendMail("verifyemail", {
-                tomail: influencerArr[0].email,
-                ccmail: "",
-                subjectmail: "Registration | Pinksky",
+              if (influencerData.isNonInfluencer.uuid.toString()?.length > 2) {
+                //remove non-influencer data...
+              } else {
+                sendMail("verifyemail", {
+                  tomail: influencerArr[0].email,
+                  ccmail: "",
+                  subjectmail: "Registration | Pinksky",
 
-                text: `Dear ${influencerArr[0].name},<br/><br/>
-       
-Welcome to Pinksky’s secret club of influencers. We are excited to invite you to our upcoming events & be a part of the campaigns hope you are too!
-<br/><br/>
-Thanks for choosing Pinksky 💕 `,
-                href:
-                  environments.VERIFY_EMAIL +
-                  "?registeras=Influencer&id=" +
-                  influencerArr[0].id,
-                hrefText: "Verify your account -> ",
-              });
+                  text: `Dear ${influencerArr[0].name},<br/><br/>
+  Welcome to Pinksky’s secret club of influencers. We are excited to invite you to our upcoming events & be a part of the campaigns hope you are too!
+  <br/><br/>
+  Thanks for choosing Pinksky 💕 `,
+                  href:
+                    environments.VERIFY_EMAIL +
+                    "?registeras=Influencer&id=" +
+                    influencerArr[0].id,
+                  hrefText: "Verify your account -> ",
+                });
+              }
+
               // text:
               // "Hey " +
               // influencerArr[0].name +
@@ -6579,18 +6585,34 @@ Thanks for choosing Pinksky 💕 `,
                 hrefText: "pinkskyclub.com",
               });
               logging.end();
-              res.status(200).json({
-                message: {
-                  displayName: createUser.name,
-                  id: influencerArr[0].id,
-                  // email: createUser.email,
-                  email: influencerArr[0].email,
-                  type: "Posted Influencer",
-                  uuid: userResponse?.uid,
-                  member: false,
-                  status: "new",
-                },
-              });
+              if (influencerData.isNonInfluencer.uuid.toString()?.length > 2) {
+                res.status(200).json({
+                  message: {
+                    displayName: createUser.name,
+                    id: influencerArr[0].id,
+                    // email: createUser.email,
+                    email: influencerArr[0].email,
+                    type: "Posted Influencer",
+                    uuid: userResponse?.uid,
+                    member: influencerSchema.pinkskymember.isMember,
+                    status: "new",
+                  },
+                });
+              }else{
+                res.status(200).json({
+                  message: {
+                    displayName: createUser.name,
+                    id: influencerArr[0].id,
+                    // email: createUser.email,
+                    email: influencerArr[0].email,
+                    type: "Posted Influencer",
+                    uuid: userResponse?.uid,
+                    member: false,
+                    status: "new",
+                  },
+                });
+              }
+             
             }, 1000);
           }, 2000);
         }
