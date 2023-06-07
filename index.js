@@ -5411,7 +5411,7 @@ app.put("/api/campaign/update", async (req, res) => {
 // MODAL FETCHING DATA SECTION
 // 1. Name + Number data create
 app.post("/api/randomdata/create", async (req, res) => {
-  logging.write(new Date() + " - randomdata/create POST 🚀 \n");
+  // logging.write(new Date() + " - randomdata/create POST 🚀 \n");
   console.log(new Date() + " - randomdata/create POST 🚀 \n");
 
   try {
@@ -5420,14 +5420,58 @@ app.post("/api/randomdata/create", async (req, res) => {
 
     await Firebase.RandomData.add(data);
 
-    logging.end();
-    res.status(200).json({ message: "Posted RandomData" });
+    let randomData = [];
+    let internData = [];
+    if (data.category.toLowerCase().indexOf("intern") !== -1) {
+      internData.push({
+        id: data.id,
+        category: data.category,
+        name: data.name,
+        number: data.number,
+        userid: data.userid,
+        internCategory: data.internCat,
+        resumelink: data.resumelink,
+        role: data.role == undefined ? "" : data.role,
+        city: data.city == undefined ? "" : data.city,
+      });
+      if (internData?.length > 0) {
+        clientInternData.create(internData).then(
+          function (data) {
+            res.status(200).json({ message: "Posted RandomData" });
+          },
+          function (err) {
+            isValid = 0;
+            throw err;
+          }
+        );
+      }
+    } else {
+      randomData.push({
+        id: data.id,
+        category: data.category,
+        name: data.name,
+        brandname: data?.brandname,
+        number: data.number,
+        userid: data.userid,
+      });
+      if (randomData?.length > 0) {
+        clientNamePhonenumber.create(randomData).then(
+          function (data) {
+            res.status(200).json({ message: "Posted RandomData" });
+          },
+          function (err) {
+            isValid = 0;
+            throw err;
+          }
+        );
+      }
+    }
   } catch (error) {
     //console.log("error", error);
-    logging.write(new Date() + " - randomdata/create ❌ - " + error + " \n");
+    // logging.write(new Date() + " - randomdata/create ❌ - " + error + " \n");
     console.log(new Date() + " - randomdata/create ❌ - " + error + " \n");
 
-    logging.end();
+    // logging.end();
     res.status(500).json({ message: error });
   }
 });
@@ -5985,7 +6029,28 @@ app.post("/api/brand-requirement/create", async (req, res) => {
 
     await Firebase.BrandRequirement.add(data);
 
-    res.status(200).json({ message: "Posted brand-requirement" });
+    let BrandRequirementData = [];
+    BrandRequirementData.push({
+      id: data.id,
+      city: data.city,
+      companyname: data.companyname,
+      designation: data.designation,
+      name: data.name,
+      service: data.service,
+      whatsappnumber: data.whatsappnumber,
+    });
+
+    if (BrandRequirementData?.length > 0) {
+      clientBrandRequirement.create(BrandRequirementData).then(
+        function (data) {
+          res.status(200).json({ message: "Posted brand-requirement" });
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
   } catch (error) {
     console.log(
       new Date() + " - brand-requirement/create ❌ - " + error + " \n"
@@ -6003,7 +6068,30 @@ app.post("/api/campaign-requirement/create", async (req, res) => {
 
     await Firebase.CampaignRequirement.add(data);
 
-    res.status(200).json({ message: "Posted campaign-requirement" });
+    let campaignReqData = [];
+    campaignReqData.push({
+      id: data.id,
+      contactnumber: data.contactnumber,
+      budget: data.budget,
+      companyname: data.companyname,
+      category: data.category.join(", "),
+      deliverable: data.deliverable.join(", "),
+      marketinggoals: data.marketinggoals,
+      numberofinfluencerrequired: data.numberofinfluencerrequired,
+      postingdate: data.postingdate,
+    });
+
+    if (campaignReqData?.length > 0) {
+      clientCampaignRequirement.create(campaignReqData).then(
+        function (data) {
+          res.status(200).json({ message: "Posted campaign-requirement" });
+        },
+        function (err) {
+          isValid = 0;
+          throw err;
+        }
+      );
+    }
   } catch (error) {
     console.log(
       new Date() + " - campaign-requirement/create ❌ - " + error + " \n"
@@ -6598,7 +6686,7 @@ app.post("/api/v2/influencer/create", async (req, res) => {
                     status: "new",
                   },
                 });
-              }else{
+              } else {
                 res.status(200).json({
                   message: {
                     displayName: createUser.name,
@@ -6612,7 +6700,6 @@ app.post("/api/v2/influencer/create", async (req, res) => {
                   },
                 });
               }
-             
             }, 1000);
           }, 2000);
         }
