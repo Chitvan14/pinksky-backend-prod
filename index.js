@@ -6395,7 +6395,18 @@ app.put("/api/mappinginfluencerwithcampaignlinks/update", async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
-
+app.post("/api/errormail", async (req, res) => {
+  console.log(new Date() + " - errormail POST 🚀 \n");
+  let data = req.body;
+  sendMail("errormail", {
+    tomail: environments.EML_USER,
+    ccmail: "",
+    subjectmail: "Error Details | Pinksky",
+    text: data,
+    href: "Website",
+    hrefText: "pinkskyclub.com",
+  });
+});
 //----------------------------------------------------------------------
 app.post("/api/v2/influencer/create", async (req, res) => {
   console.log(new Date() + " - v2/influencer/create POST 🚀 \n");
