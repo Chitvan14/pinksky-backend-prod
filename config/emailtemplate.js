@@ -10,7 +10,8 @@ module.exports = function (type, data) {
     type === "influencercampaignaccepted" ||
     type === "brandnewrequestaccepted" ||
     type === "influencereventaccepted" ||
-    type === "verifyemail"
+    type === "verifyemail" ||
+    type === "errormail"
   ) {
     // html = `<span> ${data.text} </span> <a href=${data.href} style="text-decoration:none; color:#151515;"> Go to website →</a>`;
     html = `<!doctype html><html> <head>
