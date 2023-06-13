@@ -6402,7 +6402,7 @@ app.post("/api/errormail", async (req, res) => {
     tomail: environments.EML_USER,
     ccmail: "",
     subjectmail: "Error Details | Pinksky",
-    text: data,
+    text: JSON.stringify(data),
     href: "Website",
     hrefText: "pinkskyclub.com",
   });
