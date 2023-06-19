@@ -5438,9 +5438,9 @@ app.post("/api/randomdata/create", async (req, res) => {
         role: data.role == undefined ? "" : data.role,
         city: data.city == undefined ? "" : data.city,
         tellusaboutyourself:
-              doc.tellusaboutyourself == undefined
+              data.tellusaboutyourself == undefined
                 ? ""
-                : doc.tellusaboutyourself,
+                : data.tellusaboutyourself,
       });
       if (internData?.length > 0) {
         clientInternData.create(internData).then(
