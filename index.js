@@ -768,6 +768,10 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
             resumelink: doc.resumelink,
             role: doc.role == undefined ? "" : doc.role,
             city: doc.city == undefined ? "" : doc.city,
+            tellusaboutyourself:
+              doc.tellusaboutyourself == undefined
+                ? ""
+                : doc.tellusaboutyourself,
           });
         } else {
           randomData.push({
