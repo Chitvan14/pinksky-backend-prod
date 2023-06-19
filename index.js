@@ -5437,6 +5437,10 @@ app.post("/api/randomdata/create", async (req, res) => {
         resumelink: data.resumelink,
         role: data.role == undefined ? "" : data.role,
         city: data.city == undefined ? "" : data.city,
+        tellusaboutyourself:
+              doc.tellusaboutyourself == undefined
+                ? ""
+                : doc.tellusaboutyourself,
       });
       if (internData?.length > 0) {
         clientInternData.create(internData).then(
