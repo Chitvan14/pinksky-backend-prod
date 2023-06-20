@@ -5429,7 +5429,7 @@ app.post("/api/randomdata/create", async (req, res) => {
     if (data.category.toLowerCase().indexOf("intern") !== -1) {
       internData.push({
         id: data.id,
-        category: data.category,
+        // category: data.category,
         name: data.name,
         number: data.number,
         userid: data.userid,
@@ -5437,10 +5437,10 @@ app.post("/api/randomdata/create", async (req, res) => {
         resumelink: data.resumelink,
         role: data.role == undefined ? "" : data.role,
         city: data.city == undefined ? "" : data.city,
+        address: data.address == undefined ? "" : data.address,
+        instagramurl: data.instagramurl == undefined ? "" : data.instagramurl,
         tellusaboutyourself:
-              data.tellusaboutyourself == undefined
-                ? ""
-                : data.tellusaboutyourself,
+          data.tellusaboutyourself == undefined ? "" : data.tellusaboutyourself,
       });
       if (internData?.length > 0) {
         clientInternData.create(internData).then(
