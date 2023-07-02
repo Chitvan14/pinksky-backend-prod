@@ -35,6 +35,7 @@ const Gallery = db.collection("Gallery");
 const Feedback = db.collection("Feedback");
 const BrandRequirement = db.collection("BrandRequirement");
 const CampaignRequirement = db.collection("CampaignRequirement");
+const PhographyStudio = db.collection("PhographyStudio");
 const docid = firebase.firestore.FieldPath.documentId();
 
 const multer = Multer({
@@ -78,4 +79,5 @@ module.exports.Firebase = {
   gallerymulter,
   Feedback,
   docid,
+  PhographyStudio
 };

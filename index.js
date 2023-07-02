@@ -53,6 +53,10 @@ const clientBrandRequirement = sheetdb({
 const clientCampaignRequirement = sheetdb({
   address: environments.SPREADSHEET + "?sheet=CampaignRequirement",
 });
+const clientPhographyStudio = sheetdb({
+  address: environments.SPREADSHEET + "?sheet=PhographyStudio",
+});
+
 const app = express();
 const PORT = environments.PORT;
 let logging = fs.createWriteStream("log.txt", { flags: "a" });
@@ -6108,7 +6112,42 @@ app.post("/api/campaign-requirement/create", async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
+// 14. Create Pinksky Studio
+app.post("/api/phographystudio/create", async (req, res) => {
+  console.log(new Date() + " - phographystudio/create POST 🚀 \n");
 
+  try {
+    const data = req.body;
+
+    await Firebase.PhographyStudio.add(data);
+
+    let reqData = [];
+    reqData.push({
+      name: data.name,
+      number: data.number,
+      rentedfor: data.rentedfor,
+      intentofshoot: data.intentofshoot,
+      datetime: data.datetime,
+      hourstype: data.hourstype,
+      numberofperson: data.numberofperson,
+    });
+
+    if (reqData?.length > 0) {
+      clientPhographyStudio.create(reqData).then(
+        function (data) {
+          res.status(200).json({ message: "Posted phographystudio" });
+        },
+        function (err) {
+          throw err;
+        }
+      );
+    }
+  } catch (error) {
+    console.log(new Date() + " - phographystudio/create ❌ - " + error + " \n");
+
+    res.status(500).json({ message: error });
+  }
+});
 // MAPPING SECTION
 // 1. Mapping brand with influencer - Hire me
 app.put("/api/mappingbrandwithinfluencer/update", async (req, res) => {
