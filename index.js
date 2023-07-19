@@ -67,45 +67,117 @@ app.use(cors());
 // 1. Logging
 
 app.post("/api/testaccount", async (req, res) => {
-  const users = await customFunction.spreadsheettofirebase(
-    clientSpreadsheetToDB
-  );
-  for (const user of users) {
-    const options = {
-      method: "POST",
-      url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
-      headers: {
-        "content-type": "application/json",
-        "X-RapidAPI-Key": environments.RapidAPIKey_V2,
-        "X-RapidAPI-Host": environments.RapidAPIHost_V2,
-      },
-      data: `{"username":"${user.instagramurl}"}`,
-    };
-    await axios
-      .request(options)
-      .then(function (response) {
-        let instadatares = response.data.response.body.data.user;
-        if (instadatares.is_private === false) {
-          if (instadatares.edge_owner_to_timeline_media.edges?.length > 4) {
-          } else {
-            const err = new TypeError(
-              "We cant't calculate your profile. Please login in with public instagram profile with more than 5 posts."
-            );
-            throw err;
-          }
-        } else {
-          const err = new TypeError(
-            "Please Register With Public Instagram Account"
-          );
-          throw err;
-        }
-      })
-      .catch(function (error) {
-        throw error;
-      });
+  try {
+    const userData = [
+      "6239075416",
+      "6239327895",
+      "62843834",
+      "6239777863",
+      "8847612109",
+      "7888910804",
+      "6280197272",
+      "7986568145",
+      "8168361384",
+      "9988869554",
+      "884762527",
+      "9871956791",
+      "8360013282",
+      "7814551260",
+      "847470266",
+      "7889146589",
+      "7888345358",
+      "6230061586",
+      "7888989145",
+      "8727800554",
+      "7982736900",
+      "7986027499 ",
+      "MomInfluencer",
+      "7589619135",
+      "8708882947",
+      "9056944865",
+      "7988492722",
+      "6283418543",
+      "8559022446",
+      "8949027907 ",
+      "8872230881",
+      "8360215640",
+      "7700000034",
+      "7888385817",
+      "778345633",
+      "9988594218",
+      "876985446",
+    ];
+
+    let isPresent = 0;
+    let isNotPresent = 0;
+    let count = 1;
+    for (const user of userData) {
+      console.log(`${count} :: user info > `, user);
+      const phonenumber = user.replaceAll(/\s/g, "").replaceAll("-", "");
+      const obj = {
+        field: "phonenumber",
+        operation: "==",
+        value: phonenumber,
+      };
+      const documentArray = await customFunction.filteredData(0, obj);
+      console.log(`${count} :: doc length > `, documentArray.length);
+
+      if (documentArray.length > 0) {
+        logging.write(
+          new Date() + ` :: Phone Number : ${phonenumber} is Present 🤝  \n`
+        );
+        isPresent++;
+      } else {
+        logging.write(
+          new Date() + ` :: Phone Number : ${phonenumber} is Not Present 😬  \n`
+        );
+        isNotPresent++;
+      }
+      count++;
+    }
+    logging.write(
+      new Date() +
+        ` :: Summary : ${isPresent} Present : ${isNotPresent} Not Present  \n`
+    );
+    res.status(200).json({ message: "done" });
+  } catch (error) {
+    res.status(400).json({ message: error });
   }
 
-  res.json({ message: "done" });
+  // for (const user of users) {
+  //   const options = {
+  //     method: "POST",
+  //     url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
+  //     headers: {
+  //       "content-type": "application/json",
+  //       "X-RapidAPI-Key": environments.RapidAPIKey_V2,
+  //       "X-RapidAPI-Host": environments.RapidAPIHost_V2,
+  //     },
+  //     data: `{"username":"${user.instagramurl}"}`,
+  //   };
+  //   await axios
+  //     .request(options)
+  //     .then(function (response) {
+  //       let instadatares = response.data.response.body.data.user;
+  //       if (instadatares.is_private === false) {
+  //         if (instadatares.edge_owner_to_timeline_media.edges?.length > 4) {
+  //         } else {
+  //           const err = new TypeError(
+  //             "We cant't calculate your profile. Please login in with public instagram profile with more than 5 posts."
+  //           );
+  //           throw err;
+  //         }
+  //       } else {
+  //         const err = new TypeError(
+  //           "Please Register With Public Instagram Account"
+  //         );
+  //         throw err;
+  //       }
+  //     })
+  //     .catch(function (error) {
+  //       throw error;
+  //     });
+  // }
 });
 
 // 2. creating mail to send
