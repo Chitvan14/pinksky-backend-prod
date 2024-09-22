@@ -9,11 +9,9 @@ const fs = require("fs");
 const nodemailer = require("nodemailer");
 const { Firebase } = require("./config/firebaseconfig.js");
 var emailtemplate = require("./config/emailtemplate.js");
-// const PinkskyDB = require("./controller/PinkskyDB");
 const Razorpay = require("razorpay");
 const customFunction = require("./controller/CustomFunctions");
 const { influencerCategorySchema } = require("./assets/influencerCategory.js");
-// const pinkskyDB = new PinkskyDB();
 const razorpay = new Razorpay({
   key_id: environments.KEY_ID,
   key_secret: environments.KEY_SECRET,
@@ -69,43 +67,7 @@ app.use(cors());
 app.post("/api/testaccount", async (req, res) => {
   try {
     const userData = [
-      "6239075416",
-      "6239327895",
-      "62843834",
-      "6239777863",
-      "8847612109",
-      "7888910804",
-      "6280197272",
-      "7986568145",
-      "8168361384",
-      "9988869554",
-      "884762527",
-      "9871956791",
-      "8360013282",
-      "7814551260",
-      "847470266",
-      "7889146589",
-      "7888345358",
-      "6230061586",
-      "7888989145",
-      "8727800554",
-      "7982736900",
-      "7986027499 ",
-      "MomInfluencer",
-      "7589619135",
-      "8708882947",
-      "9056944865",
-      "7988492722",
-      "6283418543",
-      "8559022446",
-      "8949027907 ",
-      "8872230881",
-      "8360215640",
-      "7700000034",
-      "7888385817",
-      "778345633",
-      "9988594218",
-      "876985446",
+      "6239075***",
     ];
 
     let isPresent = 0;
@@ -143,46 +105,10 @@ app.post("/api/testaccount", async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: error });
   }
-
-  // for (const user of users) {
-  //   const options = {
-  //     method: "POST",
-  //     url: "https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info",
-  //     headers: {
-  //       "content-type": "application/json",
-  //       "X-RapidAPI-Key": environments.RapidAPIKey_V2,
-  //       "X-RapidAPI-Host": environments.RapidAPIHost_V2,
-  //     },
-  //     data: `{"username":"${user.instagramurl}"}`,
-  //   };
-  //   await axios
-  //     .request(options)
-  //     .then(function (response) {
-  //       let instadatares = response.data.response.body.data.user;
-  //       if (instadatares.is_private === false) {
-  //         if (instadatares.edge_owner_to_timeline_media.edges?.length > 4) {
-  //         } else {
-  //           const err = new TypeError(
-  //             "We cant't calculate your profile. Please login in with public instagram profile with more than 5 posts."
-  //           );
-  //           throw err;
-  //         }
-  //       } else {
-  //         const err = new TypeError(
-  //           "Please Register With Public Instagram Account"
-  //         );
-  //         throw err;
-  //       }
-  //     })
-  //     .catch(function (error) {
-  //       throw error;
-  //     });
-  // }
 });
 
 // 2. creating mail to send
 const sendMail = (sendType, data) => {
-  //console.log("sendMail started 🚀");
   var transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
@@ -209,12 +135,6 @@ const sendMail = (sendType, data) => {
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
         console.log("sendMail Failed ❌ with error - ", error);
-      } else {
-        //console.log("sendMail success ✅ with response - ", {${data.href}
-        //   response: info.response,
-        //   sendType,
-        //   data,
-        // });
       }
     });
   }, 2000);
@@ -580,7 +500,6 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
           },
         ],
       });
-      //console.log("here 1");
 
       //send mail and message with short id, coupon details and influencer detials to
       // influencer, brand, pinksky 3 mails/messages
@@ -604,14 +523,6 @@ app.post("/api/getcouponmessage/razorpay", async (req, res) => {
 
       logging.end();
       setTimeout(() => {
-        //console.log("text", {
-        //   tomail: influesnapshot.data().email,
-        //   ccmail: brandsnapshot.data().email,
-        //   subjectmail: "Coupon Redeem | Pinksky",
-        //   text: text,
-        //   href: environments.EML_HREF_WEBSITE,
-        //   hrefText: "pinkskyclub.com",
-        // });
         res.status(200).json({ message: "Notified" });
       }, 1700);
     }
@@ -694,7 +605,6 @@ app.post("/api/firebasetospreadsheet", async (req, res) => {
     }
 
     //Brand
-    //const brandsnapshot = await Firebase.Brand.get();
     let brandData = [];
     snapshotbrand.map(async (doc) => {
       if (doc.dbInserted === 0 || doc.dbInserted === undefined) {
