@@ -17,29 +17,72 @@ This project is a Node.js application utilizing Firebase and Razorpay for handli
 
 1. Clone the repository:
 
-   ``git clone https://github.com/your-repo.git``
+   ```git clone https://github.com/pinksky-backend-prod.git```
 
 2. Navigate to the project directory:
 
-   ``cd your-project``
+   ```cd pinksky-backend-prod```
 
 3. Install dependencies:
 
-   ``npm install``
+   ```npm install```
 
 4. Set up environment variables by creating a `.env` file with your Firebase, Razorpay, and other required credentials:
 
-   ``env
-   PORT=your_port
-   FIREBASE_API_KEY=your_firebase_api_key
-   RAZORPAY_KEY_ID=your_razorpay_key_id
-   RAZORPAY_KEY_SECRET=your_razorpay_key_secret
-   SPREADSHEET=your_google_sheet_link
-   ``
+ ```
+# CONFIG
+NODE_ENV=development
+PORT="5000"
+BASE_URL="https://pinksky-backend-prod.onrender.com/api/"
+LAUNCHING_MAIL="true"
+VERIFY_EMAIL="https://pinksky-development.netlify.app/verify"
+
+# FIREBASE CONNECTION
+apiKey="your-firebase-api-key"
+authDomain="your-firebase-auth-domain"
+databaseURL="your-firebase-database-url"
+projectId="your-firebase-project-id"
+storageBucket="your-firebase-storage-bucket"
+messagingSenderId="your-firebase-messaging-sender-id"
+appId="your-firebase-app-id"
+FIRESTORE_URL="your-firebase-firestore-url"
+
+# INSTAGRAM API
+RAPID_USERINFO_URL="https://instagram-scraper-data.p.rapidapi.com/userinfo/"
+RAPID_USERINFO_URL_V2="https://rocketapi-for-instagram.p.rapidapi.com/instagram/user/get_info"
+RapidAPIHost_V2="rocketapi-for-instagram.p.rapidapi.com"
+RapidAPIKey_V2="your-rapidapi-key-v2"
+RapidAPIHost="instagram-scraper-data.p.rapidapi.com"
+RapidAPIKey="your-rapidapi-key"
+
+# SPREADSHEET
+SPREADSHEET="your-spreadsheet-id"
+SPREADSHEET_URL="your-google-sheet-url"
+
+# RAZORPAY
+KEY_ID="your-razorpay-key-id"
+KEY_SECRET="your-razorpay-key-secret"
+WEBHOOK_SECRET="your-razorpay-webhook-secret"
+MEM_AMOUNT="200000"
+
+# FILTER CODE WORDS
+ADMIN_BRAND_FILTER_TEXT="allbranddata"
+ADMIN_EVENT_FILTER_TEXT="alleventdata"
+ADMIN_COUPON_FILTER_TEXT="allcoupondata"
+ADMIN_INFLUENCER_FILTER_TEXT="allinfluencerdata"
+
+# WHATSAPP AND EMAIL INTEGRATION
+WAPP_SENDMESSTEXT_UATURL_PRMNTOKN="https://graph.facebook.com/v15.0/100331042949316/messages"
+WAPP_AUTH_PRMNTOKN="your-whatsapp-auth-token"
+EML_USER="your-email"
+EML_PASS="your-email-password"
+EML_PROVIDER="gmail"
+EML_HREF_WEBSITE="http://pinkskyclub.com/"
+   ```
 
 5. Start the server:
 
-   ``npm start``
+   ```npm start```
 
 ## Packages Used
 
