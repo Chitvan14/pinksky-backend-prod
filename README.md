@@ -4,6 +4,7 @@ This project is a Node.js application utilizing Firebase and Razorpay for handli
 
 ## Table of Contents
 
+- [Folder Structure](#folder-structure)
 - [Setup](#setup)
 - [Packages Used](#packages-used)
 - [API Endpoints](#api-endpoints)
@@ -12,6 +13,10 @@ This project is a Node.js application utilizing Firebase and Razorpay for handli
   - [Brand Management](#brand-management)
   - [Campaign Management](#campaign-management)
   - [General](#general)
+
+## Folder Structure
+![folder-structure](./images/folderstruct.png)
+
 
 ## Setup
 

@@ -3,4 +3,4 @@ node_modules/
 
 # Ignore specific environment files
 environments/production.env
-services/
+services/serviceaccount_dev.json
