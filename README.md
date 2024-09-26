@@ -12,30 +12,30 @@ This project is a Node.js application utilizing Firebase and Razorpay for handli
   - [Brand Management](#brand-management)
   - [Campaign Management](#campaign-management)
   - [General](#general)
-  
+
 ## Setup
 
 1. Clone the repository:
 
-   ```git clone https://github.com/pinksky-backend-prod.git```
+   `git clone https://github.com/pinksky-backend-prod.git`
 
 2. Navigate to the project directory:
 
-   ```cd pinksky-backend-prod```
+   `cd pinksky-backend-prod`
 
 3. Install dependencies:
 
-   ```npm install```
+   `npm install`
 
 4. Set up environment variables by creating a `.env` file with your Firebase, Razorpay, and other required credentials:
 
- ```
+```
 # CONFIG
 NODE_ENV=development
 PORT="5000"
-BASE_URL="https://pinksky-backend-prod.onrender.com/api/"
+BASE_URL="https://{website-url}/api/"
 LAUNCHING_MAIL="true"
-VERIFY_EMAIL="https://pinksky-development.netlify.app/verify"
+VERIFY_EMAIL="https://{website-url}/verify"
 
 # FIREBASE CONNECTION
 apiKey="your-firebase-api-key"
@@ -72,17 +72,36 @@ ADMIN_COUPON_FILTER_TEXT="allcoupondata"
 ADMIN_INFLUENCER_FILTER_TEXT="allinfluencerdata"
 
 # WHATSAPP AND EMAIL INTEGRATION
-WAPP_SENDMESSTEXT_UATURL_PRMNTOKN="https://graph.facebook.com/v15.0/100331042949316/messages"
+WAPP_SENDMESSTEXT_UATURL_PRMNTOKN="https://graph.facebook.com/v15.0/{your-facebook-id}/messages"
 WAPP_AUTH_PRMNTOKN="your-whatsapp-auth-token"
 EML_USER="your-email"
 EML_PASS="your-email-password"
 EML_PROVIDER="gmail"
-EML_HREF_WEBSITE="http://pinkskyclub.com/"
-   ```
+EML_HREF_WEBSITE="website-url"
+```
 
-5. Start the server:
+5. Set up service accounts by creating a `.json` file with your Firebase:
 
-   ```npm start```
+```
+{
+ "type": "service_account",
+ "project_id": "firebase-project-id",
+ "private_key_id": "firebase-project-key",
+ "private_key": "firebase-private-key",
+ "client_email": "firebase-client-email",
+ "client_id": "firebase-client-id",
+ "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+ "token_uri": "https://oauth2.googleapis.com/token",
+ "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+ "client_x509_cert_url": "firebase-cert"
+}
+
+```
+
+6. Start the server:
+
+   `npm run dev ##For Development`
+   `npm run prod  ##For Production`
 
 ## Packages Used
 
@@ -94,65 +113,65 @@ EML_HREF_WEBSITE="http://pinkskyclub.com/"
 - **Shortid**: For generating unique IDs.
 - **Nodemailer**: To send emails from Node.js.
 - **SheetDB**: API for Google Sheets as a database.
-  
+
 ## API Endpoints
 
 ### Authentication
 
-| Method   | Endpoint                          | Description                                             |
-|----------|-----------------------------------|---------------------------------------------------------|
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/signin`                        | Sign in to the platform.                                 |
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/forgotpassword`                | Request password reset.                                  |
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/signin/profileupdating`        | Update user profile after sign-in.                       |
+| Method                                                                   | Endpoint                      | Description                        |
+| ------------------------------------------------------------------------ | ----------------------------- | ---------------------------------- |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/signin`                 | Sign in to the platform.           |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/forgotpassword`         | Request password reset.            |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/signin/profileupdating` | Update user profile after sign-in. |
 
 ### Influencer Management
 
-| Method   | Endpoint                              | Description                                             |
-|----------|---------------------------------------|---------------------------------------------------------|
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/influencer`                      | Create new influencer record.                            |
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/influencer/create`               | Create a new influencer with file upload.                |
-| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/influencer/update`               | Update an influencer's details.                          |
-| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/mappinginfluencerwithcampaign/update` | Map influencer to a campaign.                     |
+| Method                                                                   | Endpoint                                    | Description                               |
+| ------------------------------------------------------------------------ | ------------------------------------------- | ----------------------------------------- |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/influencer`                           | Create new influencer record.             |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/influencer/create`                    | Create a new influencer with file upload. |
+| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/influencer/update`                    | Update an influencer's details.           |
+| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/mappinginfluencerwithcampaign/update` | Map influencer to a campaign.             |
 
 ### Brand Management
 
-| Method   | Endpoint                          | Description                                             |
-|----------|-----------------------------------|---------------------------------------------------------|
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/brand`                         | Create new brand record.                                 |
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/brand/create`                  | Create a brand with file upload.                         |
-| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/brand/update`                  | Update brand details.                                    |
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/brand/advance`                 | Create advanced brand record.                            |
+| Method                                                                   | Endpoint             | Description                      |
+| ------------------------------------------------------------------------ | -------------------- | -------------------------------- |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/brand`         | Create new brand record.         |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/brand/create`  | Create a brand with file upload. |
+| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/brand/update`  | Update brand details.            |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/brand/advance` | Create advanced brand record.    |
 
 ### Campaign Management
 
-| Method   | Endpoint                              | Description                                             |
-|----------|---------------------------------------|---------------------------------------------------------|
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/campaign`                      | Create new campaign.                                     |
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/campaign/create`               | Create campaign with file upload.                        |
-| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/campaign/update`               | Update an existing campaign.                             |
-| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/removecampaign/update`         | Remove a campaign.                                       |
+| Method                                                                   | Endpoint                     | Description                       |
+| ------------------------------------------------------------------------ | ---------------------------- | --------------------------------- |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/campaign`              | Create new campaign.              |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/campaign/create`       | Create campaign with file upload. |
+| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/campaign/update`       | Update an existing campaign.      |
+| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/removecampaign/update` | Remove a campaign.                |
 
 ### General
 
-| Method   | Endpoint                              | Description                                             |
-|----------|---------------------------------------|---------------------------------------------------------|
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/testaccount`                    | Test account functionality.                              |
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/firebasetospreadsheet`          | Sync Firebase data to a Google Spreadsheet.              |
-| ![#0000FF](https://via.placeholder.com/15/0000FF/000000?text=+) **GET**  | `/api/spreadsheettofirebase`          | Sync Google Spreadsheet data to Firebase.                |
-| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/spreadsheet/reset`              | Reset spreadsheet data.                                  |
-| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/acceptstatus/update`            | Update the status to accept.                             |
-| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/rejectstatus/update`            | Update the status to reject.                             |
-| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/gallery/update`                 | Update the gallery record.                               |
+| Method                                                                   | Endpoint                     | Description                                 |
+| ------------------------------------------------------------------------ | ---------------------------- | ------------------------------------------- |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/testaccount`           | Test account functionality.                 |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/firebasetospreadsheet` | Sync Firebase data to a Google Spreadsheet. |
+| ![#0000FF](https://via.placeholder.com/15/0000FF/000000?text=+) **GET**  | `/api/spreadsheettofirebase` | Sync Google Spreadsheet data to Firebase.   |
+| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/spreadsheet/reset`     | Reset spreadsheet data.                     |
+| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/acceptstatus/update`   | Update the status to accept.                |
+| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/rejectstatus/update`   | Update the status to reject.                |
+| ![#FF0000](https://via.placeholder.com/15/FF0000/000000?text=+) **PUT**  | `/api/gallery/update`        | Update the gallery record.                  |
 
 ## Razorpay Integration
 
 Several endpoints in the project are used for managing Razorpay payments and subscriptions:
 
-| Method   | Endpoint                                  | Description                                             |
-|----------|-------------------------------------------|---------------------------------------------------------|
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/verify/razorpay`                 | Verify a Razorpay payment.                               |
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/subscription/razorpay`           | Create a subscription using Razorpay.                    |
-| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/getcouponmessage/razorpay`       | Retrieve Razorpay coupon message.                        |
+| Method                                                                   | Endpoint                         | Description                           |
+| ------------------------------------------------------------------------ | -------------------------------- | ------------------------------------- |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/verify/razorpay`           | Verify a Razorpay payment.            |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/subscription/razorpay`     | Create a subscription using Razorpay. |
+| ![#00FF00](https://via.placeholder.com/15/00FF00/000000?text=+) **POST** | `/api/getcouponmessage/razorpay` | Retrieve Razorpay coupon message.     |
 
 ## License
 
